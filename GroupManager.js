@@ -26,6 +26,10 @@ Redwood.factory("GroupManager", function () {
 
 
       // TESTING WEBSOCKETS
+      var nMsg = new Message("OUCH", "EBUY", [1, 25905, false, Date.now()]);
+      var ouchMsg = leepsMsgToOuch(nMsg);
+      printByteArray(ouchMsg, 49);
+
       // open websocket with market
       groupManager.marketURI = "ws://echo.websocket.org/";
       groupManager.socket = new WebSocket(groupManager.marketURI);

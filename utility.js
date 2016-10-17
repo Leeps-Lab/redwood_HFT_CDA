@@ -2,10 +2,12 @@
 function Message(protocol, msgType, msgData) {
    this.protocol = protocol;
    this.delay = false;
-   this.timeStamp = Date.now();
    this.msgType = msgType;
    this.msgData = msgData;
    this.asString = "Message using protocol: " + this.protocol + " generated at " + String(this.timeStamp);
+   this.senderId;
+   this.msgId;
+   this.timeStamp = Date.now();
 }
 
 // Updates timestamp of message to current timestamp

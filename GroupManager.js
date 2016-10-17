@@ -25,10 +25,36 @@ Redwood.factory("GroupManager", function () {
       groupManager.isDebug = groupArgs.isDebug;     //indicates if message logger should be used
 
 
-      // TESTING WEBSOCKETS
-      var nMsg = new Message("OUCH", "EBUY", [1, 25905, false, Date.now()]);
-      var ouchMsg = leepsMsgToOuch(nMsg);
-      printByteArray(ouchMsg, 49);
+      // TESTING AREA
+      var testMsgs = [];
+      
+      var nMsg = new Message("OUCH", "EBUY", [1, 991000, false, Date.now()]);
+      nMsg.senderId = 1;
+      nMsg.msgId = 1024;
+      testMsgs.push(leepsMsgToOuch(nMsg));
+
+      nMsg = new Message("OUCH", "ESELL", [2, 980000, false, Date.now()]);
+      nMsg.senderId = 2;
+      nMsg.msgId = 38;
+      testMsgs.push(leepsMsgToOuch(nMsg));
+
+      nMsg = new Message("OUCH", "EBUY", [3, 1010999, false, Date.now()]);
+      nMsg.senderId = 3;
+      nMsg.msgId = 785135456;
+      testMsgs.push(leepsMsgToOuch(nMsg));
+
+      nMsg = new Message("OUCH", "RBUY", [1, Date.now()]);
+      nMsg.senderId = 1;
+      nMsg.msgId = 1024;
+      testMsgs.push(leepsMsgToOuch(nMsg));
+
+      nMsg = new Message("OUCH", "RSELL", [2, Date.now()]);
+      nMsg.senderId = 2;
+      nMsg.msgId = 38;
+      testMsgs.push(leepsMsgToOuch(nMsg));
+
+      printByteArray(testMsgs[0], 49);
+      outputMsgs(testMsgs);
 
       // open websocket with market
       groupManager.marketURI = "ws://echo.websocket.org/";
@@ -39,7 +65,7 @@ Redwood.factory("GroupManager", function () {
       groupManager.socket.onmessage = function(event) {
          console.log("Recieved " + event.data);
       };
-      // END TESTING WEBSOCKETS
+      // END TESTING AREA
 
 
       if (groupManager.isDebug) {

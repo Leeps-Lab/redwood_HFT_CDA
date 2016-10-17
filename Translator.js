@@ -17,9 +17,122 @@ function leepsMsgToOuch(leepsMsg){
    // Convert an enter order message
    if(leepsMsg.msgType === "EBUY" || leepsMsg.msgType === "ESELL"){
       var ouchMsg = new Uint8Array(49);
+      
+      // Type
       ouchMsg[0] = charToByte('O');
 
+      // Order Token
+      ouchMsg[1] = charToByte('S');
+      ouchMsg[2] = charToByte('B');
+      spliceInArray(decimalToByteArray(leepsMsg.senderId, 2), ouchMsg, 2, 3);
+      spliceInArray(decimalToByteArray(leepsMsg.msgId, 10), ouchMsg, 10, 5);
+
+      // Buy/Sell indicator
+      if(leepsMsg.msgType === "EBUY"){
+         ouchMsg[15] = charToByte('B');
+      }
+      else if(leepsMsg.msgType === "ESELL"){
+         ouchMsg[15] = charToByte('S');
+      }
       
+      // Shares
+      spliceInArray(intToByteArray(1), ouchMsg, 4, 16);
+
+      // Stock Symbol - these two numbers together make "LPS     " when cast from bytes to characters
+      spliceInArray(intToByteArray(1280332576), ouchMsg, 4, 20);
+      spliceInArray(intToByteArray(538976288), ouchMsg, 4, 24);
+
+      // Price
+      spliceInArray(priceToByteArray(leepsMsg.msgData[1]), ouchMsg, 4, 28);
+
+      // Time in Force
+      if(leepsMsg.msgData[2] === true){
+         spliceInArray(intToByteArray(0), ouchMsg, 4, 32);
+      }
+      else{
+         spliceInArray(intToByteArray(99999), ouchMsg, 4, 32);
+      }
+
+      // Firm
+      //spliceInArray(intToByteArray(leepsMsg.senderId), ouchMsg, 4, 36);
+      ouchMsg[36] = charToByte('S');
+      ouchMsg[37] = charToByte('B');      
+      spliceInArray(decimalToByteArray(leepsMsg.senderId, 2), ouchMsg, 2, 38);
+
+      // Display
+      ouchMsg[40] = charToByte('Y');
+
+      // Capacity
+      ouchMsg[41] = charToByte('P');
+
+      // Intermarket Sweep Eligibility
+      ouchMsg[42] = charToByte('N');
+
+      // Minimum quantity
+      spliceInArray(intToByteArray(0), ouchMsg, 4, 43);
+
+      // Cross Type
+      ouchMsg[47] = charToByte('N');
+
+      // Customer Type
+      ouchMsg[48] = charToByte('R');
+
+      return ouchMsg;
+   }
+   else if(leepsMsg.msgType === "RBUY" || leepsMsg.msgType === "RSELL")
+   {
+      var ouchMsg = new Uint8Array(19);
+      
+      // Type
+      ouchMsg[0] = charToByte('X');
+
+      // Order Token
+      ouchMsg[1] = charToByte('S');
+      ouchMsg[2] = charToByte('B');
+      spliceInArray(decimalToByteArray(leepsMsg.senderId, 2), ouchMsg, 2, 3);
+      spliceInArray(decimalToByteArray(leepsMsg.msgId, 10), ouchMsg, 10, 5);
+
+      // Shares
+      spliceInArray(intToByteArray(0), ouchMsg, 4, 15);
+
+      return ouchMsg;
+   }
+   else if(leepsMsg.msgType === "UBUY" || leepsMsg.msgType === "USELL")
+   {
+      var ouchMsg = new Uint8Array(47);
+
+      // Type
+      ouchMsg[0] = charToByte('U');
+
+      // Existing Order Token
+      // TODO
+
+      // Replacement Order Token
+      // TODO
+
+      // Shares
+      spliceInArray(intToByteArray(1), ouchMsg, 4, 29);
+
+      // Price
+      spliceInArray(priceToByteArray(leepsMsg.msgData[1]), ouchMsg, 4, 33);
+
+      // Time in Force
+      if(leepsMsg.msgData[2] === true){
+         spliceInArray(intToByteArray(0), ouchMsg, 4, 37);
+      }
+      else{
+         spliceInArray(intToByteArray(99999), ouchMsg, 4, 37);
+      }
+
+      // Display
+      ouchMsg[41] = charToByte('Y');
+
+      // Intermarket Sweep Eligibility
+      ouchMsg[42] = charToByte('N');
+
+      // Minimum quantity
+      spliceInArray(intToByteArray(1), ouchMsg, 4, 43);
+
       return ouchMsg;
    }
 }
@@ -60,11 +173,17 @@ function intToByteArray(num){
    num = num >> 8
    bytes[0] = num & (255);
 
-   console.log("Original num: " + num);
-   printByteArray(bytes, 4);
-
    return bytes;
 }
+
+
+
+// converts a float price into the standard byte format for OUCH and ITCH.
+// $179.26 becomes 17926 and then is converted to a byte array
+function priceToByteArray(price){
+   price = Math.trunc(price * 100);
+   return intToByteArray(price);
+}  
 
 
 
@@ -87,6 +206,82 @@ function charToByte(character){
 // prints a byte array for debugging. Each byte is printed in hex
 function printByteArray(byteArray, length){
    for(var i = 0; i < length; i++){
-      console.log("byte " + i + ": " + byteArray[i].toString(16));
+      
+      // as hex number:
+      console.log("byte " + i + ": " + byteArray[i].toString(16) + "\t\tchar:" + String.fromCharCode(byteArray[i]));   
    }
+}
+
+function decimalToByteArray(num, numDigits){
+   console.log("Num: " + num);
+   var bytes = new Uint8Array(numDigits);
+   for(var i = numDigits-1; i >= 0; i--){
+      var tmp = num % 10;
+      console.log(tmp);
+      bytes[i] = tmp + 48;
+      num = Math.floor(num/10);
+   }
+   return bytes;
+}
+
+
+
+
+// For testing output
+function download(strData, strFileName, strMimeType) {
+    var D = document,
+        A = arguments,
+        a = D.createElement("a"),
+        d = A[0],
+        n = A[1],
+        t = A[2] || "text/plain";
+
+    //build download link:
+    a.href = "data:" + strMimeType + "charset=utf-8," + escape(strData);
+
+
+    if (window.MSBlobBuilder) { // IE10
+        var bb = new MSBlobBuilder();
+        bb.append(strData);
+        return navigator.msSaveBlob(bb, strFileName);
+    } /* end if(window.MSBlobBuilder) */
+
+
+
+    if ('download' in a) { //FF20, CH19
+        a.setAttribute("download", n);
+        a.innerHTML = "downloading...";
+        D.body.appendChild(a);
+        setTimeout(function() {
+            var e = D.createEvent("MouseEvents");
+            e.initMouseEvent("click", true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
+            a.dispatchEvent(e);
+            D.body.removeChild(a);
+        }, 66);
+        return true;
+    }; /* end if('download' in a) */
+
+
+
+    //do iframe dataURL download: (older W3)
+    var f = D.createElement("iframe");
+    D.body.appendChild(f);
+    f.src = "data:" + (A[2] ? A[2] : "application/octet-stream") + (window.btoa ? ";base64" : "") + "," + (window.btoa ? window.btoa : escape)(strData);
+    setTimeout(function() {
+        D.body.removeChild(f);
+    }, 333);
+    return true;
+}
+
+
+// 
+function outputMsgs(msgArray){
+   var outStr = "";
+   for(msg of msgArray){
+      console.log(msg);
+      for(byte of msg){
+         outStr += String.fromCharCode(byte);
+      }
+   }
+   download(outStr, "test.txt", "text/plain");
 }

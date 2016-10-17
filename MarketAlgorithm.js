@@ -14,6 +14,7 @@ Redwood.factory("MarketAlgorithm", function () {
       marketAlgorithm.groupId = subjectArgs.groupId;
       marketAlgorithm.groupManager = groupManager;   //Sends message to group manager, function obtained as parameter
       marketAlgorithm.fundamentalPrice = 0;
+      marketAlgorithm.currentMsgId = 1;
 
       marketAlgorithm.isDebug = subjectArgs.isDebug;
       if (marketAlgorithm.isDebug) {
@@ -46,12 +47,8 @@ Redwood.factory("MarketAlgorithm", function () {
 
       // sends out remove buy and sell messages for exiting market
       marketAlgorithm.exitMarket = function () {
-         var nMsg = new Message("OUCH", "RBUY", [this.myId]);
-         nMsg.delay = !this.using_speed;
-         var nMsg2 = new Message("OUCH", "RSELL", [this.myId]);
-         nMsg2.delay = !this.using_speed;
-         this.sendToGroupManager(nMsg);
-         this.sendToGroupManager(nMsg2);
+         this.sendToGroupManager(this.removeBuyOfferMsg());
+         this.sendToGroupManager(this.removeSellOfferMsg());
          this.buyEntered = false;
          this.sellEntered = false;
       };
@@ -226,24 +223,54 @@ Redwood.factory("MarketAlgorithm", function () {
       marketAlgorithm.enterBuyOfferMsg = function () {
          var nMsg = new Message("OUCH", "EBUY", [this.myId, this.fundamentalPrice - this.spread / 2, false, Date.now()]);
          nMsg.delay = !this.using_speed;
+         nMsg.senderId = this.myId;
+         nMsg.msgId = this.currentMsgId;
+         this.currentMsgId++;
          return nMsg;
       };
 
       marketAlgorithm.enterSellOfferMsg = function () {
          var nMsg = new Message("OUCH", "ESELL", [this.myId, this.fundamentalPrice + this.spread / 2, false, Date.now()]);
          nMsg.delay = !this.using_speed;
+         nMsg.senderId = this.myId;
+         nMsg.msgId = this.currentMsgId;
+         this.currentMsgId++;
          return nMsg;
       };
+
+      marketAlgorithm.removeBuyOfferMsg = function() {
+         var nMsg = new Message("OUCH", "RBUY", [this.myId]);
+         nMsg.delay = !this.using_speed;
+         nMsg.senderId = this.myId;
+         nMsg.msgId = this.currentMsgId;
+         this.currentMsgId++;
+         return nMsg;
+      }
+
+      marketAlgorithm.removeSellOfferMsg = function() {
+         var nMsg = new Message("OUCH", "RSELL", [this.myId]);
+         nMsg.delay = !this.using_speed;
+         nMsg.senderId = this.myId;
+         nMsg.msgId = this.currentMsgId;
+         this.currentMsgId++;
+         return nMsg;
+      }
 
       marketAlgorithm.updateBuyOfferMsg = function () {
          var nMsg = new Message("OUCH", "UBUY", [this.myId, this.fundamentalPrice - this.spread / 2, Date.now()]);
          nMsg.delay = !this.using_speed;
+         nMsg.senderId = this.myId;
+         nMsg.msgId = this.currentMsgId;
+         this.currentMsgId++;
          return nMsg;
       };
 
       marketAlgorithm.updateSellOfferMsg = function () {
          var nMsg = new Message("OUCH", "USELL", [this.myId, this.fundamentalPrice + this.spread / 2, Date.now()]);
          nMsg.delay = !this.using_speed;
+         nMsg.senderId = this.myId;
+         nMsg.msgId = this.currentMsgId;
+         this.currentMsgId++;
          return nMsg;
       };
 

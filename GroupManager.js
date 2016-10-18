@@ -54,7 +54,7 @@ Redwood.factory("GroupManager", function () {
       testMsgs.push(leepsMsgToOuch(nMsg));
 
       printByteArray(testMsgs[0], 49);
-      outputMsgs(testMsgs);
+      //outputMsgs(testMsgs);
 
       // open websocket with market
       groupManager.marketURI = "ws://echo.websocket.org/";

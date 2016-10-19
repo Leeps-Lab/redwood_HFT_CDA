@@ -23,8 +23,9 @@ function leepsMsgToOuch(leepsMsg){
 
       // Order Token
       ouchMsg[1] = charToByte('S');
-      ouchMsg[2] = charToByte('B');
-      spliceInArray(decimalToByteArray(leepsMsg.senderId, 2), ouchMsg, 2, 3);
+      ouchMsg[2] = charToByte('U');      
+      ouchMsg[3] = charToByte('B');
+      ouchMsg[4] = charToByte(String.fromCharCode(64 + leepsMsg.msgData[0]));
       spliceInArray(decimalToByteArray(leepsMsg.msgId, 10), ouchMsg, 10, 5);
 
       // Buy/Sell indicator
@@ -56,8 +57,9 @@ function leepsMsgToOuch(leepsMsg){
       // Firm
       //spliceInArray(intToByteArray(leepsMsg.senderId), ouchMsg, 4, 36);
       ouchMsg[36] = charToByte('S');
-      ouchMsg[37] = charToByte('B');      
-      spliceInArray(decimalToByteArray(leepsMsg.senderId, 2), ouchMsg, 2, 38);
+      ouchMsg[37] = charToByte('U');      
+      ouchMsg[38] = charToByte('B');
+      ouchMsg[39] = charToByte(String.fromCharCode(64 + leepsMsg.msgData[0]));
 
       // Display
       ouchMsg[40] = charToByte('Y');
@@ -213,11 +215,9 @@ function printByteArray(byteArray, length){
 }
 
 function decimalToByteArray(num, numDigits){
-   console.log("Num: " + num);
    var bytes = new Uint8Array(numDigits);
    for(var i = numDigits-1; i >= 0; i--){
       var tmp = num % 10;
-      console.log(tmp);
       bytes[i] = tmp + 48;
       num = Math.floor(num/10);
    }
@@ -228,7 +228,18 @@ function decimalToByteArray(num, numDigits){
 
 
 // For testing output
-function download(strData, strFileName, strMimeType) {
+function download(inString, strFileName, strMimeType) {
+
+    var strData = "";
+    for(var i = 0; i < inString.length; i++){
+      var temp = inString.charAt(i);
+      var hexTemp = temp.charCodeAt().toString(16);
+      if(hexTemp.length === 1){
+        strData += '0';
+      }
+      strData += hexTemp;
+    }
+
     var D = document,
         A = arguments,
         a = D.createElement("a"),

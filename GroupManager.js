@@ -28,17 +28,17 @@ Redwood.factory("GroupManager", function () {
       // TESTING AREA
       var testMsgs = [];
       
-      var nMsg = new Message("OUCH", "EBUY", [1, 991000, false, Date.now()]);
+      var nMsg = new Message("OUCH", "EBUY", [1, 9910, false, Date.now()]);
       nMsg.senderId = 1;
-      nMsg.msgId = 1024;
+      nMsg.msgId = 1;
       testMsgs.push(leepsMsgToOuch(nMsg));
 
-      nMsg = new Message("OUCH", "ESELL", [2, 980000, false, Date.now()]);
+      /*nMsg = new Message("OUCH", "ESELL", [2, 9800, false, Date.now()]);
       nMsg.senderId = 2;
       nMsg.msgId = 38;
       testMsgs.push(leepsMsgToOuch(nMsg));
 
-      nMsg = new Message("OUCH", "EBUY", [3, 1010999, false, Date.now()]);
+      nMsg = new Message("OUCH", "EBUY", [3, 10109.99, false, Date.now()]);
       nMsg.senderId = 3;
       nMsg.msgId = 785135456;
       testMsgs.push(leepsMsgToOuch(nMsg));
@@ -51,16 +51,16 @@ Redwood.factory("GroupManager", function () {
       nMsg = new Message("OUCH", "RSELL", [2, Date.now()]);
       nMsg.senderId = 2;
       nMsg.msgId = 38;
-      testMsgs.push(leepsMsgToOuch(nMsg));
+      testMsgs.push(leepsMsgToOuch(nMsg));*/
 
-      printByteArray(testMsgs[0], 49);
-      //outputMsgs(testMsgs);
+      /*printByteArray(testMsgs[0], 49);
+      outputMsgs(testMsgs);*/
 
       // open websocket with market
-      groupManager.marketURI = "ws://echo.websocket.org/";
-      groupManager.socket = new WebSocket(groupManager.marketURI);
+      groupManager.marketURI = "ws://192.168.1.25:8000/";
+      groupManager.socket = new WebSocket(groupManager.marketURI, ['binary', 'base64']);
       groupManager.socket.onopen = function(event) {
-         groupManager.socket.send("Hello websockets");
+         groupManager.socket.send("Confirmed Opened Websocket connection");
       };
       groupManager.socket.onmessage = function(event) {
          console.log("Recieved " + event.data);
@@ -140,14 +140,16 @@ Redwood.factory("GroupManager", function () {
          }
       };
 
-      // this sends message to market with specified amount of delay
-      groupManager.sendToMarket = function (msg) {
+      // TODO setup arg for routing
+      // Function for sending messages, will route msg to remote or local market based on args
+      groupManager.sendToMarket = function (leepsMsg) {
+         var msg = leepsMsgToOuch(leepsMsg);
          //If no delay send msg now, otherwise send after delay
-         if (msg.delay) {
-            window.setTimeout(this.market.recvMessage.bind(this.market), this.delay, msg);
+         if (leepsMsg.delay) {
+            window.setTimeout(this.socket.send.bind(this.socket), this.delay, msg);
          }
          else {
-            this.market.recvMessage(msg);
+            this.socket.send(msg);
          }
       };
 

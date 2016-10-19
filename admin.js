@@ -160,6 +160,12 @@ Redwood.controller("AdminCtrl",
 
             //INITIALIZE ADMIN FOR EXPERIMENT   **************************************
 
+            var marketFlag = "LOCAL";    // LOCAL  = use local market (i.e. this.market)
+                                         // REMOTE = use remote market by making websockets connection
+                                         // DEBUG  = use debug market (i.e. this.debugMarket
+
+            console.log(getTime());
+
             $scope.config = ra.get_config(1, 0);
 
             $scope.speedCost = $scope.config.speedCost;
@@ -181,6 +187,9 @@ Redwood.controller("AdminCtrl",
                   var cells = rows[i + 1].split(",");
                   for (let j = 0; j < cells.length; j++) {
                      $scope.priceChanges[i][j] = parseFloat(cells[j]);
+                     if (j == 0) {
+                        $scope.priceChanges[i][j] *= 1000000;
+                     }
                   }
                }
 
@@ -199,8 +208,12 @@ Redwood.controller("AdminCtrl",
                      var cells = rows[i + 1].split(",");
                      for (var j = 0; j < cells.length; j++) {
                         $scope.investorArrivals[i][j] = parseFloat(cells[j]);
+                        if (j == 0) {
+                           $scope.investorArrivals[i][j] *= 1000000;
+                        }
                      }
                   }
+                  
 
                   //******************** seting up groups **************************
 
@@ -232,7 +245,8 @@ Redwood.controller("AdminCtrl",
                         investorArrivals: $scope.investorArrivals,
                         groupNumber: groupNum,
                         memberIDs: group,
-                        isDebug: debugMode
+                        isDebug: debugMode,
+                        mFlag: marketFlag
                      };
                      $scope.groupManagers[groupNum] = groupManager.createGroupManager(groupArgs, ra.sendCustom);
                      $scope.groupManagers[groupNum].market = marketManager.createMarketManager(ra.sendCustom, groupNum, $scope.groupManagers[groupNum]);

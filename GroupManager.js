@@ -4,6 +4,10 @@ Redwood.factory("GroupManager", function () {
    api.createGroupManager = function (groupArgs, sendFunction) {
       var groupManager = {};
 
+      groupManager.marketFlag = groupArgs.mFlag; // LOCAL  = use local market (i.e. this.market)
+                                                 // REMOTE = use remote market by making websockets connection
+                                                 // DEBUG  = use debug market (i.e. this.debugMarket)
+
       groupManager.marketAlgorithms = {};   // reference to all market algorithms in this group, mapped by subject id ---> marketAlgorithms[subjectID]
       groupManager.market = {};             // reference to the market object for this group
       groupManager.dataStore = {};
@@ -56,15 +60,18 @@ Redwood.factory("GroupManager", function () {
       /*printByteArray(testMsgs[0], 49);
       outputMsgs(testMsgs);*/
 
-      // open websocket with market
-      groupManager.marketURI = "ws://192.168.1.25:8000/";
-      groupManager.socket = new WebSocket(groupManager.marketURI, ['binary', 'base64']);
-      /*groupManager.socket.onopen = function(event) {
-         groupManager.socket.send("Confirmed Opened Websocket connection");
-      };*/
-      groupManager.socket.onmessage = function(event) {
-         console.log("Recieved " + event.data);
-      };
+      // only open websockets connection if running in REMOTE mode
+      if(groupManager.marketFlag === "REMOTE"){
+         // open websocket with market
+         groupManager.marketURI = "ws://192.168.1.25:8000/";
+         groupManager.socket = new WebSocket(groupManager.marketURI, ['binary', 'base64']);
+         groupManager.socket.onopen = function(event) {
+            groupManager.socket.send("Confirmed Opened Websocket connection");
+         };
+         groupManager.socket.onmessage = function(event) {
+            console.log("Recieved " + event.data);
+         };
+      }
       // END TESTING AREA
 
 
@@ -141,17 +148,35 @@ Redwood.factory("GroupManager", function () {
       };
 
       // TODO setup arg for routing
-      // Function for sending messages, will route msg to remote or local market based on args
+      // Function for sending messages, will route msg to remote or local market based on this.marketFLag
       groupManager.sendToMarket = function (leepsMsg) {
-         var msg = leepsMsgToOuch(leepsMsg);
          //If no delay send msg now, otherwise send after delay
          if (leepsMsg.delay) {
-            window.setTimeout(this.socket.send.bind(this.socket), this.delay, msg);
+            if(this.marketFlag === "LOCAL"){
+               window.setTimeout(this.sendToLocalMarket.bind(this), this.delay, leepsMsg);
+            }
+            else if(this.marketFlag === "REMOTE"){
+               window.setTimeout(this.sendToRemoteMarket.bind(this), this.delay, leepsMsg);
+            }
          }
          else {
-            this.socket.send(msg);
+            if(this.marketFlag === "LOCAL"){
+               this.sendToLocalMarket(leepsMsg);
+            }
+            else if(this.marketFlag === "REMOTE"){
+               this.sendToRemoteMarket(leepsMsg);
+            }
          }
       };
+
+      groupManager.sendToLocalMarket = function(leepsMsg){
+         this.market.recvMessage(leepsMsg);
+      }
+
+      groupManager.sendToRemoteMarket = function(leepsMsg){
+         var msg = leepsMsgToOuch(leepsMsg);
+         this.socket.send(msg);
+      }
 
       // handles a message from the market
       groupManager.recvFromMarket = function (msg) {

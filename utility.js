@@ -1,3 +1,13 @@
+// return the number of nanoseconds since midnight
+function getTime(){
+   var now = new Date();    
+   var hours = now.getHours()*(60*60)*1000000000;
+   var minutes = now.getMinutes()*60*1000000000;
+   var seconds = now.getSeconds()*1000000000;
+   var millis  = now.getMilliseconds()*1000000;
+   return hours+minutes+seconds+millis;
+}
+
 // Message object. Used to communicate between group manager, subject manager, and market algorithm
 function Message(protocol, msgType, msgData) {
    this.protocol = protocol;
@@ -7,12 +17,12 @@ function Message(protocol, msgType, msgData) {
    this.asString = "Message using protocol: " + this.protocol + " generated at " + String(this.timeStamp);
    this.senderId;
    this.msgId;
-   this.timeStamp = Date.now();
+   this.timeStamp = getTime();
 }
 
 // Updates timestamp of message to current timestamp
 function updateMsgTime(msg) {
-   msg.timeStamp = Date.now();
+   msg.timeStamp = getTime();
 }
 
 // Returns packed message with "actionTime" tag used to simulate latency

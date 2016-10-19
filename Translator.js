@@ -90,8 +90,9 @@ function leepsMsgToOuch(leepsMsg){
 
       // Order Token
       ouchMsg[1] = charToByte('S');
-      ouchMsg[2] = charToByte('B');
-      spliceInArray(decimalToByteArray(leepsMsg.senderId, 2), ouchMsg, 2, 3);
+      ouchMsg[2] = charToByte('U');      
+      ouchMsg[3] = charToByte('B');
+      ouchMsg[4] = charToByte(String.fromCharCode(64 + leepsMsg.msgData[0]));
       spliceInArray(decimalToByteArray(leepsMsg.msgId, 10), ouchMsg, 10, 5);
 
       // Shares
@@ -145,7 +146,11 @@ function leepsMsgToOuch(leepsMsg){
 
 // converts from the OUCH 4.2 formatted message to the in-house leeps message format
 function ouchToLeepsMsg(ouchMsg){
-
+  
+  // Acctepted message
+  if(ouchMsg.charAt(0) === 'A'){
+    
+  }
 }
 
 
@@ -214,6 +219,7 @@ function printByteArray(byteArray, length){
    }
 }
 
+// converts decimal integer number into an array of bytes
 function decimalToByteArray(num, numDigits){
    var bytes = new Uint8Array(numDigits);
    for(var i = numDigits-1; i >= 0; i--){
@@ -227,7 +233,7 @@ function decimalToByteArray(num, numDigits){
 
 
 
-// For testing output
+// Downloads string to file For testing output
 function download(inString, strFileName, strMimeType) {
 
     var strData = "";

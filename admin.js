@@ -295,7 +295,7 @@ Redwood.controller("AdminCtrl",
 
          ra.recv("set_player_time_offset", function (uid, data) {
             if ($scope.playerTimeOffsets[uid] === undefined) {
-               $scope.playerTimeOffsets[uid] = data - Date.now();
+               $scope.playerTimeOffsets[uid] = data - getTime();
             }
          });
 
@@ -309,7 +309,7 @@ Redwood.controller("AdminCtrl",
 
             // start experiment if all subjects are marked ready
             if ($scope.startSyncArrays[groupNum].allReady()) {
-               $scope.startTime = Date.now();
+               $scope.startTime = getTime();
                var group = $scope.getGroup(groupNum);
                var startFP = $scope.priceChanges[0][1];
 
@@ -340,9 +340,9 @@ Redwood.controller("AdminCtrl",
 
                // if there are any price changes to send, start price change sending recursive function
                if ($scope.priceChanges.length > 2) {
-                  window.setTimeout($scope.groupManagers[groupNum].sendNextPriceChange, $scope.startTime + $scope.priceChanges[$scope.groupManagers[groupNum].priceIndex][0] - Date.now());
+                  window.setTimeout($scope.groupManagers[groupNum].sendNextPriceChange, $scope.startTime + $scope.priceChanges[$scope.groupManagers[groupNum].priceIndex][0] - getTime());
                }
-               window.setTimeout($scope.groupManagers[groupNum].sendNextInvestorArrival, $scope.startTime + $scope.investorArrivals[$scope.groupManagers[groupNum].investorIndex][0] - Date.now());
+               window.setTimeout($scope.groupManagers[groupNum].sendNextInvestorArrival, $scope.startTime + $scope.investorArrivals[$scope.groupManagers[groupNum].investorIndex][0] - getTime());
             }
          });
 
@@ -365,7 +365,7 @@ Redwood.controller("AdminCtrl",
                var msg = new Message("OUCH", "EBUY", [0, 214748.3647, true]);
                msg.delay = false;
                for (var group in $scope.groupManagers) {
-                  $scope.groupManagers[group].dataStore.investorArrivals.push([Date.now() - this.startTime, "BUY"]);
+                  $scope.groupManagers[group].dataStore.investorArrivals.push([getTime() - this.startTime, "BUY"]);
                   $scope.groupManagers[group].sendToMarket(msg);
                }
             });
@@ -376,7 +376,7 @@ Redwood.controller("AdminCtrl",
                var msg = new Message("OUCH", "ESELL", [0, 214748.3647, true]);
                msg.delay = false;
                for (var group in $scope.groupManagers) {
-                  $scope.groupManagers[group].dataStore.investorArrivals.push([Date.now() - this.startTime, "SELL"]);
+                  $scope.groupManagers[group].dataStore.investorArrivals.push([getTime() - this.startTime, "SELL"]);
                   $scope.groupManagers[group].sendToMarket(msg);
                }
             });
@@ -384,7 +384,7 @@ Redwood.controller("AdminCtrl",
          $("#send-fpc")
             .button()
             .click(function () {
-               var msg = new Message("ITCH", "FPC", [Date.now(), parseFloat( $("#fpc-input").val() )]);
+               var msg = new Message("ITCH", "FPC", [getTime(), parseFloat( $("#fpc-input").val() )]);
                msg.delay = false;
                for (var group in $scope.groupManagers) {
                   $scope.groupManagers[group].dataStore.storeMsg(msg);
@@ -409,8 +409,8 @@ Redwood.controller("AdminCtrl",
 
                data.unshift(["player", "final_profit"]);
 
-               // get file name by formatting start time as readable string
-               var d = new Date($scope.startTime);
+               // get file name by formatting end time as readable string
+               var d = new Date();
                var filename = d.getHours() + '_' + d.getMinutes() + '_' + d.getSeconds() + '_cda_final_profits.csv';
 
                var csvRows = [];

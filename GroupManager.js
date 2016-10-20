@@ -32,7 +32,7 @@ Redwood.factory("GroupManager", function () {
       // TESTING AREA
       var testMsgs = [];
       
-      var nMsg = new Message("OUCH", "EBUY", [1, 9910, false, Date.now()]);
+      var nMsg = new Message("OUCH", "EBUY", [1, 9910, false, getTime()]);
       nMsg.senderId = 1;
       nMsg.msgId = 1;
       testMsgs.push(leepsMsgToOuch(nMsg));
@@ -255,7 +255,7 @@ Redwood.factory("GroupManager", function () {
             return;
          }
 
-         var msg = new Message("ITCH", "FPC", [Date.now(), this.priceChanges[this.priceIndex][1], this.priceIndex]);
+         var msg = new Message("ITCH", "FPC", [getTime(), this.priceChanges[this.priceIndex][1], this.priceIndex]);
          msg.delay = false;
          this.dataStore.storeMsg(msg);
          this.sendToMarketAlgorithms(msg);
@@ -267,11 +267,11 @@ Redwood.factory("GroupManager", function () {
             return;
          }
 
-         window.setTimeout(this.sendNextPriceChange, this.startTime + this.priceChanges[this.priceIndex][0] - Date.now());
+         window.setTimeout(this.sendNextPriceChange, (this.startTime + this.priceChanges[this.priceIndex][0] - getTime()) / 1000000);
       }.bind(groupManager);
 
       groupManager.sendNextInvestorArrival = function () {
-         this.dataStore.investorArrivals.push([Date.now() - this.startTime, this.investorArrivals[this.investorIndex][1] == 1 ? "BUY" : "SELL"]);
+         this.dataStore.investorArrivals.push([getTime - this.startTime, this.investorArrivals[this.investorIndex][1] == 1 ? "BUY" : "SELL"]);
          var msg2 = new Message("OUCH", this.investorArrivals[this.investorIndex][1] == 1 ? "EBUY" : "ESELL", [0, 214748.3647, true]);
          msg2.delay = false;
          this.sendToMarket(msg2);
@@ -283,19 +283,19 @@ Redwood.factory("GroupManager", function () {
             return;
          }
 
-         window.setTimeout(this.sendNextInvestorArrival, this.startTime + this.investorArrivals[this.investorIndex][0] - Date.now());
+         window.setTimeout(this.sendNextInvestorArrival, (this.startTime + this.investorArrivals[this.investorIndex][0] - getTime()) / 1000000);
       }.bind(groupManager);
 
       groupManager.update = function () {
          //Looks for change in fundamental price and sends message if change is found
          if (this.priceIndex < this.priceChanges.length
-            && Date.now() > this.priceChanges[this.priceIndex][0] + this.startTime) {
+            && getTime() > this.priceChanges[this.priceIndex][0] + this.startTime) {
             if (this.priceChanges[this.priceIndex][1] == -1) {
                this.dataStore.exportDataCsv();
                this.rssend("end_game", this.groupNumber);
             }
             else {
-               var msg = new Message("ITCH", "FPC", [Date.now(), this.priceChanges[this.priceIndex][1], this.priceIndex]);
+               var msg = new Message("ITCH", "FPC", [getTime(), this.priceChanges[this.priceIndex][1], this.priceIndex]);
                msg.delay = false;
                this.dataStore.storeMsg(msg);
                this.sendToMarketAlgorithms(msg);
@@ -305,7 +305,7 @@ Redwood.factory("GroupManager", function () {
 
          //looks for investor arrivals and sends message if one has occurred
          if (this.investorIndex < this.investorArrivals.length
-            && Date.now() > this.investorArrivals[this.investorIndex][0] + this.startTime) {
+            && getTime() > this.investorArrivals[this.investorIndex][0] + this.startTime) {
             var msg2 = new Message("OUCH", this.investorArrivals[this.investorIndex][1] == 1 ? "EBUY" : "ESELL", [0, 214748.3647, true]);
             msg2.delay = false;
             this.sendToMarket(msg2);

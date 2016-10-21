@@ -34,6 +34,7 @@ function packMsg(msg, delay) {
    };
 }
 
+// OBSOLETE SINCE WE MOVED TO NEW TIMESTAMP SYSTEM
 // Converts timestamp to readable time
 function millisToTime(millis) {
    var date = new Date(millis);

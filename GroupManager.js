@@ -37,22 +37,22 @@ Redwood.factory("GroupManager", function () {
       nMsg.msgId = 1;
       testMsgs.push(leepsMsgToOuch(nMsg));
 
-      /*nMsg = new Message("OUCH", "ESELL", [2, 9800, false, Date.now()]);
+      /*nMsg = new Message("OUCH", "ESELL", [2, 9800, false, getTime()]);
       nMsg.senderId = 2;
       nMsg.msgId = 38;
       testMsgs.push(leepsMsgToOuch(nMsg));
 
-      nMsg = new Message("OUCH", "EBUY", [3, 10109.99, false, Date.now()]);
+      nMsg = new Message("OUCH", "EBUY", [3, 10109.99, false, getTime()]);
       nMsg.senderId = 3;
       nMsg.msgId = 785135456;
       testMsgs.push(leepsMsgToOuch(nMsg));
 
-      nMsg = new Message("OUCH", "RBUY", [1, Date.now()]);
+      nMsg = new Message("OUCH", "RBUY", [1, getTime()]);
       nMsg.senderId = 1;
       nMsg.msgId = 1024;
       testMsgs.push(leepsMsgToOuch(nMsg));
 
-      nMsg = new Message("OUCH", "RSELL", [2, Date.now()]);
+      nMsg = new Message("OUCH", "RSELL", [2, getTime()]);
       nMsg.senderId = 2;
       nMsg.msgId = 38;
       testMsgs.push(leepsMsgToOuch(nMsg));*/
@@ -66,10 +66,15 @@ Redwood.factory("GroupManager", function () {
          groupManager.marketURI = "ws://192.168.1.25:8000/";
          groupManager.socket = new WebSocket(groupManager.marketURI, ['binary', 'base64']);
          groupManager.socket.onopen = function(event) {
-            groupManager.socket.send("Confirmed Opened Websocket connection");
+            //groupManager.socket.send("Confirmed Opened Websocket connection");
          };
          groupManager.socket.onmessage = function(event) {
-            console.log("Recieved " + event.data);
+            var reader = new FileReader();
+            reader.addEventListener("loadend", function() {
+               // reader.result contains the contents of blob as a typed array
+               console.log("Recieved From Remote Market:" + reader.result);
+            });
+            reader.readAsText(event.data);
          };
       }
       // END TESTING AREA

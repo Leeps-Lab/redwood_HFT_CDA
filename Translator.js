@@ -186,9 +186,9 @@ function intToByteArray(num){
 
 
 // converts a float price into the standard byte format for OUCH and ITCH.
-// $179.26 becomes 17926 and then is converted to a byte array
+// $179.26 becomes 1792600 and then is converted to a byte array
 function priceToByteArray(price){
-   price = Math.trunc(price * 100);
+   price = Math.trunc(price * 10000);
    return intToByteArray(price);
 }  
 

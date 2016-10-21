@@ -27,7 +27,7 @@ Redwood.factory("MarketManager", function () {
 
       // handle message from subjects
       market.recvMessage = function (message) {
-         message.timestamp = Date.now();
+         message.timestamp = getTime();
          
          // copy current market state to message for debug output
          message.buyOrdersBeforeState = $.extend(true, [], this.CDABook.buyContracts);

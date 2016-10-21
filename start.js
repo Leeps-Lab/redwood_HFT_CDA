@@ -21,10 +21,10 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
             $scope.tradingGraph.draw($scope.dHistory);
 
             if ($scope.using_speed) {
-               $scope.dHistory.profit -= (Date.now() - $scope.lastTime) * $scope.dHistory.speedCost / 1000
+               $scope.dHistory.profit -= (getTime() - $scope.lastTime) * $scope.dHistory.speedCost / 1000
             }
 
-            $scope.lastTime = Date.now();
+            $scope.lastTime = getTime();
          };
 
          // Sends a message to the Group Manager
@@ -37,7 +37,7 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
 
          //First function to run when page is loaded
          rs.on_load(function () {
-            rs.send("set_player_time_offset", Date.now());
+            rs.send("set_player_time_offset", getTime());
             rs.send("Subject_Ready");
          });
 
@@ -74,7 +74,7 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
             $scope.tradingGraph.init(data.startFP, data.maxSpread, data.startingWealth);
 
             // set last time and start looping the update function
-            $scope.lastTime = Date.now();
+            $scope.lastTime = getTime();
             $interval($scope.update, CLOCK_FREQUENCY);
 
             // if input data was provided, setup automatic input system

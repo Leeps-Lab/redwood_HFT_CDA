@@ -57,7 +57,7 @@ RedwoodHighFrequencyTrading.factory("Graphing", function () {
       graph.prevMinPriceProfit = 0;
 
          graph.getCurOffsetTime = function () {
-         return Date.now() - this.timeOffset;
+         return getTime() - this.timeOffset;
       };
 
       graph.setExpandedGraph = function () {

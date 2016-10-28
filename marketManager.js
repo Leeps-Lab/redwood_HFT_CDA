@@ -101,18 +101,20 @@ Redwood.factory("MarketManager", function () {
             // remove buy offer
             case "RBUY":
                market.CDABook.removeBuy(message.msgData[0]);
-               var msg = new Message("ITCH", "C_RBUY", [message.msgData[0], message.timestamp]);
+               var msg = new Message("ITCH", "C_CANC", [message.msgData[0], message.timestamp]);
                msg.timeStamp = message.timestamp; // for test output only
                msg.buyOrdersBeforeState = message.buyOrdersBeforeState;
+               msg.msgId = message.msgId;
                this.sendToGroupManager(msg);
                break;
 
             // remove sell offer
             case "RSELL":
                market.CDABook.removeSell(message.msgData[0]);
-               var msg = new Message("ITCH", "C_RSELL", [message.msgData[0], message.timestamp]);
+               var msg = new Message("ITCH", "C_CANC", [message.msgData[0], message.timestamp]);
                msg.timeStamp = message.timestamp; // for test output only
                msg.sellOrdersBeforeState = message.sellOrdersBeforeState;
+               msg.msgId = message.msgId;
                this.sendToGroupManager(msg);
                break;
 

@@ -108,10 +108,18 @@ function leepsMsgToOuch(leepsMsg){
       ouchMsg[0] = charToByte('U');
 
       // Existing Order Token
-      // TODO
+      ouchMsg[1] = charToByte('S');
+      ouchMsg[2] = charToByte('U');      
+      ouchMsg[3] = charToByte('B');
+      ouchMsg[4] = charToByte(String.fromCharCode(64 + leepsMsg.msgData[0]));
+      spliceInArray(decimalToByteArray(leepsMsg.prevMsgId, 10), ouchMsg, 10, 5);
 
       // Replacement Order Token
-      // TODO
+      ouchMsg[15] = charToByte('S');
+      ouchMsg[16] = charToByte('U');      
+      ouchMsg[17] = charToByte('B');
+      ouchMsg[18] = charToByte(String.fromCharCode(64 + leepsMsg.msgData[0]));
+      spliceInArray(decimalToByteArray(leepsMsg.msgId, 10), ouchMsg, 10, 19);
 
       // Shares
       spliceInArray(intToByteArray(1), ouchMsg, 4, 29);
@@ -149,7 +157,111 @@ function ouchToLeepsMsg(ouchMsg){
   
   // Acctepted message
   if(ouchMsg.charAt(0) === 'A'){
+
+    // pull out timestamp
+    var timeStamp = string256ToInt(ouchMsg.substring(1, 9));
+
+    // pull out message id
+    var msgId = string10ToInt(ouchMsg.substring(13, 23));
+
+    // pull out Buy/Sell Indicator and convert to leeps format
+    var lpsMsgType;
+    if(ouchMsg.charAt(23) === "B"){
+      lpsMsgType = "C_EBUY";
+    }
+    else if(ouchMsg.charAt(23) === "S"){
+      lpsMsgType = "C_ESELL";
+    }
+    else{
+      console.error("Could not recognize Buy/Sell Indicator: " + ouchMsg.charAt(23));
+    }
+
+    // pull out number of shares
+    var numShares = string256ToInt(ouchMsg.substring(24, 28));
     
+    // pull out the price
+    var price = string256ToInt(ouchMsg.substring(36, 40));
+    
+    // pull out the time in force
+    var timeInForce = string256ToInt(ouchMsg.substring(40, 44));
+    
+    // pull out subject id from firm
+    var subjId = ouchMsg.charCodeAt(47) - 64;
+    
+    // create leeps message
+    var msg = new Message("OUCH", lpsMsgType, [subjId, price, timeStamp]);
+    msg.timeStamp = timeStamp; // for test output only
+    msg.msgId = msgId;
+    msg.numShares = numShares;
+    return msg;
+  }
+
+  // Canceled message
+  if(ouchMsg.charAt(0) === 'C'){
+
+    // pull out timestamp
+    var timeStamp = string256ToInt(ouchMsg.substring(1, 9));
+
+    // pull out subject id from order token
+    var subjId = ouchMsg.charCodeAt(12) - 64;
+
+    // pull out message id
+    var msgId = string10ToInt(ouchMsg.substring(13, 23));
+
+    // pull out number of shares canceled
+    var numCanceled = string256ToInt(ouchMsg.substring(23, 27));
+
+    var msg = new Message("OUCH", "C_RBUY", [subjId, timeStamp]);
+    msg.timeStamp = timeStamp; // for test output only
+    msg.msgId = msgId;
+    msg.numShares = numCanceled;
+    return msg;
+  }
+
+  // Replaced message
+  if(ouchMsg.charAt(0) === 'U'){
+
+    // pull out timestamp
+    var timeStamp = string256ToInt(ouchMsg.substring(1, 9));
+
+    // pull out message id
+    var msgId = string10ToInt(ouchMsg.substring(13, 23));
+
+    // pull out Buy/Sell Indicator and convert to leeps format
+    var lpsMsgType;
+    if(ouchMsg.charAt(23) === "B"){
+      lpsMsgType = "C_UBUY";
+    }
+    else if(ouchMsg.charAt(23) === "S"){
+      lpsMsgType = "C_USELL";
+    }
+    else{
+      console.error("Could not recognize Buy/Sell Indicator: " + ouchMsg.charAt(23));
+    }
+
+    // pull out number of shares
+    var numShares = string256ToInt(ouchMsg.substring(24, 28));
+    
+    // pull out the price
+    var price = string256ToInt(ouchMsg.substring(36, 40));
+    
+    // pull out the time in force
+    var timeInForce = string256ToInt(ouchMsg.substring(40, 44));
+    
+    // pull out subject id from firm
+    var subjId = ouchMsg.charCodeAt(47) - 64;
+
+    // pull out the previous message id
+    var prevMsgId = string10ToInt(ouchMsg.substring(69, 79));
+
+    // create leeps message
+    var msg = new Message("OUCH", lpsMsgType, [subjId, price, timeStamp]);
+    msg.timeStamp = timeStamp; // for test output only
+    msg.msgId = msgId;
+    msg.prevMsgId = prevMsgId;
+    msg.numShares = numShares;
+    return msg;
+
   }
 }
 
@@ -230,8 +342,36 @@ function decimalToByteArray(num, numDigits){
    return bytes;
 }
 
+// Converts a string of ascii char's stored as base 256 into a decimal int
+function string256ToInt(str){
+  var sum = 0;
+  var base = 1;
+  for(var i = str.length-1; i >= 0; i--){
+    sum += str.charCodeAt(i) * base;
+    base *= 256;
+  }
+  return sum;
+}
 
+// Converts a string of ascii char's stored as base 256 into a decimal int
+function string10ToInt(str){
+  var sum = 0;
+  var base = 1;
+  for(var i = str.length-1; i >= 0; i--){
+    sum += (str.charCodeAt(i) - 48) * base;
+    base *= 10;
+  }
+  return sum;
+}
 
+// Converts a byte array into a string
+function byteArrayToString(byteArr){
+  var outStr = "";
+  for(byte of byteArr){
+    outStr += String.fromCharCode(byte);
+  }
+  return outStr;
+}
 
 // Downloads string to file For testing output
 function download(inString, strFileName, strMimeType) {

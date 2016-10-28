@@ -160,7 +160,7 @@ Redwood.controller("AdminCtrl",
 
             //INITIALIZE ADMIN FOR EXPERIMENT   **************************************
 
-            var marketFlag = "REMOTE";    // LOCAL  = use local market (i.e. this.market)
+            var marketFlag = "LOCAL";   // LOCAL  = use local market (i.e. this.market)
                                          // REMOTE = use remote market by making websockets connection
                                          // DEBUG  = use debug market (i.e. this.debugMarket
 

@@ -17,7 +17,9 @@ function Message(protocol, msgType, msgData) {
    this.asString = "Message using protocol: " + this.protocol + " generated at " + String(this.timeStamp);
    this.senderId;
    this.msgId;
+   this.prevMsgId;
    this.timeStamp = getTime();
+   this.numShares = 0;
 }
 
 // Updates timestamp of message to current timestamp

@@ -4,7 +4,7 @@ Redwood.factory("MarketAlgorithm", function () {
    api.createMarketAlgorithm = function (subjectArgs, groupManager) {
       var marketAlgorithm = {};
 
-      marketAlgorithm.spread = subjectArgs.maxSpread / 2;            // record of this user's spread value
+      marketAlgorithm.spread = subjectArgs.maxSpread / 2;    // record of this user's spread value
       marketAlgorithm.using_speed = false;
       marketAlgorithm.state = "state_out";   // user's state - can be "state_out", "state_maker", or "state_snipe"
       marketAlgorithm.buyEntered = false;    // flags for if this user has buy/sell orders still in the book
@@ -15,6 +15,8 @@ Redwood.factory("MarketAlgorithm", function () {
       marketAlgorithm.groupManager = groupManager;   //Sends message to group manager, function obtained as parameter
       marketAlgorithm.fundamentalPrice = 0;
       marketAlgorithm.currentMsgId = 1;
+      marketAlgorithm.currentBuyId = 0;
+      marketAlgorithm.currentSellId = 0;
 
       marketAlgorithm.isDebug = subjectArgs.isDebug;
       if (marketAlgorithm.isDebug) {
@@ -161,6 +163,7 @@ Redwood.factory("MarketAlgorithm", function () {
             if (msg.msgData[0] == this.myId) {
                var nMsg = new Message("DATA", "C_EBUY", msg.msgData);
                this.sendToAllDataHistories(nMsg);
+               this.currentBuyId = msg.msgId;
             }
          }
 
@@ -169,22 +172,28 @@ Redwood.factory("MarketAlgorithm", function () {
             if (msg.msgData[0] == this.myId) {
                var nMsg = new Message("DATA", "C_ESELL", msg.msgData);
                this.sendToAllDataHistories(nMsg);
+               this.currentSellId = msg.msgId;
             }
          }
 
-         // Confirmation that a buy offer has been removed from market
-         if (msg.msgType == "C_RBUY") {
-            if (msg.msgData[0] == this.myId) {
-               var nMsg = new Message("DATA", "C_RBUY", msg.msgData);
-               this.sendToAllDataHistories(nMsg);
-            }
-         }
+         if(msg.msgType === "C_CANC"){
 
-         // Confirmation that a sell offer has been placed in market
-         if (msg.msgType == "C_RSELL") {
-            if (msg.msgData[0] == this.myId) {
-               var nMsg = new Message("DATA", "C_RSELL", msg.msgData);
-               this.sendToAllDataHistories(nMsg);
+            // Confirmation that a buy offer has been removed from market
+            if (msg.msgId === this.currentBuyId) {
+               if (msg.msgData[0] == this.myId) {
+                  var nMsg = new Message("DATA", "C_RBUY", msg.msgData);
+                  this.sendToAllDataHistories(nMsg);
+                  this.currentBuyId = 0;
+               }
+            }
+
+            // Confirmation that a sell offer has been placed in market
+            if (msg.msgId === this.currentSellId) {
+               if (msg.msgData[0] == this.myId) {
+                  var nMsg = new Message("DATA", "C_RSELL", msg.msgData);
+                  this.sendToAllDataHistories(nMsg);
+                  this.currentSellId = 0;
+               }
             }
          }
 
@@ -193,6 +202,7 @@ Redwood.factory("MarketAlgorithm", function () {
             if (msg.msgData[0] == this.myId) {
                var nMsg = new Message("DATA", "C_UBUY", msg.msgData);
                this.sendToAllDataHistories(nMsg);
+               this.currentBuyId = msg.msgId;
             }
          }
 
@@ -201,6 +211,7 @@ Redwood.factory("MarketAlgorithm", function () {
             if (msg.msgData[0] == this.myId) {
                var nMsg = new Message("DATA", "C_USELL", msg.msgData);
                this.sendToAllDataHistories(nMsg);
+               this.currentSellId = msg.msgId;
             }
          }
 
@@ -214,8 +225,16 @@ Redwood.factory("MarketAlgorithm", function () {
             }
 
             if (this.state == "state_maker") {
-               if (msg.msgData[1] === this.myId) this.sendToGroupManager(this.enterBuyOfferMsg());
-               if (msg.msgData[2] === this.myId) this.sendToGroupManager(this.enterSellOfferMsg());
+               if (msg.msgData[1] === this.myId)
+               {
+                  this.currentBuyId = 0;
+                  this.sendToGroupManager(this.enterBuyOfferMsg());
+               }
+               if (msg.msgData[2] === this.myId) 
+               {
+                  this.currentSellId = 0;
+                  this.sendToGroupManager(this.enterSellOfferMsg());
+               }
             }
          }
       };
@@ -242,8 +261,7 @@ Redwood.factory("MarketAlgorithm", function () {
          var nMsg = new Message("OUCH", "RBUY", [this.myId]);
          nMsg.delay = !this.using_speed;
          nMsg.senderId = this.myId;
-         nMsg.msgId = this.currentMsgId;
-         this.currentMsgId++;
+         nMsg.msgId = this.currentBuyId;
          return nMsg;
       }
 
@@ -251,8 +269,7 @@ Redwood.factory("MarketAlgorithm", function () {
          var nMsg = new Message("OUCH", "RSELL", [this.myId]);
          nMsg.delay = !this.using_speed;
          nMsg.senderId = this.myId;
-         nMsg.msgId = this.currentMsgId;
-         this.currentMsgId++;
+         nMsg.msgId = this.currentSellId;
          return nMsg;
       }
 
@@ -262,6 +279,7 @@ Redwood.factory("MarketAlgorithm", function () {
          nMsg.senderId = this.myId;
          nMsg.msgId = this.currentMsgId;
          this.currentMsgId++;
+         nMsg.prevMsgId = this.currentBuyId;
          return nMsg;
       };
 
@@ -271,6 +289,7 @@ Redwood.factory("MarketAlgorithm", function () {
          nMsg.senderId = this.myId;
          nMsg.msgId = this.currentMsgId;
          this.currentMsgId++;
+         nMsg.prevMsgId = this.currentSellId;
          return nMsg;
       };
 

@@ -30,6 +30,9 @@ Redwood.factory("GroupManager", function () {
 
 
       // TESTING AREA
+
+      console.log("testing numbers: " + string256ToInt("am%"));
+
       var testMsgs = [];
       
       var nMsg = new Message("OUCH", "EBUY", [1, 9910, false, getTime()]);
@@ -57,22 +60,38 @@ Redwood.factory("GroupManager", function () {
       nMsg.msgId = 38;
       testMsgs.push(leepsMsgToOuch(nMsg));*/
 
-      /*printByteArray(testMsgs[0], 49);
-      outputMsgs(testMsgs);*/
+      //printByteArray(testMsgs[0], 49);
+      //outputMsgs(testMsgs);
+
+      var testAccept   = "A\0\0\0\0\0\0\1\001SUBF0000000016B\0\0\0\001LEEPS   \0\0\1\001\0\001"+String.fromCharCode(134)+String.fromCharCode(159)+"SUBF";
+      var testCanceled = "C\0\0\0\0\0\0\1\001SUBF0000000012\0\0\000aU";
+      var testReplaced = "U\0\0\0\0\0\0\1\001SUBB0000000003S\0\0\0000LEEPS   \0\0\000a\0\0\0\000SUBBiiiiiiiiiiiiiiiiiSUBB0000000002"
+      console.log(ouchToLeepsMsg(testAccept));
+      console.log(ouchToLeepsMsg(testCanceled));
+      console.log(ouchToLeepsMsg(testReplaced));
 
       // only open websockets connection if running in REMOTE mode
       if(groupManager.marketFlag === "REMOTE"){
+
          // open websocket with market
          groupManager.marketURI = "ws://192.168.1.25:8000/";
          groupManager.socket = new WebSocket(groupManager.marketURI, ['binary', 'base64']);
          groupManager.socket.onopen = function(event) {
             //groupManager.socket.send("Confirmed Opened Websocket connection");
          };
+
+         // recievs messages from remote market
          groupManager.socket.onmessage = function(event) {
+            
+            // create reader to read "blob" object
             var reader = new FileReader();
             reader.addEventListener("loadend", function() {
-               // reader.result contains the contents of blob as a typed array
+
+               // reader.result contains the raw ouch message as a string
                console.log("Recieved From Remote Market:" + reader.result);
+
+               // translate the message and pass it to the recieve function
+               groupManager.recvFromMarket(ouchToLeepsMsg(reader.result));
             });
             reader.readAsText(event.data);
          };

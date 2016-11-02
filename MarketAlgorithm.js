@@ -203,6 +203,7 @@ Redwood.factory("MarketAlgorithm", function () {
                var nMsg = new Message("DATA", "C_UBUY", msg.msgData);
                this.sendToAllDataHistories(nMsg);
                this.currentBuyId = msg.msgId;
+               console.log("[MarketAlgorithm] DEBUG recieved C_UBUY message. Current buy id is now: " + this.currentBuyId);
             }
          }
 

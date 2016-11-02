@@ -25,14 +25,12 @@ Redwood.factory("GroupManager", function () {
 
       groupManager.syncFPArray = new SynchronizeArray(groupManager.memberIDs);
       groupManager.FPMsgList = [];
+      groupManager.curMsgId = 1;
 
       groupManager.isDebug = groupArgs.isDebug;     //indicates if message logger should be used
 
 
-      // TESTING AREA
-
-      console.log("testing numbers: " + string256ToInt("am%"));
-
+      // TESTING AREA ********************************************************************************
       var testMsgs = [];
       
       var nMsg = new Message("OUCH", "EBUY", [1, 9910, false, getTime()]);
@@ -63,18 +61,20 @@ Redwood.factory("GroupManager", function () {
       //printByteArray(testMsgs[0], 49);
       //outputMsgs(testMsgs);
 
-      var testAccept   = "A\0\0\0\0\0\0\1\001SUBF0000000016B\0\0\0\001LEEPS   \0\0\1\001\0\001"+String.fromCharCode(134)+String.fromCharCode(159)+"SUBF";
+      /*var testAccept   = "A\0\0\0\0\0\0\1\001SUBF0000000016B\0\0\0\001LEEPS   \0\0\1\001\0\001"+String.fromCharCode(134)+String.fromCharCode(159)+"SUBF";
       var testCanceled = "C\0\0\0\0\0\0\1\001SUBF0000000012\0\0\000aU";
       var testReplaced = "U\0\0\0\0\0\0\1\001SUBB0000000003S\0\0\0000LEEPS   \0\0\000a\0\0\0\000SUBBiiiiiiiiiiiiiiiiiSUBB0000000002"
       console.log(ouchToLeepsMsg(testAccept));
       console.log(ouchToLeepsMsg(testCanceled));
       console.log(ouchToLeepsMsg(testReplaced));
+*/
+      // END TESTING AREA **********************************************************************
 
       // only open websockets connection if running in REMOTE mode
       if(groupManager.marketFlag === "REMOTE"){
 
          // open websocket with market
-         groupManager.marketURI = "ws://192.168.1.25:8000/";
+         groupManager.marketURI = "ws://192.168.1.15:8000/";
          groupManager.socket = new WebSocket(groupManager.marketURI, ['binary', 'base64']);
          groupManager.socket.onopen = function(event) {
             //groupManager.socket.send("Confirmed Opened Websocket connection");
@@ -88,15 +88,31 @@ Redwood.factory("GroupManager", function () {
             reader.addEventListener("loadend", function() {
 
                // reader.result contains the raw ouch message as a string
-               console.log("Recieved From Remote Market:" + reader.result);
+               console.log("Recieved From Remote Market: " + reader.result);
+               logStringAsNums(reader.result);
+
+               console.log(ouchToLeepsMsg(reader.result));
 
                // translate the message and pass it to the recieve function
                groupManager.recvFromMarket(ouchToLeepsMsg(reader.result));
             });
-            reader.readAsText(event.data);
+            reader.readAsText(event.data, "ASCII");
          };
       }
-      // END TESTING AREA
+
+      if(groupManager.marketFlag === "DEBUG"){
+         
+         // wrapper for debug market recieve function
+         groupManager.recvFromDebugMarket = function(msg){
+
+            console.log("Recieved From Debug Market: " + msg);
+            console.log(ouchToLeepsMsg(msg));
+            groupManager.recvFromMarket(ouchToLeepsMsg(msg));
+         }
+
+         // initialize debug market
+         groupManager.debugMarket = new DebugMarket(groupManager.recvFromDebugMarket);
+      }
 
 
       if (groupManager.isDebug) {
@@ -182,6 +198,9 @@ Redwood.factory("GroupManager", function () {
             else if(this.marketFlag === "REMOTE"){
                window.setTimeout(this.sendToRemoteMarket.bind(this), this.delay, leepsMsg);
             }
+            else if(this.marketFlag === "DEBUG"){
+               window.setTimeout(this.sendToDebugMarket.bind(this), this.delay, leepsMsg);
+            }
          }
          else {
             if(this.marketFlag === "LOCAL"){
@@ -189,6 +208,9 @@ Redwood.factory("GroupManager", function () {
             }
             else if(this.marketFlag === "REMOTE"){
                this.sendToRemoteMarket(leepsMsg);
+            }
+            else if(this.marketFlag === "DEBUG"){
+               this.sendToDebugMarket(leepsMsg);
             }
          }
       };
@@ -200,6 +222,11 @@ Redwood.factory("GroupManager", function () {
       groupManager.sendToRemoteMarket = function(leepsMsg){
          var msg = leepsMsgToOuch(leepsMsg);
          this.socket.send(msg);
+      }
+
+      groupManager.sendToDebugMarket = function(leepsMsg){
+         var msg = leepsMsgToOuch(leepsMsg);
+         this.debugMarket.recvMessage(msg);
       }
 
       // handles a message from the market
@@ -297,6 +324,8 @@ Redwood.factory("GroupManager", function () {
       groupManager.sendNextInvestorArrival = function () {
          this.dataStore.investorArrivals.push([getTime - this.startTime, this.investorArrivals[this.investorIndex][1] == 1 ? "BUY" : "SELL"]);
          var msg2 = new Message("OUCH", this.investorArrivals[this.investorIndex][1] == 1 ? "EBUY" : "ESELL", [0, 214748.3647, true]);
+         msg2.msgId = this.curMsgId;
+         this.curMsgId ++;
          msg2.delay = false;
          this.sendToMarket(msg2);
 

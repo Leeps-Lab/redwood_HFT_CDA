@@ -160,11 +160,10 @@ Redwood.controller("AdminCtrl",
 
             //INITIALIZE ADMIN FOR EXPERIMENT   **************************************
 
-            var marketFlag = "LOCAL";   // LOCAL  = use local market (i.e. this.market)
-                                         // REMOTE = use remote market by making websockets connection
-                                         // DEBUG  = use debug market (i.e. this.debugMarket
-
-            console.log(getTime());
+            var marketFlag = "REMOTE";
+                                       // LOCAL  = use local market (i.e. this.market)
+                                       // REMOTE = use remote market by making websockets connection
+                                       // DEBUG  = use debug market (i.e. this.debugMarket
 
             $scope.config = ra.get_config(1, 0);
 
@@ -327,7 +326,7 @@ Redwood.controller("AdminCtrl",
                };
 
                if($scope.config.hasOwnProperty("input_addresses")) {
-                  console.log("%cRUNNING IN TEST MODE", 'font-family: "Comic Sans MS"');
+                  //console.log("%cRUNNING IN TEST MODE", 'font-family: "Comic Sans MS"');
                   beginData.input_addresses = $scope.config.input_addresses.split(',');
                }
 

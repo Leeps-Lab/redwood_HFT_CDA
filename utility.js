@@ -127,3 +127,37 @@ function SynchronizeArray(key_array) {
       return this.readyCount === this.targetReadyCount;
    };
 }
+
+function getTimeToString(){
+   byteArrayToString(intToByteArray(getTime()));
+}
+
+// simple exchange server that always accepts enter buy/sell cancels, and replaces. Will generate simple crosses
+function DebugMarket(sendFunction){
+
+   var LOG_MSGS = true;
+   console.log("Setting up DebugMarket...");
+
+   this.recvMessage = function(msgArr){
+
+      var msg = "";
+      for(num of msgArr){
+         msg += String.fromCharCode(num);
+      }
+      
+      if(LOG_MSGS){
+         console.log("Debug Market recieved: " + msg);
+      }
+
+      // Enter order message
+      if(msg.charAt(0) === "O"){
+         console.log("order");
+         var testAccept   = "A" + getTimeToString() + msg.subString(1, 15) + "LEEPS   \0\0\1\001\0\001"+String.fromCharCode(134)+String.fromCharCode(159)+"SUBF";
+      }
+   }
+
+   this.sendMessage = function(msg){
+      sendFunction(msg);
+   }
+
+}

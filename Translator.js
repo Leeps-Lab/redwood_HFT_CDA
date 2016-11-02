@@ -173,6 +173,7 @@ function ouchToLeepsMsg(ouchMsg){
       lpsMsgType = "C_ESELL";
     }
     else{
+      console.log(ouchMsg);
       console.error("Could not recognize Buy/Sell Indicator: " + ouchMsg.charAt(23));
     }
 
@@ -371,6 +372,17 @@ function byteArrayToString(byteArr){
     outStr += String.fromCharCode(byte);
   }
   return outStr;
+}
+
+// logs string of characters using thier ascii numbers
+function logStringAsNums(str){
+  var i = 0;
+  var outString = "";
+  for(char of str){
+    outString += "(" + i + ":" + char.charCodeAt(0) + ")";
+    i++;
+  }
+  console.log(outString);
 }
 
 // Downloads string to file For testing output

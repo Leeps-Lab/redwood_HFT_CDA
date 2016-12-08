@@ -24,14 +24,11 @@ RedwoodHighFrequencyTrading.factory("DataHistory", function () {
       dataHistory.lowestProfitPrice = startingWealth;
 
       dataHistory.debugMode = debugMode;
-      if (debugMode) {
-         dataHistory.logger = new MessageLogger("Data History " + String(myId), "orange", "subject-log");
-      }
 
       dataHistory.recvMessage = function (msg) {
-         if (this.debugMode) {
-            this.logger.logRecv(msg, "Market Algorithm");
-         }
+
+         //console.log("[DEBUG] Data History recieved msg: ");
+         //console.log(msg);
 
          switch (msg.msgType) {
             case "FPC"      :
@@ -128,6 +125,8 @@ RedwoodHighFrequencyTrading.factory("DataHistory", function () {
          //Check if current buy offer needs to be stored
          if (this.playerData[buyMsg.msgData[0]].curBuyOffer != null) {
             this.storeBuyOffer(buyMsg.msgData[2], buyMsg.msgData[0]);
+            console.log("Data being stored: " + buyMsg.msgData[2] + " : " + buyMsg.msgData[0]);
+            console.log("Local timestamp: " + getTime());
          }
          //Push on new buy offer
          this.playerData[buyMsg.msgData[0]].curBuyOffer = [buyMsg.msgData[2], buyMsg.msgData[1]];   // [timestamp, price]

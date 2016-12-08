@@ -10,6 +10,26 @@
 // for referance on the OUTCH 4.1 format
 
 
+var ouchMsgSizes = {'A' : 66, 'U' : 80, 'C' : 28};
+
+// splits a string that can contain multiple messages into an array of messages
+function splitMessages(messageStr){
+  
+  var i = 0;
+  var msgArray = [];
+
+  // keep looping until reach end of conjoined message
+  while(i < messageStr.length){
+
+    // check the type of this message and find its size
+    var msgSize = ouchMsgSizes[messageStr[i]];
+    msgArray.push(messageStr.substring(i, i + msgSize));
+    i += msgSize;
+  }
+  return msgArray;
+}
+
+
 
 // converts from the in-house leeps message format to an OUCH 4.2 formatted message
 function leepsMsgToOuch(leepsMsg){
@@ -181,7 +201,7 @@ function ouchToLeepsMsg(ouchMsg){
     var numShares = string256ToInt(ouchMsg.substring(24, 28));
     
     // pull out the price
-    var price = string256ToInt(ouchMsg.substring(36, 40));
+    var price = string256ToPrice(ouchMsg.substring(36, 40));
     
     // pull out the time in force
     var timeInForce = string256ToInt(ouchMsg.substring(40, 44));
@@ -212,7 +232,7 @@ function ouchToLeepsMsg(ouchMsg){
     // pull out number of shares canceled
     var numCanceled = string256ToInt(ouchMsg.substring(23, 27));
 
-    var msg = new Message("OUCH", "C_RBUY", [subjId, timeStamp]);
+    var msg = new Message("OUCH", "C_CANC", [subjId, timeStamp]);
     msg.timeStamp = timeStamp; // for test output only
     msg.msgId = msgId;
     msg.numShares = numCanceled;
@@ -244,7 +264,7 @@ function ouchToLeepsMsg(ouchMsg){
     var numShares = string256ToInt(ouchMsg.substring(24, 28));
     
     // pull out the price
-    var price = string256ToInt(ouchMsg.substring(36, 40));
+    var price = string256ToPrice(ouchMsg.substring(36, 40));
     
     // pull out the time in force
     var timeInForce = string256ToInt(ouchMsg.substring(40, 44));
@@ -354,6 +374,13 @@ function string256ToInt(str){
   return sum;
 }
 
+// Converts a string of ascii char's stored as base 256 into a decimal price ("152500" -> 15.25)
+function string256ToPrice(str){
+  var temp = string256ToInt(str);
+  var temp = temp / 10000;
+  return temp;
+}
+
 // Converts a string of ascii char's stored as base 256 into a decimal int
 function string10ToInt(str){
   var sum = 0;
@@ -386,7 +413,7 @@ function logStringAsNums(str){
 }
 
 // Downloads string to file For testing output
-function download(inString, strFileName, strMimeType) {
+function downloadHex(inString, strFileName, strMimeType) {
 
     var strData = "";
     for(var i = 0; i < inString.length; i++){

@@ -163,7 +163,7 @@ Redwood.controller("AdminCtrl",
             var marketFlag = "REMOTE";
                                        // LOCAL  = use local market (i.e. this.market)
                                        // REMOTE = use remote market by making websockets connection
-                                       // DEBUG  = use debug market (i.e. this.debugMarket
+                                       // DEBUG  = use debug market (i.e. this.debugMarket)
 
             $scope.config = ra.get_config(1, 0);
 

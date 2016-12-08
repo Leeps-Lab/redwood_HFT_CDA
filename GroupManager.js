@@ -27,8 +27,8 @@ Redwood.factory("GroupManager", function () {
       groupManager.FPMsgList = [];
       groupManager.curMsgId = 1;
 
-      groupManager.isDebug = groupArgs.isDebug;     //indicates if message logger should be used
-
+      groupManager.isDebug = groupArgs.isDebug;     // indicates if message logger should be used
+      groupManager.marketLog = "";                  // strig of market events, will be output to file
 
       // TESTING AREA ********************************************************************************
       var testMsgs = [];
@@ -71,32 +71,38 @@ Redwood.factory("GroupManager", function () {
       // END TESTING AREA **********************************************************************
 
       // only open websockets connection if running in REMOTE mode
-      if(groupManager.marketFlag === "REMOTE"){
+      if(groupManager.marketFlag === "REMOTE"/*ZACH, D/N MODIFY!*/){
 
          // open websocket with market
-         groupManager.marketURI = "ws://192.168.1.15:8000/";
+         groupManager.marketURI = "ws://54.213.222.175:8000/";
          groupManager.socket = new WebSocket(groupManager.marketURI, ['binary', 'base64']);
          groupManager.socket.onopen = function(event) {
             //groupManager.socket.send("Confirmed Opened Websocket connection");
          };
 
-         // recievs messages from remote market
+         // recieves messages from remote market
          groupManager.socket.onmessage = function(event) {
             
             // create reader to read "blob" object
             var reader = new FileReader();
             reader.addEventListener("loadend", function() {
 
-               // reader.result contains the raw ouch message as a string
-               console.log("Recieved From Remote Market: " + reader.result);
-               logStringAsNums(reader.result);
+               console.log("Recieved From Remote Market: ");
 
-               console.log(ouchToLeepsMsg(reader.result));
+               // reader.result contains the raw ouch message as a DataBuffer, convert it to string
+               var ouchStr = String.fromCharCode.apply(null, new Uint8Array(reader.result));
+               logStringAsNums(ouchStr);
 
-               // translate the message and pass it to the recieve function
-               groupManager.recvFromMarket(ouchToLeepsMsg(reader.result));
+               // split the string in case messages are conjoined
+               var ouchMsgArray = splitMessages(ouchStr);
+
+               for(ouchMsg of ouchMsgArray){
+                  // translate the message and pass it to the recieve function
+                  groupManager.recvFromMarket(ouchToLeepsMsg(ouchMsg));
+               }
             });
-            reader.readAsText(event.data, "ASCII");
+            reader.readAsArrayBuffer(event.data);
+            //reader.readAsText(event.data, "ASCII");
          };
       }
 
@@ -115,13 +121,6 @@ Redwood.factory("GroupManager", function () {
       }
 
 
-      if (groupManager.isDebug) {
-         // add the logging terminal to the ui section of the html
-         $("#ui").append('<div class="terminal-wrap"><div class="terminal-head">Group ' + groupManager.groupNumber +
-            ' Message Log</div><div id="group-' + groupManager.groupNumber + '-log" class="terminal"></div></div>');
-         groupManager.logger = new MessageLogger("Group Manager " + String(groupManager.groupNumber), "#5555FF", "group-" + groupManager.groupNumber + "-log");
-      }
-
       // wrapper for the redwood send function
       groupManager.rssend = function (key, value) {
          sendFunction(key, value, "admin", 1, this.groupNumber);
@@ -132,7 +131,7 @@ Redwood.factory("GroupManager", function () {
       };
 
       groupManager.sendToAllDataHistories = function (msg) {
-         this.dataStore.storeMsg(msg);
+         //this.dataStore.storeMsg(msg);
          this.rssend("To_All_Data_Histories", msg);
       };
 
@@ -145,10 +144,6 @@ Redwood.factory("GroupManager", function () {
 
       // receive a message from a single market algorithm in this group
       groupManager.recvFromMarketAlgorithm = function (msg) {
-
-         if (this.isDebug) {
-            this.logger.logRecv(msg, "Market Algorithm");
-         }
 
          // synchronized message in response to fundamental price change
          if (msg.protocol === "SYNC_FP") {
@@ -216,6 +211,7 @@ Redwood.factory("GroupManager", function () {
       };
 
       groupManager.sendToLocalMarket = function(leepsMsg){
+         console.log("sending to local market");
          this.market.recvMessage(leepsMsg);
       }
 
@@ -232,41 +228,20 @@ Redwood.factory("GroupManager", function () {
       // handles a message from the market
       groupManager.recvFromMarket = function (msg) {
 
-         if (this.isDebug) {
-            this.logger.logRecv(msg, "Market");
-         }
+         // add message to log
+         this.marketLog += msg.asString + "\n";
+         console.log(this.marketLog);
 
-         switch (msg.msgType) {
-            case "C_EBUY"  :
-            case "C_RBUY"  :
-            case "C_UBUY"  :
-               this.dataStore.storeBuyOrderState(msg.timeStamp, this.market.CDABook.buyContracts, msg.buyOrdersBeforeState);
-               break;
-            case "C_RSELL" :
-            case "C_ESELL" :
-            case "C_USELL" :
-               this.dataStore.storeSellOrderState(msg.timeStamp, this.market.CDABook.sellContracts, msg.sellOrdersBeforeState);
-               break;
-            case "C_TRA"   :
-               this.sendToMarketAlgorithms(msg);
-               // I'm actually a little ashamed of this one
-               if (msg.hasOwnProperty("buyOrdersBeforeState")) {
-                  this.dataStore.storeBuyOrderState(msg.timeStamp, this.market.CDABook.buyContracts, msg.buyOrdersBeforeState);
-               }
-               else {
-                  this.dataStore.storeSellOrderState(msg.timeStamp, this.market.CDABook.sellContracts, msg.sellOrdersBeforeState);
-               }
-               return;
+         if(msg.msgType === "C_TRA"){
+            this.sendToMarketAlgorithms(msg);
          }
-         this.marketAlgorithms[msg.msgData[0]].recvFromGroupManager(msg);
+         else {
+            this.marketAlgorithms[msg.msgData[0]].recvFromGroupManager(msg);
+         }
       };
 
       // handles message from subject and passes it on to market algorithm
       groupManager.recvFromSubject = function (msg) {
-
-         if (this.isDebug) {
-            this.logger.logRecv(msg, "Subjects");
-         }
 
          // if this is a user message, handle it and don't send it to market
          if (msg.protocol === "USER") {

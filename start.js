@@ -21,7 +21,7 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
             $scope.tradingGraph.draw($scope.dHistory);
 
             if ($scope.using_speed) {
-               $scope.dHistory.profit -= (getTime() - $scope.lastTime) * $scope.dHistory.speedCost / 1000
+               $scope.dHistory.profit -= (getTime() - $scope.lastTime) * $scope.dHistory.speedCost / 1000;
             }
 
             $scope.lastTime = getTime();
@@ -240,9 +240,6 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
 
          // receives message sent to all dataHistories
          rs.recv("To_All_Data_Histories", function (uid, msg) {
-            if ($scope.isDebug) {
-               $scope.logger.logRecv(msg, "Market Algorithm");
-            }
             $scope.dHistory.recvMessage(msg);
          });
 

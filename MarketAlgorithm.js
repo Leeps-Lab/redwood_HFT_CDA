@@ -58,10 +58,6 @@ Redwood.factory("MarketAlgorithm", function () {
       // Handle message sent to the market algorithm
       marketAlgorithm.recvFromGroupManager = function (msg) {
 
-         if (this.isDebug) {
-            this.logger.logRecv(msg, "Group Manager");
-         }
-
          // Fundamental Price Change
          if (msg.msgType === "FPC") {
 

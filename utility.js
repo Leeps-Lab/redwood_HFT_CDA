@@ -1,10 +1,11 @@
 // return the number of nanoseconds since midnight
 function getTime(){
-   var m = moment.tz("America/Los_Angeles"); 
-   var hours =   m.hours()       *(60*60)*1000000000;
-   var minutes = m.minutes()     *60*1000000000;
-   var seconds = m.seconds()     *1000000000;
-   var millis  = m.milliseconds()*1000000;
+   //var m = moment.tz("America/Los_Angeles"); 
+   var d = new Date();
+   var hours =   d.getHours()       *(60*60)*1000000000;
+   var minutes = d.getMinutes()     *60*1000000000;
+   var seconds = d.getSeconds()     *1000000000;
+   var millis  = d.getMilliseconds()*1000000;
    return hours+minutes+seconds+millis;
 }
 

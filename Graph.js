@@ -292,7 +292,7 @@ RedwoodHighFrequencyTrading.factory("Graphing", function () {
             });
 
          if (currentData != null) {
-            var pricefinal = currentData[1] - ((graphRefr.currentTime - currentData[0]) * currentData[2] / 1000); //determines how far down the line has moved
+            var pricefinal = currentData[1] - ((graphRefr.currentTime - currentData[0]) * currentData[2] / 1000000000); // changed from 1000 //determines how far down the line has moved
             this.profitSVG.append("line")
                .attr("x1", this.mapTimeToXAxis(currentData[0]))
                .attr("x2", this.curTimeX)

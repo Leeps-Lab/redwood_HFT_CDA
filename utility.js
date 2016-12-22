@@ -1,11 +1,10 @@
 // return the number of nanoseconds since midnight
 function getTime(){
-   //var m = moment.tz("America/Los_Angeles"); 
-   var d = new Date();
-   var hours =   d.getHours()       *(60*60)*1000000000;
-   var minutes = d.getMinutes()     *60*1000000000;
-   var seconds = d.getSeconds()     *1000000000;
-   var millis  = d.getMilliseconds()*1000000;
+   var m = moment.tz("America/Los_Angeles"); 
+   var hours =   m.hours()       *(60*60)*1000000000;
+   var minutes = m.minutes()     *60*1000000000;
+   var seconds = m.seconds()     *1000000000;
+   var millis  = m.milliseconds()*1000000;
    return hours+minutes+seconds+millis;
 }
 
@@ -28,9 +27,20 @@ function Message(protocol, msgType, msgData) {
    this.msgType = msgType;
    this.msgData = msgData;
    this.timeStamp = getTime();
-   this.asString = msgType + " timestamp:" + printTime(this.timeStamp) + " subjID:" + msgData[0];
-   if(msgType == "C_EBUY" || msgType == "C_ESELL" || msgType == "C_UBUY" || msgType == "C_USELL"){
-      this.asString += " price: " + msgData[1];
+   
+   // formats message as string for debugging
+   this.asString = function(){
+      var s = msgType + " timestamp:" + printTime(this.timeStamp) + " subjID:" + msgData[0];
+      if(msgType == "C_EBUY" || msgType == "C_ESELL" || msgType == "C_UBUY" || msgType == "C_USELL"){
+        s += " msgID:" + this.msgId + " price: " + msgData[1];
+      }
+      else if(msgType == "UBUY" || msgType == "USELL"){
+        s +=  " id:" + this.prevMsgId + "->" + this.msgId;
+      }
+      else{
+        s += " msgID:" + this.msgId;
+      }
+      return s;
    }
    this.senderId;
    this.msgId;

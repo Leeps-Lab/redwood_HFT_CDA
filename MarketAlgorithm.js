@@ -159,7 +159,6 @@ Redwood.factory("MarketAlgorithm", function () {
             if (msg.msgData[0] == this.myId) {
                var nMsg = new Message("DATA", "C_EBUY", msg.msgData);
                this.sendToAllDataHistories(nMsg);
-               this.currentBuyId = msg.msgId;
             }
          }
 
@@ -168,7 +167,6 @@ Redwood.factory("MarketAlgorithm", function () {
             if (msg.msgData[0] == this.myId) {
                var nMsg = new Message("DATA", "C_ESELL", msg.msgData);
                this.sendToAllDataHistories(nMsg);
-               this.currentSellId = msg.msgId;
             }
          }
 
@@ -198,7 +196,6 @@ Redwood.factory("MarketAlgorithm", function () {
             if (msg.msgData[0] == this.myId) {
                var nMsg = new Message("DATA", "C_UBUY", msg.msgData);
                this.sendToAllDataHistories(nMsg);
-               this.currentBuyId = msg.msgId;
                console.log("[MarketAlgorithm] DEBUG recieved C_UBUY message. Current buy id is now: " + this.currentBuyId);
             }
          }
@@ -208,7 +205,6 @@ Redwood.factory("MarketAlgorithm", function () {
             if (msg.msgData[0] == this.myId) {
                var nMsg = new Message("DATA", "C_USELL", msg.msgData);
                this.sendToAllDataHistories(nMsg);
-               this.currentSellId = msg.msgId;
             }
          }
 
@@ -241,6 +237,7 @@ Redwood.factory("MarketAlgorithm", function () {
          nMsg.delay = !this.using_speed;
          nMsg.senderId = this.myId;
          nMsg.msgId = this.currentMsgId;
+         this.currentBuyId = this.currentMsgId;
          this.currentMsgId++;
          return nMsg;
       };
@@ -250,6 +247,7 @@ Redwood.factory("MarketAlgorithm", function () {
          nMsg.delay = !this.using_speed;
          nMsg.senderId = this.myId;
          nMsg.msgId = this.currentMsgId;
+         this.currentSellId = this.currentMsgId;
          this.currentMsgId++;
          return nMsg;
       };
@@ -275,8 +273,9 @@ Redwood.factory("MarketAlgorithm", function () {
          nMsg.delay = !this.using_speed;
          nMsg.senderId = this.myId;
          nMsg.msgId = this.currentMsgId;
-         this.currentMsgId++;
          nMsg.prevMsgId = this.currentBuyId;
+         this.currentBuyId = this.currentMsgId;
+         this.currentMsgId++;
          return nMsg;
       };
 
@@ -285,8 +284,9 @@ Redwood.factory("MarketAlgorithm", function () {
          nMsg.delay = !this.using_speed;
          nMsg.senderId = this.myId;
          nMsg.msgId = this.currentMsgId;
-         this.currentMsgId++;
          nMsg.prevMsgId = this.currentSellId;
+         this.currentSellId = this.currentMsgId;
+         this.currentMsgId++;
          return nMsg;
       };
 

@@ -10,7 +10,7 @@
 // for referance on the OUTCH 4.1 format
 
 
-var ouchMsgSizes = {'A' : 66, 'U' : 80, 'C' : 28};
+var ouchMsgSizes = {'A' : 66, 'U' : 80, 'C' : 28, 'E' : 40};
 
 // splits a string that can contain multiple messages into an array of messages
 function splitMessages(messageStr){
@@ -282,8 +282,26 @@ function ouchToLeepsMsg(ouchMsg){
     msg.prevMsgId = prevMsgId;
     msg.numShares = numShares;
     return msg;
-
   }
+
+  // Executed message
+  if(ouchMsg.charAt(0) === 'E'){
+
+    // pull out timestamp
+    var timeStamp = string256ToInt(ouchMsg.substring(1, 9));
+
+    // pull out message id
+    var msgId = string10ToInt(ouchMsg.substring(13, 23));
+
+    // pull out number of executed shares
+    var numShares = string256ToInt(ouchMsg.substring(23, 27));
+
+    // pull out the price
+    var price = string256ToInt(ouchMsg.substring(27, 31));
+
+    return null;
+  }
+
 }
 
 

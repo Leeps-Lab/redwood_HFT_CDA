@@ -341,7 +341,11 @@ Redwood.controller("AdminCtrl",
                if ($scope.priceChanges.length > 2) {
                   window.setTimeout($scope.groupManagers[groupNum].sendNextPriceChange, $scope.startTime + $scope.priceChanges[$scope.groupManagers[groupNum].priceIndex][0] - getTime());
                }
-               window.setTimeout($scope.groupManagers[groupNum].sendNextInvestorArrival, $scope.startTime + $scope.investorArrivals[$scope.groupManagers[groupNum].investorIndex][0] - getTime());
+               console.log("number 1: " + $scope.investorArrivals[$scope.groupManagers[groupNum].investorIndex][0]);
+               console.log("number 2: " + getTime());
+               var investorDelayTime = ($scope.startTime + $scope.investorArrivals[$scope.groupManagers[groupNum].investorIndex][0]) - getTime();
+               console.log("Initial Delay: " + investorDelayTime);
+               window.setTimeout($scope.groupManagers[groupNum].sendNextInvestorArrival, investorDelayTime / 1000000);
             }
          });
 

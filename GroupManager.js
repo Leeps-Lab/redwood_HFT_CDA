@@ -28,7 +28,8 @@ Redwood.factory("GroupManager", function () {
       groupManager.curMsgId = 1;
 
       groupManager.isDebug = groupArgs.isDebug;     // indicates if message logger should be used
-      groupManager.marketLog = "";                  // strig of market events, will be output to file
+      groupManager.outboundMarketLog = "";          // string of debug info for messages outbound to market
+      groupManager.inboundMarketLog = "";           // string of debug info for messages inbound from market
 
       // TESTING AREA ********************************************************************************
       var testMsgs = [];
@@ -74,7 +75,7 @@ Redwood.factory("GroupManager", function () {
       if(groupManager.marketFlag === "REMOTE"/*ZACH, D/N MODIFY!*/){
 
          // open websocket with market
-         groupManager.marketURI = "ws://54.213.222.175:8000/";
+         groupManager.marketURI = "ws://54.191.157.90:8000/";
          groupManager.socket = new WebSocket(groupManager.marketURI, ['binary', 'base64']);
          groupManager.socket.onopen = function(event) {
             //groupManager.socket.send("Confirmed Opened Websocket connection");
@@ -87,7 +88,7 @@ Redwood.factory("GroupManager", function () {
             var reader = new FileReader();
             reader.addEventListener("loadend", function() {
 
-               console.log("Recieved From Remote Market: ");
+               console.log("[" + moment().format("hh:mm:ss.SSS") + "]Recieved From Remote Market: ");
 
                // reader.result contains the raw ouch message as a DataBuffer, convert it to string
                var ouchStr = String.fromCharCode.apply(null, new Uint8Array(reader.result));
@@ -185,6 +186,11 @@ Redwood.factory("GroupManager", function () {
       // TODO setup arg for routing
       // Function for sending messages, will route msg to remote or local market based on this.marketFLag
       groupManager.sendToMarket = function (leepsMsg) {
+
+         // add message to log
+         this.outboundMarketLog += leepsMsg.asString() + "\n";
+         console.log("Outbound messages:\n" + this.outboundMarketLog);
+
          //If no delay send msg now, otherwise send after delay
          if (leepsMsg.delay) {
             if(this.marketFlag === "LOCAL"){
@@ -229,8 +235,8 @@ Redwood.factory("GroupManager", function () {
       groupManager.recvFromMarket = function (msg) {
 
          // add message to log
-         this.marketLog += msg.asString + "\n";
-         console.log(this.marketLog);
+         this.inboundMarketLog += msg.asString() + "\n";
+         console.log("Inbound Messages:\n" + this.inboundMarketLog);
 
          if(msg.msgType === "C_TRA"){
             this.sendToMarketAlgorithms(msg);
@@ -297,12 +303,13 @@ Redwood.factory("GroupManager", function () {
       }.bind(groupManager);
 
       groupManager.sendNextInvestorArrival = function () {
-         this.dataStore.investorArrivals.push([getTime - this.startTime, this.investorArrivals[this.investorIndex][1] == 1 ? "BUY" : "SELL"]);
+         this.dataStore.investorArrivals.push([getTime() - this.startTime, this.investorArrivals[this.investorIndex][1] == 1 ? "BUY" : "SELL"]);
          var msg2 = new Message("OUCH", this.investorArrivals[this.investorIndex][1] == 1 ? "EBUY" : "ESELL", [0, 214748.3647, true]);
          msg2.msgId = this.curMsgId;
          this.curMsgId ++;
          msg2.delay = false;
-         this.sendToMarket(msg2);
+         console.log("Trying to send investor arrival");
+         //this.sendToMarket(msg2);
 
          this.investorIndex++;
 

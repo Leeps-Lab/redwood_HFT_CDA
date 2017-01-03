@@ -210,6 +210,22 @@ Redwood.factory("MarketAlgorithm", function () {
 
          // Confirmation that a transaction has taken place
          if (msg.msgType == "C_TRA") {
+
+            // for remote market, figure out if this is a buy or sell
+            // TODO MAKE THIS WHOLE PROCESS CLEANER so that this check does not have to be done
+            /*if(msg.msgData[1] === this.myId || msg.msgData[2] === this.myId){
+               
+               // if this order token matches my current buy token
+               if(msg.msgId === this.currentBuyId){
+                  this.msgData[2] = -1;   // do not consider this a sell
+               }
+
+               // if this order token matches my current sell token
+               if(msg.msgId === this.currentSellId){
+                  this.msgData[1] = -1;   // do not consider this a buy
+               }
+            }*/
+
             //send data message to dataHistory containing [timestamp, price, fund-price, buyer, seller]
             //pick the buyer to send the message unless the buyer is an outside investor, then use the seller
             if (msg.msgData[2] === this.myId || (msg.msgData[1] === this.myId && msg.msgData[2] == 0)) {

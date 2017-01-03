@@ -46,7 +46,14 @@ function leepsMsgToOuch(leepsMsg){
       ouchMsg[2] = charToByte('U');      
       ouchMsg[3] = charToByte('B');
       ouchMsg[4] = charToByte(String.fromCharCode(64 + leepsMsg.msgData[0]));
-      spliceInArray(decimalToByteArray(leepsMsg.msgId, 10), ouchMsg, 10, 5);
+      // Buy/Sell indicator within order id
+      if(leepsMsg.msgType === "EBUY"){
+         ouchMsg[5] = charToByte('B');
+      }
+      else if(leepsMsg.msgType === "ESELL"){
+         ouchMsg[5] = charToByte('S');
+      }
+      spliceInArray(decimalToByteArray(leepsMsg.msgId, 9), ouchMsg, 9, 6);
 
       // Buy/Sell indicator
       if(leepsMsg.msgType === "EBUY"){
@@ -113,7 +120,14 @@ function leepsMsgToOuch(leepsMsg){
       ouchMsg[2] = charToByte('U');      
       ouchMsg[3] = charToByte('B');
       ouchMsg[4] = charToByte(String.fromCharCode(64 + leepsMsg.msgData[0]));
-      spliceInArray(decimalToByteArray(leepsMsg.msgId, 10), ouchMsg, 10, 5);
+            // Buy/Sell indicator within order id
+      if(leepsMsg.msgType === "RBUY"){
+         ouchMsg[5] = charToByte('B');
+      }
+      else if(leepsMsg.msgType === "RSELL"){
+         ouchMsg[5] = charToByte('S');
+      }
+      spliceInArray(decimalToByteArray(leepsMsg.msgId, 9), ouchMsg, 9, 6);
 
       // Shares
       spliceInArray(intToByteArray(0), ouchMsg, 4, 15);
@@ -132,14 +146,28 @@ function leepsMsgToOuch(leepsMsg){
       ouchMsg[2] = charToByte('U');      
       ouchMsg[3] = charToByte('B');
       ouchMsg[4] = charToByte(String.fromCharCode(64 + leepsMsg.msgData[0]));
-      spliceInArray(decimalToByteArray(leepsMsg.prevMsgId, 10), ouchMsg, 10, 5);
+      // Buy/Sell indicator within order id
+      if(leepsMsg.msgType === "UBUY"){
+         ouchMsg[5] = charToByte('B');
+      }
+      else if(leepsMsg.msgType === "USELL"){
+         ouchMsg[5] = charToByte('S');
+      }
+      spliceInArray(decimalToByteArray(leepsMsg.prevMsgId, 9), ouchMsg, 9, 6);
 
       // Replacement Order Token
       ouchMsg[15] = charToByte('S');
       ouchMsg[16] = charToByte('U');      
       ouchMsg[17] = charToByte('B');
       ouchMsg[18] = charToByte(String.fromCharCode(64 + leepsMsg.msgData[0]));
-      spliceInArray(decimalToByteArray(leepsMsg.msgId, 10), ouchMsg, 10, 19);
+      // Buy/Sell indicator within order id
+      if(leepsMsg.msgType === "UBUY"){
+         ouchMsg[19] = charToByte('B');
+      }
+      else if(leepsMsg.msgType === "USELL"){
+         ouchMsg[19] = charToByte('S');
+      }
+      spliceInArray(decimalToByteArray(leepsMsg.msgId, 9), ouchMsg, 9, 20);
 
       // Shares
       spliceInArray(intToByteArray(1), ouchMsg, 4, 29);
@@ -182,7 +210,7 @@ function ouchToLeepsMsg(ouchMsg){
     var timeStamp = string256ToInt(ouchMsg.substring(1, 9));
 
     // pull out message id
-    var msgId = string10ToInt(ouchMsg.substring(13, 23));
+    var msgId = string10ToInt(ouchMsg.substring(14, 23));
 
     // pull out Buy/Sell Indicator and convert to leeps format
     var lpsMsgType;
@@ -227,7 +255,7 @@ function ouchToLeepsMsg(ouchMsg){
     var subjId = ouchMsg.charCodeAt(12) - 64;
 
     // pull out message id
-    var msgId = string10ToInt(ouchMsg.substring(13, 23));
+    var msgId = string10ToInt(ouchMsg.substring(14, 23));
 
     // pull out number of shares canceled
     var numCanceled = string256ToInt(ouchMsg.substring(23, 27));
@@ -246,7 +274,7 @@ function ouchToLeepsMsg(ouchMsg){
     var timeStamp = string256ToInt(ouchMsg.substring(1, 9));
 
     // pull out message id
-    var msgId = string10ToInt(ouchMsg.substring(13, 23));
+    var msgId = string10ToInt(ouchMsg.substring(14, 23));
 
     // pull out Buy/Sell Indicator and convert to leeps format
     var lpsMsgType;
@@ -290,16 +318,35 @@ function ouchToLeepsMsg(ouchMsg){
     // pull out timestamp
     var timeStamp = string256ToInt(ouchMsg.substring(1, 9));
 
+    // pull out subject id from order id
+    var subjId = ouchMsg.charCodeAt(12) - 64;
+
+    // should either be B or S indicating which side of the transaction this executed msg represents
+    var transactionType = ouchMsg.charAt(13);
+
     // pull out message id
-    var msgId = string10ToInt(ouchMsg.substring(13, 23));
+    var msgId = string10ToInt(ouchMsg.substring(14, 23));
 
     // pull out number of executed shares
     var numShares = string256ToInt(ouchMsg.substring(23, 27));
 
     // pull out the price
-    var price = string256ToInt(ouchMsg.substring(27, 31));
+    var price = string256ToPrice(ouchMsg.substring(27, 31));
 
-    return null;
+    // create leeps message
+    if(transactionType === "B"){
+      var msg = new Message("OUCH", "C_TRA", [timeStamp, subjId, 0, price]);
+    }
+    else if(transactionType === "S"){
+      var msg = new Message("OUCH", "C_TRA", [timeStamp, 0, subjId, price]);
+    }
+    else{
+      console.error("Unable to recognize type of tranaction: " + transactionType);
+    }
+    msg.msgId = msgId;
+
+    console.log(msg);
+    return msg;
   }
 
 }

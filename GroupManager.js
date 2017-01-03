@@ -75,7 +75,7 @@ Redwood.factory("GroupManager", function () {
       if(groupManager.marketFlag === "REMOTE"/*ZACH, D/N MODIFY!*/){
 
          // open websocket with market
-         groupManager.marketURI = "ws://54.191.157.90:8000/";
+         groupManager.marketURI = "ws://54.202.196.170:8000/";
          groupManager.socket = new WebSocket(groupManager.marketURI, ['binary', 'base64']);
          groupManager.socket.onopen = function(event) {
             //groupManager.socket.send("Confirmed Opened Websocket connection");
@@ -239,10 +239,16 @@ Redwood.factory("GroupManager", function () {
          console.log("Inbound Messages:\n" + this.inboundMarketLog);
 
          if(msg.msgType === "C_TRA"){
+            console.log("TRANSACTION TRYING TO SEND");
             this.sendToMarketAlgorithms(msg);
          }
          else {
-            this.marketAlgorithms[msg.msgData[0]].recvFromGroupManager(msg);
+            console.log("FLAG 1");
+            console.log(msg);
+            console.log(this.marketAlgorithms);
+            if(msg.msgData[0] > 0) {
+               this.marketAlgorithms[msg.msgData[0]].recvFromGroupManager(msg);
+            }
          }
       };
 
@@ -308,8 +314,7 @@ Redwood.factory("GroupManager", function () {
          msg2.msgId = this.curMsgId;
          this.curMsgId ++;
          msg2.delay = false;
-         console.log("Trying to send investor arrival");
-         //this.sendToMarket(msg2);
+         this.sendToMarket(msg2);
 
          this.investorIndex++;
 

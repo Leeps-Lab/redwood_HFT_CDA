@@ -189,7 +189,7 @@ Redwood.factory("GroupManager", function () {
 
          // add message to log
          this.outboundMarketLog += leepsMsg.asString() + "\n";
-         console.log("Outbound messages:\n" + this.outboundMarketLog);
+         //console.log("Outbound messages:\n" + this.outboundMarketLog);
 
          //If no delay send msg now, otherwise send after delay
          if (leepsMsg.delay) {

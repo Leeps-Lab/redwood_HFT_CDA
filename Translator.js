@@ -53,6 +53,7 @@ function leepsMsgToOuch(leepsMsg){
       else if(leepsMsg.msgType === "ESELL"){
          ouchMsg[5] = charToByte('S');
       }
+      console.log("Order ID: " + decimalToByteArray(leepsMsg.msgId, 9));
       spliceInArray(decimalToByteArray(leepsMsg.msgId, 9), ouchMsg, 9, 6);
 
       // Buy/Sell indicator
@@ -120,13 +121,14 @@ function leepsMsgToOuch(leepsMsg){
       ouchMsg[2] = charToByte('U');      
       ouchMsg[3] = charToByte('B');
       ouchMsg[4] = charToByte(String.fromCharCode(64 + leepsMsg.msgData[0]));
-            // Buy/Sell indicator within order id
+      // Buy/Sell indicator within order id
       if(leepsMsg.msgType === "RBUY"){
          ouchMsg[5] = charToByte('B');
       }
       else if(leepsMsg.msgType === "RSELL"){
          ouchMsg[5] = charToByte('S');
       }
+      console.log("Order ID: " + decimalToByteArray(leepsMsg.msgId, 9));
       spliceInArray(decimalToByteArray(leepsMsg.msgId, 9), ouchMsg, 9, 6);
 
       // Shares
@@ -153,6 +155,7 @@ function leepsMsgToOuch(leepsMsg){
       else if(leepsMsg.msgType === "USELL"){
          ouchMsg[5] = charToByte('S');
       }
+      console.log("Order ID: " + decimalToByteArray(leepsMsg.prevMsgId, 9));
       spliceInArray(decimalToByteArray(leepsMsg.prevMsgId, 9), ouchMsg, 9, 6);
 
       // Replacement Order Token
@@ -167,6 +170,7 @@ function leepsMsgToOuch(leepsMsg){
       else if(leepsMsg.msgType === "USELL"){
          ouchMsg[19] = charToByte('S');
       }
+      console.log("Order ID: " + decimalToByteArray(leepsMsg.msgId, 9));
       spliceInArray(decimalToByteArray(leepsMsg.msgId, 9), ouchMsg, 9, 20);
 
       // Shares

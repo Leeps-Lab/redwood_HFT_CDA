@@ -88,11 +88,11 @@ Redwood.factory("GroupManager", function () {
             var reader = new FileReader();
             reader.addEventListener("loadend", function() {
 
-               console.log("[" + moment().format("hh:mm:ss.SSS") + "]Recieved From Remote Market: ");
+               //console.log("[" + moment().format("hh:mm:ss.SSS") + "]Recieved From Remote Market: ");
 
                // reader.result contains the raw ouch message as a DataBuffer, convert it to string
                var ouchStr = String.fromCharCode.apply(null, new Uint8Array(reader.result));
-               logStringAsNums(ouchStr);
+               //logStringAsNums(ouchStr);
 
                // split the string in case messages are conjoined
                var ouchMsgArray = splitMessages(ouchStr);
@@ -236,16 +236,13 @@ Redwood.factory("GroupManager", function () {
 
          // add message to log
          this.inboundMarketLog += msg.asString() + "\n";
-         console.log("Inbound Messages:\n" + this.inboundMarketLog);
+         //console.log("Inbound Messages:\n" + this.inboundMarketLog);
 
          if(msg.msgType === "C_TRA"){
-            console.log("TRANSACTION TRYING TO SEND");
             this.sendToMarketAlgorithms(msg);
          }
          else {
-            console.log("FLAG 1");
-            console.log(msg);
-            console.log(this.marketAlgorithms);
+            //console.log(msg);
             if(msg.msgData[0] > 0) {
                this.marketAlgorithms[msg.msgData[0]].recvFromGroupManager(msg);
             }

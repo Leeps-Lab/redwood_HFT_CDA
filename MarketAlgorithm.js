@@ -254,6 +254,10 @@ Redwood.factory("MarketAlgorithm", function () {
          nMsg.msgId = this.currentMsgId;
          this.currentBuyId = this.currentMsgId;
          this.currentMsgId++;
+         if(this.msgId === undefined){
+            debugger;
+         }
+         //
          return nMsg;
       };
 
@@ -264,6 +268,7 @@ Redwood.factory("MarketAlgorithm", function () {
          nMsg.msgId = this.currentMsgId;
          this.currentSellId = this.currentMsgId;
          this.currentMsgId++;
+         //
          return nMsg;
       };
 

@@ -429,6 +429,9 @@ function decimalToByteArray(num, numDigits){
       bytes[i] = tmp + 48;
       num = Math.floor(num/10);
    }
+   if(bytes[0] === 0){
+    console.log("Input-> 'Num':" + num + " numDigits:" + numDigits);
+   }
    return bytes;
 }
 

@@ -54,6 +54,7 @@ function leepsMsgToOuch(leepsMsg){
          ouchMsg[5] = charToByte('S');
       }
       console.log("Order ID: (Before):" + leepsMsg.msgId);
+      consoel.log(leepsMsg);
       console.log("Order ID: (After ):" + decimalToByteArray(leepsMsg.msgId, 9));
       spliceInArray(decimalToByteArray(leepsMsg.msgId, 9), ouchMsg, 9, 6);
 

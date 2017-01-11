@@ -53,7 +53,8 @@ function leepsMsgToOuch(leepsMsg){
       else if(leepsMsg.msgType === "ESELL"){
          ouchMsg[5] = charToByte('S');
       }
-      console.log("Order ID: " + decimalToByteArray(leepsMsg.msgId, 9));
+      console.log("Order ID: (Before):" + leepsMsg.msgId);
+      console.log("Order ID: (After ):" + decimalToByteArray(leepsMsg.msgId, 9));
       spliceInArray(decimalToByteArray(leepsMsg.msgId, 9), ouchMsg, 9, 6);
 
       // Buy/Sell indicator

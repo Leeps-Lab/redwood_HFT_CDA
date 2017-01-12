@@ -261,7 +261,8 @@ Redwood.factory("MarketAlgorithm", function () {
          this.currentBuyId = this.currentMsgId;
          this.currentMsgId++;
          
-         console.log("Flag 1: " + nMsg);
+         console.log("Flag 1: ");
+         console.log(nMsg);
 
          return nMsg;
       };

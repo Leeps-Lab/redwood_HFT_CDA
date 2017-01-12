@@ -26,6 +26,7 @@ Redwood.factory("MarketAlgorithm", function () {
 
       // sends a message to the group manager via direct reference
       marketAlgorithm.sendToGroupManager = function (msg) {
+         console.log("Flag 2: " + msg);
          this.groupManager.recvFromMarketAlgorithm(msg);
       };
 
@@ -254,10 +255,9 @@ Redwood.factory("MarketAlgorithm", function () {
          nMsg.msgId = this.currentMsgId;
          this.currentBuyId = this.currentMsgId;
          this.currentMsgId++;
-         if(nMsg.msgData[0] === 4){
-            debugger;
-         }
-         //
+         
+         console.log("Flag 1: " + nMsg);
+
          return nMsg;
       };
 
@@ -268,10 +268,6 @@ Redwood.factory("MarketAlgorithm", function () {
          nMsg.msgId = this.currentMsgId;
          this.currentSellId = this.currentMsgId;
          this.currentMsgId++;
-         if(nMsg.msgData[0] === 4){
-            debugger;
-         }
-         //
          return nMsg;
       };
 

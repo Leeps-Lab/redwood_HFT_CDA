@@ -323,7 +323,7 @@ Redwood.factory("GroupManager", function () {
 
       groupManager.sendNextInvestorArrival = function () {
          this.dataStore.investorArrivals.push([getTime() - this.startTime, this.investorArrivals[this.investorIndex][1] == 1 ? "BUY" : "SELL"]);
-         var msg2 = new Message("OUCH", this.investorArrivals[this.investorIndex][1] == 1 ? "EBUY" : "ESELL", [0, 214748.3647, true]);
+         var msg2 = new Message("OUCH", this.investorArrivals[this.investorIndex][1] == 1 ? "EBUY" : "ESELL", [0, 214748.3647, true, getTime()]);
          msg2.msgId = this.curMsgId;
          this.curMsgId ++;
          msg2.delay = false;

@@ -26,7 +26,12 @@ Redwood.factory("MarketAlgorithm", function () {
 
       // sends a message to the group manager via direct reference
       marketAlgorithm.sendToGroupManager = function (msg) {
-         console.log("Flag 2: " + msg);
+
+         if(msg.msgType === "EBUY"){
+            console.log("Flag 2:");
+            console.log(msg);
+         }
+         
          this.groupManager.recvFromMarketAlgorithm(msg);
       };
 

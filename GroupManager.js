@@ -146,7 +146,10 @@ Redwood.factory("GroupManager", function () {
       // receive a message from a single market algorithm in this group
       groupManager.recvFromMarketAlgorithm = function (msg) {
 
-         console.log("Flag 3: " + msg);
+         if(msg.msgType === "EBUY"){
+            console.log("Flag 3:");
+            console.log(msg);
+         }
 
          // synchronized message in response to fundamental price change
          if (msg.protocol === "SYNC_FP") {
@@ -189,7 +192,10 @@ Redwood.factory("GroupManager", function () {
       // Function for sending messages, will route msg to remote or local market based on this.marketFLag
       groupManager.sendToMarket = function (leepsMsg) {
 
-         console.log("Flag 4: " + leepsMsg);
+         if(leepsMsg.msgType === "EBUY"){
+            console.log("Flag 4:");
+            console.log(leepsMsg);
+         }
 
          // add message to log
          this.outboundMarketLog += leepsMsg.asString() + "\n";
@@ -227,7 +233,10 @@ Redwood.factory("GroupManager", function () {
 
       groupManager.sendToRemoteMarket = function(leepsMsg){
 
-         console.log("Flag 5: " + leepsMsg);
+         if(leepsMsg.msgType === "EBUY"){
+            console.log("Flag 5:");
+            console.log(leepsMsg);
+         }
 
          var msg = leepsMsgToOuch(leepsMsg);
          this.socket.send(msg);

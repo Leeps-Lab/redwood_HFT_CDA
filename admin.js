@@ -128,12 +128,6 @@ Redwood.controller("AdminCtrl",
 
          $scope.groupManagers = {};
 
-         $scope.updateGroupManagers = function () {
-            $scope.groupManagers.forEach(function (entry) {
-               entry.update();
-            });
-         };
-
          var resetGroups = function () {
             var config = ra.get_config(1, 0) || {};
             for (var i = 0; i < ra.subjects.length; i++) { //set all subjects to group 1 (this is so that matching can be changed per period)

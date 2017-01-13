@@ -31,46 +31,6 @@ Redwood.factory("GroupManager", function () {
       groupManager.outboundMarketLog = "";          // string of debug info for messages outbound to market
       groupManager.inboundMarketLog = "";           // string of debug info for messages inbound from market
 
-      // TESTING AREA ********************************************************************************
-      var testMsgs = [];
-      
-      var nMsg = new Message("OUCH", "EBUY", [1, 9910, false, getTime()]);
-      nMsg.senderId = 1;
-      nMsg.msgId = 1;
-      testMsgs.push(leepsMsgToOuch(nMsg));
-
-      /*nMsg = new Message("OUCH", "ESELL", [2, 9800, false, getTime()]);
-      nMsg.senderId = 2;
-      nMsg.msgId = 38;
-      testMsgs.push(leepsMsgToOuch(nMsg));
-
-      nMsg = new Message("OUCH", "EBUY", [3, 10109.99, false, getTime()]);
-      nMsg.senderId = 3;
-      nMsg.msgId = 785135456;
-      testMsgs.push(leepsMsgToOuch(nMsg));
-
-      nMsg = new Message("OUCH", "RBUY", [1, getTime()]);
-      nMsg.senderId = 1;
-      nMsg.msgId = 1024;
-      testMsgs.push(leepsMsgToOuch(nMsg));
-
-      nMsg = new Message("OUCH", "RSELL", [2, getTime()]);
-      nMsg.senderId = 2;
-      nMsg.msgId = 38;
-      testMsgs.push(leepsMsgToOuch(nMsg));*/
-
-      //printByteArray(testMsgs[0], 49);
-      //outputMsgs(testMsgs);
-
-      /*var testAccept   = "A\0\0\0\0\0\0\1\001SUBF0000000016B\0\0\0\001LEEPS   \0\0\1\001\0\001"+String.fromCharCode(134)+String.fromCharCode(159)+"SUBF";
-      var testCanceled = "C\0\0\0\0\0\0\1\001SUBF0000000012\0\0\000aU";
-      var testReplaced = "U\0\0\0\0\0\0\1\001SUBB0000000003S\0\0\0000LEEPS   \0\0\000a\0\0\0\000SUBBiiiiiiiiiiiiiiiiiSUBB0000000002"
-      console.log(ouchToLeepsMsg(testAccept));
-      console.log(ouchToLeepsMsg(testCanceled));
-      console.log(ouchToLeepsMsg(testReplaced));
-*/
-      // END TESTING AREA **********************************************************************
-
       // only open websockets connection if running in REMOTE mode
       if(groupManager.marketFlag === "REMOTE"/*ZACH, D/N MODIFY!*/){
 

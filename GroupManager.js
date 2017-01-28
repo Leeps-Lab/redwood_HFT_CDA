@@ -52,7 +52,7 @@ Redwood.factory("GroupManager", function () {
 
                // reader.result contains the raw ouch message as a DataBuffer, convert it to string
                var ouchStr = String.fromCharCode.apply(null, new Uint8Array(reader.result));
-               //logStringAsNums(ouchStr);
+               logStringAsNums(ouchStr);
 
                // split the string in case messages are conjoined
                var ouchMsgArray = splitMessages(ouchStr);
@@ -107,8 +107,8 @@ Redwood.factory("GroupManager", function () {
       groupManager.recvFromMarketAlgorithm = function (msg) {
 
          if(msg.msgType === "EBUY"){
-            console.log("Flag 3:");
-            console.log(msg);
+            //console.log("Flag 3:");
+            //console.log(msg);
          }
 
          // synchronized message in response to fundamental price change
@@ -153,13 +153,13 @@ Redwood.factory("GroupManager", function () {
       groupManager.sendToMarket = function (leepsMsg) {
 
          if(leepsMsg.msgType === "EBUY"){
-            console.log("Flag 4:");
-            console.log(leepsMsg);
+            //console.log("Flag 4:");
+            //console.log(leepsMsg);
          }
 
          // add message to log
          this.outboundMarketLog += leepsMsg.asString() + "\n";
-         //console.log("Outbound messages:\n" + this.outboundMarketLog);
+         console.log("Outbound messages:\n" + this.outboundMarketLog);
 
          //If no delay send msg now, otherwise send after delay
          if (leepsMsg.delay) {
@@ -194,8 +194,8 @@ Redwood.factory("GroupManager", function () {
       groupManager.sendToRemoteMarket = function(leepsMsg){
 
          if(leepsMsg.msgType === "EBUY"){
-            console.log("Flag 5:");
-            console.log(leepsMsg);
+            //console.log("Flag 5:");
+            //console.log(leepsMsg);
          }
 
          var msg = leepsMsgToOuch(leepsMsg);
@@ -212,7 +212,7 @@ Redwood.factory("GroupManager", function () {
 
          // add message to log
          this.inboundMarketLog += msg.asString() + "\n";
-         //console.log("Inbound Messages:\n" + this.inboundMarketLog);
+         console.log("Inbound Messages:\n" + this.inboundMarketLog);
 
          if(msg.msgType === "C_TRA"){
             this.sendToMarketAlgorithms(msg);

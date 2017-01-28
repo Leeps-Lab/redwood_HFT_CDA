@@ -28,8 +28,8 @@ Redwood.factory("MarketAlgorithm", function () {
       marketAlgorithm.sendToGroupManager = function (msg) {
 
          if(msg.msgType === "EBUY"){
-            console.log("Flag 2:");
-            console.log(msg);
+            //console.log("Flag 2:");
+            //console.log(msg);
          }
          
          this.groupManager.recvFromMarketAlgorithm(msg);
@@ -261,8 +261,8 @@ Redwood.factory("MarketAlgorithm", function () {
          this.currentBuyId = this.currentMsgId;
          this.currentMsgId++;
          
-         console.log("Flag 1: ");
-         console.log(nMsg);
+         //console.log("Flag 1: ");
+         //console.log(nMsg);
 
          return nMsg;
       };

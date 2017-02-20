@@ -76,7 +76,7 @@ Redwood.factory("MarketManager", function () {
                if (message.msgData[1] == 214748.3647) {
                   market.CDABook.makeIOCSell(message.msgData[0], 0, message.timestamp, message.buyOrdersBeforeState);
                }
-               else if (message.msgData[1] > 199999.9900 || message.msgData[1] <= 0) {
+               else if (message.msgData[1] > 199999.9900 || message.msgData[1] < 0) {
                   console.error("marketManager: invalid sell price of " + message.msgData[1]);
                   break;
                }

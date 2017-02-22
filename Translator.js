@@ -109,6 +109,7 @@ function leepsMsgToOuch(leepsMsg){
       // Customer Type
       ouchMsg[48] = charToByte('R');
 
+      console.log(leepsMsg.msgType + ": " + printOuchMsg(ouchMsg));
       return ouchMsg;
    }
    else if(leepsMsg.msgType === "RBUY" || leepsMsg.msgType === "RSELL")
@@ -484,6 +485,16 @@ function logStringAsNums(str){
     i++;
   }
   console.log(outString);
+}
+
+function printOuchMsg(str){
+  var i=0;
+  var outString = "";
+  for(;i < outString.length; i++){
+    outString += "(" + i + ":" + str[i] + ")";
+  } 
+  outString += "\n";
+  return outString;
 }
 
 // Downloads string to file For testing output

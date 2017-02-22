@@ -69,7 +69,8 @@ Redwood.factory("MarketAlgorithm", function () {
 
             // update fundamental price variable
             this.fundamentalPrice = msg.msgData[1];
-
+            //console.log("This is the fundamentalPrice: " + msg.msgData[1] + "\n");
+            
             //send player state to group manager
             var nMsg3;
             if (this.state == "state_out") {
@@ -94,6 +95,7 @@ Redwood.factory("MarketAlgorithm", function () {
                snipeSellMsg = new Message("OUCH", "ESELL", [this.myId, this.fundamentalPrice, true, getTime()]);
                snipeSellMsg.delay = !this.using_speed;
                nMsg3.msgData[2].push(snipeBuyMsg, snipeSellMsg);
+               console.log("snipeBuyMsg: " + snipeBuyMsg.asString() + "\n" + " snipeSellMsg " + snipeSellMsg.asString() + "\n");
             }
             else {
                console.error("invalid state");

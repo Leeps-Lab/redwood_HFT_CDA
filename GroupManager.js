@@ -130,6 +130,7 @@ Redwood.factory("GroupManager", function () {
                for (var index of indexOrder) {
                   playerOrder.push(this.FPMsgList[index].msgData[0]);
                   for (var rmsg of this.FPMsgList[index].msgData[2]) {
+                     //console.log("SYNC_FP Message: " + rmsg.asString());
                      this.sendToMarket(rmsg);
                   }
                }
@@ -160,7 +161,7 @@ Redwood.factory("GroupManager", function () {
          // add message to log
          this.outboundMarketLog += leepsMsg.asString() + "\n";
          console.log("Outbound messages:\n" + this.outboundMarketLog);
-
+         this.outboundMarketLog = "";
          //If no delay send msg now, otherwise send after delay
          if (leepsMsg.delay) {
             if(this.marketFlag === "LOCAL"){

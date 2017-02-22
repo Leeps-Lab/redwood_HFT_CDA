@@ -27,8 +27,8 @@ RedwoodHighFrequencyTrading.factory("DataHistory", function () {
 
       dataHistory.recvMessage = function (msg) {
 
-         //console.log("[DEBUG] Data History recieved msg: ");
-         //console.log(msg);
+         console.log("[DEBUG] Data History recieved msg: ");
+         console.log(msg);
 
          switch (msg.msgType) {
             case "FPC"      :
@@ -209,6 +209,7 @@ RedwoodHighFrequencyTrading.factory("DataHistory", function () {
             this.storeProfitSegment(startTime, uid);
          }
          this.playerData[uid].curProfitSegment = [startTime, price, slope, state];
+         console.log("player: " + uid + " state: " + state + " transaction, price:" + price + " \n");
       };
 
       dataHistory.storeProfitSegment = function (endTime, uid) {

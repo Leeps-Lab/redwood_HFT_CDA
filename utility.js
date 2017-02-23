@@ -42,7 +42,7 @@ function Message(protocol, msgType, msgData) {
         s += msgType + " timestamp:" + printTime(this.timeStamp) + " buyerID:" + msgData[1] + " sellerID: " + msgData[2] + " price: " + msgData[3];
       }
       else if(msgType == "EBUY" || msgType == "ESELL"){
-        s += msgType + " timestamp:" + printTime(this.timeStamp) + " buyer/sellerID:" + msgData[0] + " price:" + msgData[1] + " IOC: " + msgData[2];
+        s += msgType + " timestamp:" + printTime(this.timeStamp) + " buyer/sellerID:" + msgData[0] + " price:" + msgData[1] + " IOC: " + msgData[2] + " msgID: " + this.msgId;
       }
       else{
         s += msgType + " timestamp:" + printTime(this.timeStamp) + " subjID:" + msgData[0] + " msgID:" + this.msgId;

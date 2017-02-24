@@ -14,6 +14,7 @@ Redwood.factory("MarketAlgorithm", function () {
       marketAlgorithm.groupId = subjectArgs.groupId;
       marketAlgorithm.groupManager = groupManager;   //Sends message to group manager, function obtained as parameter
       marketAlgorithm.fundamentalPrice = 0;
+      marketAlgorithm.oldFundamentalPrice = 0;
       marketAlgorithm.currentMsgId = 1;
       marketAlgorithm.currentBuyId = 0;
       marketAlgorithm.currentSellId = 0;
@@ -69,7 +70,7 @@ Redwood.factory("MarketAlgorithm", function () {
 
             // update fundamental price variable
             this.fundamentalPrice = msg.msgData[1];
-            //console.log("This is the fundamentalPrice: " + msg.msgData[1] + "\n");
+            console.log("Old Fundamental Price: " + this.oldFundamentalPrice + "Current Fundamental Price: " + this.fundamentalPrice + "\n");
             
             //send player state to group manager
             var nMsg3;
@@ -90,17 +91,29 @@ Redwood.factory("MarketAlgorithm", function () {
             else if (this.state == "state_snipe") {
                nMsg3 = new Message("SYNC_FP", "SNIPE", [this.myId, this.using_speed, []]);
                nMsg3.timeStamp = msg.msgData[0]; // for debugging test output only
-               snipeBuyMsg = new Message("OUCH", "EBUY", [this.myId, this.fundamentalPrice, true, getTime()]);
+
+               snipeBuyMsg = new Message("OUCH", "EBUY", [this.myId, this.fundamentalPrice, true, getTime()]);          //create snipe buy message
                snipeBuyMsg.delay = !this.using_speed;
-               snipeSellMsg = new Message("OUCH", "ESELL", [this.myId, this.fundamentalPrice, true, getTime()]);
+               snipeBuyMsg.msgId = this.currentMsgId;
+               this.currentBuyId = this.currentMsgId;
+               this.currentMsgId++;
+
+               snipeSellMsg = new Message("OUCH", "ESELL", [this.myId, this.fundamentalPrice +1, true, getTime()]);
                snipeSellMsg.delay = !this.using_speed;
                nMsg3.msgData[2].push(snipeBuyMsg, snipeSellMsg);
-               console.log("snipeBuyMsg: " + snipeBuyMsg.asString() + "\n" + " snipeSellMsg " + snipeSellMsg.asString() + "\n");
+
+               snipeSellMsg.msgId = this.currentMsgId;
+               this.currentSellId = this.currentMsgId;
+               this.currentMsgId++;
+               console.log("snipeBuyMsg: " + snipeBuyMsg.asString() + "\n" + " snipeSellMsg " + snipeSellMsg.asString() + "\n");    //create snipe sell message
             }
             else {
                console.error("invalid state");
                return;
             }
+
+            //Set the old fundamental price to the current fundamental price
+            this.oldFundamentalPrice = this.fundamentalPrice;
 
             this.sendToGroupManager(nMsg3);
 

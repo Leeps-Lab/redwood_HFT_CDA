@@ -209,7 +209,7 @@ RedwoodHighFrequencyTrading.factory("DataHistory", function () {
             this.storeProfitSegment(startTime, uid);
          }
          this.playerData[uid].curProfitSegment = [startTime, price, slope, state];
-         console.log("player: " + uid + " state: " + state + " transaction, price:" + price + " \n");
+         console.log("player: " + uid + " state: " + state + " price:" + price + " \n");
       };
 
       dataHistory.storeProfitSegment = function (endTime, uid) {

@@ -160,7 +160,8 @@ Redwood.factory("GroupManager", function () {
 
          // add message to log
          this.outboundMarketLog += leepsMsg.asString() + "\n";
-         console.log("Outbound messages:\n" + this.outboundMarketLog);
+         //console.log("Outbound messages:\n" + this.outboundMarketLog);
+         console.log("Outbound Message: " + leepsMsg.asString() + "\n");
          this.outboundMarketLog = "";
          //If no delay send msg now, otherwise send after delay
          if (leepsMsg.delay) {
@@ -213,8 +214,8 @@ Redwood.factory("GroupManager", function () {
 
          // add message to log
          this.inboundMarketLog += msg.asString() + "\n";
-         console.log("Inbound Messages:\n" + this.inboundMarketLog);
-
+         //console.log("Inbound Messages:\n" + this.inboundMarketLog);
+         console.log("Inbound Message: " + msg.asString() + "\n");
          if(msg.msgType === "C_TRA"){
             this.sendToMarketAlgorithms(msg);
          }
@@ -289,9 +290,11 @@ Redwood.factory("GroupManager", function () {
          var msgType = this.investorArrivals[this.investorIndex][1] === 1 ? "EBUY" : "ESELL";
          if(msgType === "EBUY"){
             var msg2 = new Message("OUCH", "EBUY", [0, 214748.3647, true, getTime()]);
+            //var msg2 = new Message("OUCH", "EBUY", [0, 102, true, getTime()]);
          }
          else if(msgType === "ESELL"){
             var msg2 = new Message("OUCH", "ESELL", [0, 0, true, getTime()]);
+            //var msg2 = new Message("OUCH", "ESELL", [0, 102, true, getTime()]);
          }
          msg2.msgId = this.curMsgId;
          this.curMsgId ++;

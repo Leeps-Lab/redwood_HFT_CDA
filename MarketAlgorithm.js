@@ -85,12 +85,25 @@ Redwood.factory("MarketAlgorithm", function () {
             else if (this.state == "state_maker") {
                nMsg3 = new Message("SYNC_FP", "UOFFERS", [this.myId, this.using_speed, []]);
                nMsg3.timeStamp = msg.msgData[0]; // for debugging test output only
-               if (this.buyEntered) {
-                  nMsg3.msgData[2].push(this.updateBuyOfferMsg());
+
+               //prevent maker from sniping themself
+               if(positiveChange){                       //the price moved up -> update sell order before buy order
+                  if (this.buyEntered) {
+                     nMsg3.msgData[2].push(this.updateSellOfferMsg());
+                  }
+                  if (this.sellEntered) {
+                     nMsg3.msgData[2].push(this.updateBuyOfferMsg());
+                  }
                }
-               if (this.sellEntered) {
-                  nMsg3.msgData[2].push(this.updateSellOfferMsg());
+               else{                                     //the price moved down -> update buy order before sell order
+                  if (this.buyEntered) {
+                     nMsg3.msgData[2].push(this.updateBuyOfferMsg());
+                  }
+                  if (this.sellEntered) {
+                     nMsg3.msgData[2].push(this.updateSellOfferMsg());
+                  }
                }
+               
             }
             else if (this.state == "state_snipe") {
                nMsg3 = new Message("SYNC_FP", "SNIPE", [this.myId, this.using_speed, []]);

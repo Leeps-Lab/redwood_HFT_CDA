@@ -70,8 +70,12 @@ Redwood.factory("MarketAlgorithm", function () {
 
             // update fundamental price variable
             this.fundamentalPrice = msg.msgData[1];
-            console.log("Old Fundamental Price: " + this.oldFundamentalPrice + "Current Fundamental Price: " + this.fundamentalPrice + "\n");
             
+            //Calculate if the new fundamental price is greater than the old price
+            var positiveChange = (this.fundamentalPrice - this.oldFundamentalPrice) > 0 ? true : false;
+            console.log("Old Fundamental Price: " + this.oldFundamentalPrice + " Current Fundamental Price: " + this.fundamentalPrice + " positiveChange: " + positiveChange + "\n");
+
+
             //send player state to group manager
             var nMsg3;
             if (this.state == "state_out") {
@@ -92,20 +96,38 @@ Redwood.factory("MarketAlgorithm", function () {
                nMsg3 = new Message("SYNC_FP", "SNIPE", [this.myId, this.using_speed, []]);
                nMsg3.timeStamp = msg.msgData[0]; // for debugging test output only
 
-               snipeBuyMsg = new Message("OUCH", "EBUY", [this.myId, this.fundamentalPrice, true, getTime()]);          //create snipe buy message
-               snipeBuyMsg.delay = !this.using_speed;
-               snipeBuyMsg.msgId = this.currentMsgId;
-               this.currentBuyId = this.currentMsgId;
-               this.currentMsgId++;
+               if(positiveChange){     //the new price is greater than the old price -> generate snipe buy message
+                  snipeBuyMsg = new Message("OUCH", "EBUY", [this.myId, this.fundamentalPrice, true, getTime()]);        
+                  snipeBuyMsg.delay = !this.using_speed;
+                  snipeBuyMsg.msgId = this.currentMsgId;
+                  this.currentBuyId = this.currentMsgId;
+                  this.currentMsgId++;
+                  nMsg3.msgData[2].push(snipeBuyMsg);
+                  console.log("snipeBuyMsg: " + snipeBuyMsg.asString() + "\n");
+               }
+               else{                   //the new price is less than the old price -> generate snipe sell message
+                  snipeSellMsg = new Message("OUCH", "ESELL", [this.myId, this.fundamentalPrice, true, getTime()]);
+                  snipeSellMsg.delay = !this.using_speed;
+                  snipeSellMsg.msgId = this.currentMsgId;
+                  this.currentSellId = this.currentMsgId;
+                  this.currentMsgId++;
+                  nMsg3.msgData[2].push(snipeSellMsg);
+                  console.log("snipeSellMsg: " + snipeSellMsg.asString() + "\n");
+               }
 
-               snipeSellMsg = new Message("OUCH", "ESELL", [this.myId, this.fundamentalPrice +1, true, getTime()]);
-               snipeSellMsg.delay = !this.using_speed;
-               nMsg3.msgData[2].push(snipeBuyMsg, snipeSellMsg);
-
-               snipeSellMsg.msgId = this.currentMsgId;
-               this.currentSellId = this.currentMsgId;
-               this.currentMsgId++;
-               console.log("snipeBuyMsg: " + snipeBuyMsg.asString() + "\n" + " snipeSellMsg " + snipeSellMsg.asString() + "\n");    //create snipe sell message
+               //old
+               // snipeBuyMsg = new Message("OUCH", "EBUY", [this.myId, this.fundamentalPrice, true, getTime()]);        
+               // snipeBuyMsg.delay = !this.using_speed;
+               // snipeBuyMsg.msgId = this.currentMsgId;
+               // this.currentBuyId = this.currentMsgId;
+               // this.currentMsgId++;
+               // snipeSellMsg = new Message("OUCH", "ESELL", [this.myId, this.fundamentalPrice, true, getTime()]);
+               // snipeSellMsg.delay = !this.using_speed;
+               // snipeSellMsg.msgId = this.currentMsgId;
+               // this.currentSellId = this.currentMsgId;
+               // this.currentMsgId++;
+               //nMsg3.msgData[2].push(snipeBuyMsg, snipeSellMsg);
+               //console.log("snipeBuyMsg: " + snipeBuyMsg.asString() + "\n" + " snipeSellMsg " + snipeSellMsg.asString() + "\n");    //create snipe sell message
             }
             else {
                console.error("invalid state");

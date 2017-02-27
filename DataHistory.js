@@ -123,7 +123,7 @@ RedwoodHighFrequencyTrading.factory("DataHistory", function () {
       //records a new buy offer
       dataHistory.recordBuyOffer = function (buyMsg) {
          if(this.playerData[buyMsg.msgData[0]].state == 'Snipe'){                                   //TEST -> don't want to graph snipe offer
-            console.log("record sell offer state: "  + this.playerData[buyMsg.msgData[0]].state);
+            console.log("Tried to record buy offer, state: "  + this.playerData[buyMsg.msgData[0]].state);
             return;
          }
          //Check if current buy offer needs to be stored
@@ -142,7 +142,7 @@ RedwoodHighFrequencyTrading.factory("DataHistory", function () {
       // Records a new Sell offer
       dataHistory.recordSellOffer = function (sellMsg) {
          if(this.playerData[sellMsg.msgData[0]].state == 'Snipe'){                                 //TEST -> don't want to graph snipe offer
-            console.log("record sell offer state: "  + this.playerData[sellMsg.msgData[0]].state);
+            console.log("Tried to record sell offer, state: "  + this.playerData[sellMsg.msgData[0]].state);
             return;
          }
          //Check if current sell offer needs to be stored

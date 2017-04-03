@@ -107,8 +107,8 @@ Redwood.factory("GroupManager", function () {
       groupManager.recvFromMarketAlgorithm = function (msg) {
 
          if(msg.msgType === "EBUY"){
-            console.log("Flag 3:");
-            console.log(msg);
+            //console.log("Flag 3:");
+            //console.log(msg);
          }
 
          // synchronized message in response to fundamental price change
@@ -120,6 +120,7 @@ Redwood.factory("GroupManager", function () {
 
             // check if every user has sent a response
             if (this.syncFPArray.allReady()) {
+               console.log("Time after players are synced: " + printTime(getTime()) + "\n");
                // shuffle the order of messages sitting in the arrays
                var indexOrder = this.getRandomMsgOrder(this.FPMsgList.length);
 
@@ -154,8 +155,8 @@ Redwood.factory("GroupManager", function () {
       groupManager.sendToMarket = function (leepsMsg) {
 
          if(leepsMsg.msgType === "EBUY"){
-            console.log("Flag 4:");
-            console.log(leepsMsg);
+            //onsole.log("Flag 4:");
+            //console.log(leepsMsg);
          }
 
          // add message to log
@@ -260,6 +261,7 @@ Redwood.factory("GroupManager", function () {
             indices[i] = indices[rand];
             indices[rand] = temp;
          }
+         console.log("indices: " + indices); 
          return indices;
       };
 

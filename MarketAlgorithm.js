@@ -73,7 +73,7 @@ Redwood.factory("MarketAlgorithm", function () {
             
             //Calculate if the new fundamental price is greater than the old price
             var positiveChange = (this.fundamentalPrice - this.oldFundamentalPrice) > 0 ? true : false;
-            console.log("Old Fundamental Price: " + this.oldFundamentalPrice + " Current Fundamental Price: " + this.fundamentalPrice + " positiveChange: " + positiveChange + "\n");
+            console.log(printTime(getTime()) + " Old Fundamental Price: " + this.oldFundamentalPrice + " Current Fundamental Price: " + this.fundamentalPrice + " positiveChange: " + positiveChange +  " UserID: " + this.myId + "\n");
 
 
             //send player state to group manager
@@ -127,20 +127,6 @@ Redwood.factory("MarketAlgorithm", function () {
                   nMsg3.msgData[2].push(snipeSellMsg);
                   console.log("snipeSellMsg: " + snipeSellMsg.asString() + "\n");
                }
-
-               //old
-               // snipeBuyMsg = new Message("OUCH", "EBUY", [this.myId, this.fundamentalPrice, true, getTime()]);        
-               // snipeBuyMsg.delay = !this.using_speed;
-               // snipeBuyMsg.msgId = this.currentMsgId;
-               // this.currentBuyId = this.currentMsgId;
-               // this.currentMsgId++;
-               // snipeSellMsg = new Message("OUCH", "ESELL", [this.myId, this.fundamentalPrice, true, getTime()]);
-               // snipeSellMsg.delay = !this.using_speed;
-               // snipeSellMsg.msgId = this.currentMsgId;
-               // this.currentSellId = this.currentMsgId;
-               // this.currentMsgId++;
-               //nMsg3.msgData[2].push(snipeBuyMsg, snipeSellMsg);
-               //console.log("snipeBuyMsg: " + snipeBuyMsg.asString() + "\n" + " snipeSellMsg " + snipeSellMsg.asString() + "\n");    //create snipe sell message
             }
             else {
                console.error("invalid state");
@@ -152,6 +138,7 @@ Redwood.factory("MarketAlgorithm", function () {
 
             this.sendToGroupManager(nMsg3);
 
+            console.log("User : " + this.myId + "'s time after messages sent to be synced: " + printTime(getTime()) + "\n");
             // send message to data history recording price change
             var nmsg = new Message("DATA", "FPC", msg.msgData);
             this.sendToDataHistory(nmsg);
@@ -311,8 +298,8 @@ Redwood.factory("MarketAlgorithm", function () {
          this.currentBuyId = this.currentMsgId;
          this.currentMsgId++;
          
-         console.log("Flag 1: ");
-         console.log(nMsg);
+         //console.log("Flag 1: ");
+         //console.log(nMsg);
 
          return nMsg;
       };

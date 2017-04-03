@@ -111,6 +111,7 @@ RedwoodHighFrequencyTrading.factory("DataHistory", function () {
          if (fpcMsg.msgData[1] > this.highestMarketPrice) this.highestMarketPrice = fpcMsg.msgData[1];
          if (fpcMsg.msgData[1] < this.lowestMarketPrice) this.lowestMarketPrice = fpcMsg.msgData[1];
 
+         console.log(printTime(getTime()) + " Player: " + this.myId + " in DataHistory price change\n");
          this.storeFundPrice(fpcMsg.msgData[0]);
          this.curFundPrice = [fpcMsg.msgData[0], fpcMsg.msgData[1], 0];
       };

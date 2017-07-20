@@ -28,7 +28,6 @@ RedwoodHighFrequencyTrading.factory("DataHistory", function () {
       dataHistory.recvMessage = function (msg) {
 
          console.log("[DEBUG] Data History recieved msg: ");
-         console.log(msg);
 
          switch (msg.msgType) {
             case "FPC"      :

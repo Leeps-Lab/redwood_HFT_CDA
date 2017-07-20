@@ -35,7 +35,8 @@ Redwood.factory("GroupManager", function () {
       if(groupManager.marketFlag === "REMOTE"/*ZACH, D/N MODIFY!*/){
 
          // open websocket with market
-         groupManager.marketURI = "ws://54.202.196.170:8000/";
+         //groupManager.marketURI = "ws://54.202.196.170:8000/";           //use for vagrant testing
+         groupManager.marketURI = "ws://54.149.235.92:8000/";
          groupManager.socket = new WebSocket(groupManager.marketURI, ['binary', 'base64']);
          groupManager.socket.onopen = function(event) {
             //groupManager.socket.send("Confirmed Opened Websocket connection");
@@ -72,8 +73,8 @@ Redwood.factory("GroupManager", function () {
          // wrapper for debug market recieve function
          groupManager.recvFromDebugMarket = function(msg){
 
-            console.log("Recieved From Debug Market: " + msg);
-            console.log(ouchToLeepsMsg(msg));
+            //console.log("Recieved From Debug Market: " + msg);
+            //console.log(ouchToLeepsMsg(msg));
             groupManager.recvFromMarket(ouchToLeepsMsg(msg));
          }
 
@@ -92,7 +93,7 @@ Redwood.factory("GroupManager", function () {
       };
 
       groupManager.sendToAllDataHistories = function (msg) {
-         //this.dataStore.storeMsg(msg);
+         this.dataStore.storeMsg(msg);
          this.rssend("To_All_Data_Histories", msg);
       };
 
@@ -120,7 +121,7 @@ Redwood.factory("GroupManager", function () {
 
             // check if every user has sent a response
             if (this.syncFPArray.allReady()) {
-               console.log("Time after players are synced: " + printTime(getTime()) + "\n");
+               //console.log("Time after players are synced: " + printTime(getTime()) + "\n");
                // shuffle the order of messages sitting in the arrays
                var indexOrder = this.getRandomMsgOrder(this.FPMsgList.length);
 
@@ -146,6 +147,12 @@ Redwood.factory("GroupManager", function () {
 
          // general message that needs to be passed on to marketManager
          if (msg.protocol === "OUCH") {
+            //ADDDED 4/6/17 TO RANDOMIZE NON FPC MESSAGES SO THERE IS RANDOMIZATION WITHOUT RELYING ON JUMP
+            //var indexOrder = this.getRandomMsgOrder(this.FPMsgList.length);   //added
+            //for (var index of indexOrder) {
+            //   groupManager.sendToMarket(msg);
+            //}
+            //console.log("random test: " + msg.asString());
             groupManager.sendToMarket(msg);
          }
       };
@@ -162,7 +169,7 @@ Redwood.factory("GroupManager", function () {
          // add message to log
          this.outboundMarketLog += leepsMsg.asString() + "\n";
          //console.log("Outbound messages:\n" + this.outboundMarketLog);
-         console.log("Outbound Message: " + leepsMsg.asString() + "\n");
+         //console.log("Outbound Message: " + leepsMsg.asString() + "\n");
          this.outboundMarketLog = "";
 
          //If no delay send msg now, otherwise send after delay
@@ -198,8 +205,8 @@ Redwood.factory("GroupManager", function () {
       groupManager.sendToRemoteMarket = function(leepsMsg){
 
          if(leepsMsg.msgType === "EBUY"){
-            console.log("Flag 5:");
-            console.log(leepsMsg);
+            //console.log("Flag 5:");
+            //console.log(leepsMsg);
          }
 
          var msg = leepsMsgToOuch(leepsMsg);
@@ -217,7 +224,7 @@ Redwood.factory("GroupManager", function () {
          // add message to log
          this.inboundMarketLog += msg.asString() + "\n";
          //console.log("Inbound Messages:\n" + this.inboundMarketLog);
-         console.log("Inbound Message: " + msg.asString() + "\n");
+         //console.log("Inbound Message: " + msg.asString() + "\n");
 
          if(msg.msgType === "C_TRA"){
             this.sendToMarketAlgorithms(msg);
@@ -261,7 +268,7 @@ Redwood.factory("GroupManager", function () {
             indices[i] = indices[rand];
             indices[rand] = temp;
          }
-         console.log("indices: " + indices); 
+         //console.log("indices: " + indices); 
          return indices;
       };
 

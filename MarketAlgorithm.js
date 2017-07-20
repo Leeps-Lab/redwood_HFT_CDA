@@ -29,8 +29,8 @@ Redwood.factory("MarketAlgorithm", function () {
       marketAlgorithm.sendToGroupManager = function (msg) {
 
          if(msg.msgType === "EBUY"){
-            console.log("Flag 2:");
-            console.log(msg);
+            //console.log("Flag 2:");
+            //console.log(msg);
          }
          
          this.groupManager.recvFromMarketAlgorithm(msg);
@@ -73,7 +73,7 @@ Redwood.factory("MarketAlgorithm", function () {
             
             //Calculate if the new fundamental price is greater than the old price
             var positiveChange = (this.fundamentalPrice - this.oldFundamentalPrice) > 0 ? true : false;
-            console.log(printTime(getTime()) + " Old Fundamental Price: " + this.oldFundamentalPrice + " Current Fundamental Price: " + this.fundamentalPrice + " positiveChange: " + positiveChange +  " UserID: " + this.myId + "\n");
+            //console.log(printTime(getTime()) + " Old Fundamental Price: " + this.oldFundamentalPrice + " Current Fundamental Price: " + this.fundamentalPrice + " positiveChange: " + positiveChange +  " UserID: " + this.myId + "\n");
 
 
             //send player state to group manager
@@ -138,7 +138,7 @@ Redwood.factory("MarketAlgorithm", function () {
 
             this.sendToGroupManager(nMsg3);
 
-            console.log("User : " + this.myId + "'s time after messages sent to be synced: " + printTime(getTime()) + "\n");
+            //console.log("User : " + this.myId + "'s time after messages sent to be synced: " + printTime(getTime()) + "\n");
             // send message to data history recording price change
             var nmsg = new Message("DATA", "FPC", msg.msgData);
             this.sendToDataHistory(nmsg);

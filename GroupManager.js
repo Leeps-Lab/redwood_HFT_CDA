@@ -106,12 +106,6 @@ Redwood.factory("GroupManager", function () {
 
       // receive a message from a single market algorithm in this group
       groupManager.recvFromMarketAlgorithm = function (msg) {
-
-         if(msg.msgType === "EBUY"){
-            //console.log("Flag 3:");
-            //console.log(msg);
-         }
-
          // synchronized message in response to fundamental price change
          if (msg.protocol === "SYNC_FP") {
             //mark that this user sent msg
@@ -147,12 +141,6 @@ Redwood.factory("GroupManager", function () {
 
          // general message that needs to be passed on to marketManager
          if (msg.protocol === "OUCH") {
-            //ADDDED 4/6/17 TO RANDOMIZE NON FPC MESSAGES SO THERE IS RANDOMIZATION WITHOUT RELYING ON JUMP
-            //var indexOrder = this.getRandomMsgOrder(this.FPMsgList.length);   //added
-            //for (var index of indexOrder) {
-            //   groupManager.sendToMarket(msg);
-            //}
-            //console.log("random test: " + msg.asString());
             groupManager.sendToMarket(msg);
          }
       };
@@ -160,17 +148,7 @@ Redwood.factory("GroupManager", function () {
       // TODO setup arg for routing
       // Function for sending messages, will route msg to remote or local market based on this.marketFLag
       groupManager.sendToMarket = function (leepsMsg) {
-
-         if(leepsMsg.msgType === "EBUY"){
-            //onsole.log("Flag 4:");
-            //console.log(leepsMsg);
-         }
-
-         // add message to log
-         this.outboundMarketLog += leepsMsg.asString() + "\n";
-         //console.log("Outbound messages:\n" + this.outboundMarketLog);
-         //console.log("Outbound Message: " + leepsMsg.asString() + "\n");
-         this.outboundMarketLog = "";
+         //console.log("Outbound Message", leepsMsg);                //debug OUCH messages
 
          //If no delay send msg now, otherwise send after delay
          if (leepsMsg.delay) {
@@ -197,42 +175,35 @@ Redwood.factory("GroupManager", function () {
          }
       };
 
-      groupManager.sendToLocalMarket = function(leepsMsg){
+      groupManager.sendToLocalMarket = function(leepsMsg){     //obsolete
          console.log("sending to local market");
          this.market.recvMessage(leepsMsg);
       }
 
       groupManager.sendToRemoteMarket = function(leepsMsg){
-
-         if(leepsMsg.msgType === "EBUY"){
-            //console.log("Flag 5:");
-            //console.log(leepsMsg);
-         }
-
          var msg = leepsMsgToOuch(leepsMsg);
          this.socket.send(msg);
       }
 
       groupManager.sendToDebugMarket = function(leepsMsg){
          var msg = leepsMsgToOuch(leepsMsg);
+         //console.log(msg);                                        //debug for outgoing message
          this.debugMarket.recvMessage(msg);
       }
 
       // handles a message from the market
       groupManager.recvFromMarket = function (msg) {
-
-         // add message to log
-         this.inboundMarketLog += msg.asString() + "\n";
-         //console.log("Inbound Messages:\n" + this.inboundMarketLog);
-         //console.log("Inbound Message: " + msg.asString() + "\n");
-
+         //console.log("Inbound Message", msg);                //debug incoming ITCH messages
          if(msg.msgType === "C_TRA"){
             this.sendToMarketAlgorithms(msg);
          }
          else {
             //console.log(msg);
-            if(msg.msgData[0] > 0) {
-               this.marketAlgorithms[msg.msgData[0]].recvFromGroupManager(msg);
+            if(msg.subjectID > 0) {
+               this.marketAlgorithms[msg.subjectID].recvFromGroupManager(msg);
+            }
+            else {
+               this.sendToAllDataHistories(msg);            //added 7/20/17 for refactor
             }
          }
       };
@@ -244,6 +215,8 @@ Redwood.factory("GroupManager", function () {
          if (msg.protocol === "USER") {
             var subjectID = msg.msgData[0];
             this.marketAlgorithms[subjectID].recvFromGroupManager(msg);
+
+            this.sendToAllDataHistories(msg);            //updates the UI, doesn't work when directly sent from start.js
 
             this.dataStore.storeMsg(msg);
             if (msg.msgType == "UMAKER") this.dataStore.storeSpreadChange(msg.msgData[1], this.marketAlgorithms[subjectID].spread, msg.msgData[0]);
@@ -300,12 +273,10 @@ Redwood.factory("GroupManager", function () {
          // create the outside investor leeps message
          var msgType = this.investorArrivals[this.investorIndex][1] === 1 ? "EBUY" : "ESELL";
          if(msgType === "EBUY"){
-            var msg2 = new Message("OUCH", "EBUY", [0, 214748.3647, true, getTime()]);
-            //var msg2 = new Message("OUCH", "EBUY", [0, 102, true, getTime()]);
+            var msg2 = new OuchMessage("EBUY", 0, 214748.3647, true);      //changed 7/20/17
          }
          else if(msgType === "ESELL"){
-            var msg2 = new Message("OUCH", "ESELL", [0, 0, true, getTime()]);
-            //var msg2 = new Message("OUCH", "ESELL", [0, 102, true, getTime()]);
+            var msg2 = new OuchMessage("ESELL", 0, 0, true);      //changed 7/20/17
          }
          msg2.msgId = this.curMsgId;
          this.curMsgId ++;

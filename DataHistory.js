@@ -36,7 +36,7 @@ RedwoodHighFrequencyTrading.factory("DataHistory", function () {
             case "C_TRA"    :
                this.storeTransaction(msg);
                break;
-            case "C_USPEED" :
+            case "USPEED" :
                this.storeSpeedChange(msg);
                break;
             case "C_UBUY"   :
@@ -48,21 +48,23 @@ RedwoodHighFrequencyTrading.factory("DataHistory", function () {
                this.recordSellOffer(msg);
                break;
             case "C_RBUY"   :
-               this.storeBuyOffer(msg.msgData[1], msg.msgData[0]);
+               //this.storeBuyOffer(msg.msgData[1], msg.msgData[0]);
+               this.storeBuyOffer(msg.timeStamp, msg.subjectID);
                break;
             case "C_RSELL"  :
-               this.storeSellOffer(msg.msgData[1], msg.msgData[0]);
+               this.storeBuyOffer(msg.timeStamp, msg.subjectID);
+               //this.storeSellOffer(msg.msgData[1], msg.msgData[0]);
                break;
-            case "C_UMAKER" :
+            case "UMAKER" :
                this.recordStateChange("Maker", msg.msgData[0], msg.msgData[1]);
                break;
-            case "C_USNIPE" :
+            case "USNIPE" :
                this.recordStateChange("Snipe", msg.msgData[0], msg.msgData[1]);
                break;
-            case "C_UOUT" :
+            case "UOUT" :
                this.recordStateChange("Out", msg.msgData[0], msg.msgData[1]);
                break;
-            case "C_UUSPR" :
+            case "UUSPR" :
                this.playerData[msg.msgData[0]].spread = msg.msgData[1];
                this.calcLowestSpread();
                break;
@@ -122,38 +124,46 @@ RedwoodHighFrequencyTrading.factory("DataHistory", function () {
 
       //records a new buy offer
       dataHistory.recordBuyOffer = function (buyMsg) {
-         if(this.playerData[buyMsg.msgData[0]].state == 'Snipe'){                                   //TEST -> don't want to graph snipe offer
-            console.log("Tried to record buy offer, state: "  + this.playerData[buyMsg.msgData[0]].state);
-            return;
-         }
-         //Check if current buy offer needs to be stored
-         if (this.playerData[buyMsg.msgData[0]].curBuyOffer != null) {
-            this.storeBuyOffer(buyMsg.msgData[2], buyMsg.msgData[0]);
-            console.log("Data being stored: " + buyMsg.msgData[2] + " : " + buyMsg.msgData[0]);
-            console.log("Local timestamp: " + getTime());
-         }
-         //Push on new buy offer
-         this.playerData[buyMsg.msgData[0]].curBuyOffer = [buyMsg.msgData[2], buyMsg.msgData[1]];   // [timestamp, price]
+         if(buyMsg.subjectID > 0){
+            console.log(buyMsg.subjectID);
+            console.log(this.playerData[buyMsg.subjectID].state);
+            if(this.playerData[buyMsg.subjectID].state == 'Snipe'){                                   //TEST -> don't want to graph snipe offer
+               console.log("Tried to record buy offer, state: "  + this.playerData[buyMsg.subjectID].state);
+               return;
+            }
+            //Check if current buy offer needs to be stored
+            if (this.playerData[buyMsg.subjectID].curBuyOffer != null) {
+               this.storeBuyOffer(buyMsg.timeStamp, buyMsg.subjectID);
+               console.log("Data being stored: " + buyMsg.timeStamp + " : " + buyMsg.subjectID);
+               console.log("Local timestamp: " + getTime());
+            }
+            //Push on new buy offer
+            this.playerData[buyMsg.subjectID].curBuyOffer = [buyMsg.timeStamp, buyMsg.price];   // [timestamp, price]
 
-         // check to see if new buy price is lowest price so far
-         if (buyMsg.msgData[1] < this.lowestMarketPrice) this.lowestMarketPrice = buyMsg.msgData[1];
+            // check to see if new buy price is lowest price so far
+            if (buyMsg.price < this.lowestMarketPrice) this.lowestMarketPrice = buyMsg.price;
+         }
       };
 
       // Records a new Sell offer
       dataHistory.recordSellOffer = function (sellMsg) {
-         if(this.playerData[sellMsg.msgData[0]].state == 'Snipe'){                                 //TEST -> don't want to graph snipe offer
-            console.log("Tried to record sell offer, state: "  + this.playerData[sellMsg.msgData[0]].state);
-            return;
-         }
-         //Check if current sell offer needs to be stored
-         if (this.playerData[sellMsg.msgData[0]].curSellOffer != null) {
-            this.storeSellOffer(sellMsg.msgData[2], sellMsg.msgData[0]);
-         }
-         //Push on new sell offer
-         this.playerData[sellMsg.msgData[0]].curSellOffer = [sellMsg.msgData[2], sellMsg.msgData[1]];   // [timestamp, price]
+         if(sellMsg.subjectID > 0){                            //TEST 7/20/17 
+            console.log(sellMsg.subjectID);
+            console.log(this.playerData[sellMsg.subjectID].state);
+            if(this.playerData[sellMsg.subjectID].state == 'Snipe'){                                 //TEST -> don't want to graph snipe offer
+               console.log("Tried to record sell offer, state: "  + this.playerData[sellMsg.subjectID].state);
+               return;
+            }
+            //Check if current sell offer needs to be stored
+            if (this.playerData[sellMsg.subjectID].curSellOffer != null) {
+               this.storeSellOffer(sellMsg.timeStamp, sellMsg.subjectID);
+            }
+            //Push on new sell offer
+            this.playerData[sellMsg.subjectID].curSellOffer = [sellMsg.timeStamp, sellMsg.price];   // [timestamp, price]
 
-         // check to see if new sell price is highest price so far
-         if (sellMsg.msgData[1] > this.highestMarketPrice) this.highestMarketPrice = sellMsg.msgData[1];
+            // check to see if new sell price is highest price so far
+            if (sellMsg.price > this.highestMarketPrice) this.highestMarketPrice = sellMsg.price;
+         }
       };
 
       // Shifts buy offer from currently being active into the history
@@ -176,33 +186,31 @@ RedwoodHighFrequencyTrading.factory("DataHistory", function () {
 
 
       dataHistory.storeTransaction = function (msg) {
-         if (msg.msgData[3] == this.myId) {
-            // if I'm the buyer
-            this.profit += msg.msgData[2] - msg.msgData[1];
+         if (msg.buyerID == this.myId) {                                            // if I'm the buyer
+            this.profit += msg.FPC - msg.price;                                     //fundPrice - myPrice
          }
-         else if (msg.msgData[4] == this.myId) {
-            //if I'm the seller
-            this.profit += msg.msgData[1] - msg.msgData[2];
+         else if (msg.sellerID == this.myId) {                                      //if I'm the seller
+            this.profit += msg.price - msg.FPC;
          }
 
-         if (msg.msgData[3] != 0) {
-            if (this.playerData[msg.msgData[3]].curBuyOffer !== null) this.storeBuyOffer(msg.msgData[0], msg.msgData[3]);
+         if (msg.buyerID != 0) {
+            if (this.playerData[msg.buyerID].curBuyOffer !== null) this.storeBuyOffer(msg.timeStamp, msg.buyerID);
 
-            var uid = msg.msgData[3];
-            var curProfit = this.playerData[uid].curProfitSegment[1] - ((msg.msgData[0] - this.playerData[uid].curProfitSegment[0]) * this.playerData[uid].curProfitSegment[2] / 1000000000); //changed from 1000
-            this.recordProfitSegment(curProfit + msg.msgData[2] - msg.msgData[1], msg.msgData[0], this.playerData[uid].curProfitSegment[2], uid, this.playerData[uid].state);
+            var uid = msg.buyerID;
+            var curProfit = this.playerData[uid].curProfitSegment[1] - ((msg.timeStamp - this.playerData[uid].curProfitSegment[0]) * this.playerData[uid].curProfitSegment[2] / 1000000000); //changed from 1000
+            this.recordProfitSegment(curProfit + msg.FPC - msg.price, msg.timeStamp, this.playerData[uid].curProfitSegment[2], uid, this.playerData[uid].state);
          }
-         if (msg.msgData[4] != 0) {
-            if (this.playerData[msg.msgData[4]].curSellOffer !== null) this.storeSellOffer(msg.msgData[0], msg.msgData[4]);
+         if (msg.sellerID != 0) {
+            if (this.playerData[msg.sellerID].curSellOffer !== null) this.storeSellOffer(msg.timeStamp, msg.sellerID);
 
-            var uid = msg.msgData[4];
-            var curProfit = this.playerData[uid].curProfitSegment[1] - ((msg.msgData[0] - this.playerData[uid].curProfitSegment[0]) * this.playerData[uid].curProfitSegment[2] / 1000000000); //changed from 1000
-            this.recordProfitSegment(curProfit + msg.msgData[1] - msg.msgData[2], msg.msgData[0], this.playerData[uid].curProfitSegment[2], uid, this.playerData[uid].state);
+            var uid = msg.sellerID;
+            var curProfit = this.playerData[uid].curProfitSegment[1] - ((msg.timeStamp - this.playerData[uid].curProfitSegment[0]) * this.playerData[uid].curProfitSegment[2] / 1000000000); //changed from 1000
+            this.recordProfitSegment(curProfit + msg.price - msg.FPC, msg.timeStamp, this.playerData[uid].curProfitSegment[2], uid, this.playerData[uid].state);
          }
          this.transactions.push(msg.msgData);
       };
 
-      dataHistory.storeSpeedChange = function (msg) {
+      dataHistory.storeSpeedChange = function (msg) { //("USER", "USPEED", [rs.user_id, $scope.using_speed, $scope.tradingGraph.getCurOffsetTime()])
          var uid = msg.msgData[0];
          this.playerData[uid].speed = msg.msgData[1];
          var curProfit = this.playerData[uid].curProfitSegment[1] - ((msg.msgData[2] - this.playerData[uid].curProfitSegment[0]) * this.playerData[uid].curProfitSegment[2] / 1000000000); //changed from 1000

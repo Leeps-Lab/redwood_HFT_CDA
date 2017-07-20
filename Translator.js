@@ -45,7 +45,8 @@ function leepsMsgToOuch(leepsMsg){
       ouchMsg[1] = charToByte('S');
       ouchMsg[2] = charToByte('U');      
       ouchMsg[3] = charToByte('B');
-      ouchMsg[4] = charToByte(String.fromCharCode(64 + leepsMsg.msgData[0]));
+      //ouchMsg[4] = charToByte(String.fromCharCode(64 + leepsMsg.msgData[0]));
+      ouchMsg[4] = charToByte(String.fromCharCode(64 + leepsMsg.subjectID));
       // Buy/Sell indicator within order id
       if(leepsMsg.msgType === "EBUY"){
          ouchMsg[5] = charToByte('B');
@@ -74,14 +75,21 @@ function leepsMsgToOuch(leepsMsg){
       spliceInArray(intToByteArray(538976288), ouchMsg, 4, 24);
 
       // Price
-      spliceInArray(priceToByteArray(leepsMsg.msgData[1]), ouchMsg, 4, 28);
+      //spliceInArray(priceToByteArray(leepsMsg.msgData[1]), ouchMsg, 4, 28);
+      spliceInArray(priceToByteArray(leepsMsg.price), ouchMsg, 4, 28);
 
       // Time in Force
-      if(leepsMsg.msgData[2] === true){
-         spliceInArray(intToByteArray(0), ouchMsg, 4, 32);
+      //if(leepsMsg.msgData[2] === true){
+      if(leepsMsg.IOC === true){
+        if(ouchMsg[4] != charToByte(String.fromCharCode(64))){   //if youre not an investor
+          spliceInArray(intToByteArray(1), ouchMsg, 4, 32);      //changed 5/24 to test sniping (time of force of 1)
+        }
+        else{
+          spliceInArray(intToByteArray(3), ouchMsg, 4, 32);       //investors have TOF of 3 seconds
+        }
       }
-      else{
-         spliceInArray(intToByteArray(99999), ouchMsg, 4, 32);
+      else{    
+          spliceInArray(intToByteArray(99999), ouchMsg, 4, 32);   //users have TOF of infinity
       }
 
       // Firm
@@ -89,7 +97,8 @@ function leepsMsgToOuch(leepsMsg){
       ouchMsg[36] = charToByte('S');
       ouchMsg[37] = charToByte('U');      
       ouchMsg[38] = charToByte('B');
-      ouchMsg[39] = charToByte(String.fromCharCode(64 + leepsMsg.msgData[0]));
+      //ouchMsg[39] = charToByte(String.fromCharCode(64 + leepsMsg.msgData[0]));
+      ouchMsg[39] = charToByte(String.fromCharCode(64 + leepsMsg.subjectID));
 
       // Display
       ouchMsg[40] = charToByte('Y');
@@ -123,7 +132,8 @@ function leepsMsgToOuch(leepsMsg){
       ouchMsg[1] = charToByte('S');
       ouchMsg[2] = charToByte('U');      
       ouchMsg[3] = charToByte('B');
-      ouchMsg[4] = charToByte(String.fromCharCode(64 + leepsMsg.msgData[0]));
+      //ouchMsg[4] = charToByte(String.fromCharCode(64 + leepsMsg.msgData[0]));
+      ouchMsg[4] = charToByte(String.fromCharCode(64 + leepsMsg.subjectID));
       // Buy/Sell indicator within order id
       if(leepsMsg.msgType === "RBUY"){
          ouchMsg[5] = charToByte('B');
@@ -131,7 +141,7 @@ function leepsMsgToOuch(leepsMsg){
       else if(leepsMsg.msgType === "RSELL"){
          ouchMsg[5] = charToByte('S');
       }
-      console.log("Order ID: " + decimalToByteArray(leepsMsg.msgId, 9));
+      //console.log("Order ID: " + decimalToByteArray(leepsMsg.msgId, 9));
       spliceInArray(decimalToByteArray(leepsMsg.msgId, 9), ouchMsg, 9, 6);
 
       // Shares
@@ -150,7 +160,8 @@ function leepsMsgToOuch(leepsMsg){
       ouchMsg[1] = charToByte('S');
       ouchMsg[2] = charToByte('U');      
       ouchMsg[3] = charToByte('B');
-      ouchMsg[4] = charToByte(String.fromCharCode(64 + leepsMsg.msgData[0]));
+      //ouchMsg[4] = charToByte(String.fromCharCode(64 + leepsMsg.msgData[0]));
+      ouchMsg[4] = charToByte(String.fromCharCode(64 + leepsMsg.subjectID));
       // Buy/Sell indicator within order id
       if(leepsMsg.msgType === "UBUY"){
          ouchMsg[5] = charToByte('B');
@@ -165,7 +176,8 @@ function leepsMsgToOuch(leepsMsg){
       ouchMsg[15] = charToByte('S');
       ouchMsg[16] = charToByte('U');      
       ouchMsg[17] = charToByte('B');
-      ouchMsg[18] = charToByte(String.fromCharCode(64 + leepsMsg.msgData[0]));
+      //ouchMsg[18] = charToByte(String.fromCharCode(64 + leepsMsg.msgData[0]));
+      ouchMsg[18] = charToByte(String.fromCharCode(64 + leepsMsg.subjectID));
       // Buy/Sell indicator within order id
       if(leepsMsg.msgType === "UBUY"){
          ouchMsg[19] = charToByte('B');
@@ -180,11 +192,13 @@ function leepsMsgToOuch(leepsMsg){
       spliceInArray(intToByteArray(1), ouchMsg, 4, 29);
 
       // Price
-      spliceInArray(priceToByteArray(leepsMsg.msgData[1]), ouchMsg, 4, 33);
+      //spliceInArray(priceToByteArray(leepsMsg.msgData[1]), ouchMsg, 4, 33);
+      spliceInArray(priceToByteArray(leepsMsg.price), ouchMsg, 4, 33);
 
       // Time in Force
-      if(leepsMsg.msgData[2] === true){
-         spliceInArray(intToByteArray(0), ouchMsg, 4, 37);
+      //if(leepsMsg.msgData[2] === true){
+      if(leepsMsg.IOC === true){  
+         spliceInArray(intToByteArray(1), ouchMsg, 4, 37);    //7/18/17 changed from 0 to 1 for sniping purposes
       }
       else{
          spliceInArray(intToByteArray(99999), ouchMsg, 4, 37);
@@ -209,7 +223,6 @@ function leepsMsgToOuch(leepsMsg){
 
 // converts from the OUCH 4.2 formatted message to the in-house leeps message format
 function ouchToLeepsMsg(ouchMsg){
-  
   // Acctepted message
   if(ouchMsg.charAt(0) === 'A'){
 
@@ -243,9 +256,9 @@ function ouchToLeepsMsg(ouchMsg){
     
     // pull out subject id from firm
     var subjId = ouchMsg.charCodeAt(47) - 64;
-    
     // create leeps message
-    var msg = new Message("OUCH", lpsMsgType, [subjId, price, timeStamp]);
+    //var msg = new Message("OUCH", lpsMsgType, [subjId, price, timeStamp]);
+    var msg = new ItchMessage(lpsMsgType, subjId, price, timeStamp, null, null, null);
     msg.timeStamp = timeStamp; // for test output only
     msg.msgId = msgId;
     msg.numShares = numShares;
@@ -267,7 +280,8 @@ function ouchToLeepsMsg(ouchMsg){
     // pull out number of shares canceled
     var numCanceled = string256ToInt(ouchMsg.substring(23, 27));
 
-    var msg = new Message("OUCH", "C_CANC", [subjId, timeStamp]);
+    //var msg = new Message("OUCH", "C_CANC", [subjId, timeStamp]);
+    var msg = new ItchMessage("C_CANC", subjId, null, timeStamp, null, null);
     msg.timeStamp = timeStamp; // for test output only
     msg.msgId = msgId;
     msg.numShares = numCanceled;
@@ -311,7 +325,8 @@ function ouchToLeepsMsg(ouchMsg){
     var prevMsgId = string10ToInt(ouchMsg.substring(69, 79));
 
     // create leeps message
-    var msg = new Message("OUCH", lpsMsgType, [subjId, price, timeStamp]);
+    //var msg = new Message("OUCH", lpsMsgType, [subjId, price, timeStamp]);
+    var msg = new ItchMessage(lpsMsgType, subjId, price, timeStamp, null, null);
     msg.timeStamp = timeStamp; // for test output only
     msg.msgId = msgId;
     msg.prevMsgId = prevMsgId;
@@ -342,10 +357,12 @@ function ouchToLeepsMsg(ouchMsg){
 
     // create leeps message
     if(transactionType === "B"){
-      var msg = new Message("OUCH", "C_TRA", [timeStamp, subjId, 0, price]);
+      //var msg = new Message("OUCH", "C_TRA", [timeStamp, subjId, 0, price]);
+      var msg = new ItchMessage("C_TRA", subjId, price, timeStamp, subjId, 0);
     }
     else if(transactionType === "S"){
-      var msg = new Message("OUCH", "C_TRA", [timeStamp, 0, subjId, price]);
+      //var msg = new Message("OUCH", "C_TRA", [timeStamp, 0, subjId, price]);
+      var msg = new ItchMessage("C_TRA", subjId, price, timeStamp, 0, subjId);
     }
     else{
       console.error("Unable to recognize type of tranaction: " + transactionType);
@@ -356,9 +373,20 @@ function ouchToLeepsMsg(ouchMsg){
     return msg;
   }
 
-  if(ouchMsg.charAt(0) === 'B'){
-    console.log("test");
+  if(ouchMsg.charAt(0) === 'S'){
+    var batchType = ouchMsg.charAt(9);  //B for start of batch, P for end of batch
+    var timeStamp = string256ToInt(ouchMsg.substring(1,9));  
+    //var msg = new Message("ITCH", "BATCH", [batchType, timeStamp]);
+    var msg = new ItchMessage("BATCH", null, null, timeStamp, null, null);
+    msg.batchType = batchType;
+    //if B -> make isBatch true (6/30/17)
+    return msg;
   }
+
+
+  // else{
+  //     console.log("Not a supported msg format");
+  // }
 
 }
 

@@ -70,7 +70,8 @@ Redwood.factory("DataStorage", function () {
                this.storeSpreadChange(message.msgData[2], message.msgData[1], message.msgData[0]);
                break;
             case "C_TRA" :
-               this.storeTransaction(message.timeStamp, message.msgData[1], message.msgData[2], message.msgData[3], message.msgData[4]);
+               //this.storeTransaction(message.timeStamp, message.msgData[1], message.msgData[2], message.msgData[3], message.msgData[4]);
+               this.storeTransaction(message.timeStamp, message.price, message.FPC, message.buyerID, message.sellerID);
                break;
             case "FPC" :
                this.storeFPC(message.timeStamp, message.msgData[1])

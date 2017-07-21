@@ -79,19 +79,13 @@ function leepsMsgToOuch(leepsMsg){
       spliceInArray(priceToByteArray(leepsMsg.price), ouchMsg, 4, 28);
 
       // Time in Force
-      //if(leepsMsg.msgData[2] === true){
       if(leepsMsg.IOC === true){
-        if(ouchMsg[4] != charToByte(String.fromCharCode(64))){   //if youre not an investor
-          spliceInArray(intToByteArray(1), ouchMsg, 4, 32);      //changed 5/24 to test sniping (time of force of 1)
-        }
-        else{
-          spliceInArray(intToByteArray(3), ouchMsg, 4, 32);       //investors have TOF of 3 seconds
-        }
+         spliceInArray(intToByteArray(0), ouchMsg, 4, 32);        //in CDA, remote server can handle IOC orders so 0 seconds
       }
-      else{    
-          spliceInArray(intToByteArray(99999), ouchMsg, 4, 32);   //users have TOF of infinity
+      else{
+         spliceInArray(intToByteArray(99999), ouchMsg, 4, 32);
       }
-
+      
       // Firm
       //spliceInArray(intToByteArray(leepsMsg.senderId), ouchMsg, 4, 36);
       ouchMsg[36] = charToByte('S');
@@ -198,7 +192,7 @@ function leepsMsgToOuch(leepsMsg){
       // Time in Force
       //if(leepsMsg.msgData[2] === true){
       if(leepsMsg.IOC === true){  
-         spliceInArray(intToByteArray(1), ouchMsg, 4, 37);    //7/18/17 changed from 0 to 1 for sniping purposes
+         spliceInArray(intToByteArray(0), ouchMsg, 4, 37);    //7/21/17 changed from 1 to 0 for CDA vs FBA
       }
       else{
          spliceInArray(intToByteArray(99999), ouchMsg, 4, 37);

@@ -131,15 +131,15 @@ svg {
 
 .my-positive-transactions {
     stroke: green;
-    stroke-width: 1;
+    stroke-width: 2;
 }
 
 .my-negative-transactions {
     stroke: red;
-    stroke-width: 1;
+    stroke-width: 2;
 }
 
 .other-transactions {
     stroke: gray;
-    stroke-width: 1;
+    stroke-width: 2;
 }

@@ -58,6 +58,8 @@ RedwoodHighFrequencyTrading.factory("Graphing", function () {
       graph.prevMaxPriceProfit = 0;
       graph.prevMinPriceProfit = 0;
 
+      graph.currentTick = [];          //added 7/21/17 for drawing transaction lines
+
          graph.getCurOffsetTime = function () {
          return Date.now() - this.timeOffset;
       };
@@ -290,12 +292,37 @@ RedwoodHighFrequencyTrading.factory("Graphing", function () {
             if (user !== dataHistory.myId && dataHistory.playerData[user].curBuyOffer !== null && dataHistory.playerData[user].curSellOffer !== null) {
                let p = Math.min(dataHistory.playerData[user].curSellOffer[1] - dataHistory.curFundPrice[1], dataHistory.curFundPrice[1] - dataHistory.playerData[user].curBuyOffer[1]);
                this.drawMarket(graphRefr, dataHistory.playerData[user].pastBuyOffers, p, "others-buy-offer");
+               this.currentTick[user] = p;
             }
          }
          if (dataHistory.playerData[dataHistory.myId].curBuyOffer !== null && dataHistory.playerData[dataHistory.myId].curSellOffer !== null) {
             let p = Math.min(dataHistory.playerData[dataHistory.myId].curSellOffer[1] - dataHistory.curFundPrice[1], dataHistory.curFundPrice[1] - dataHistory.playerData[dataHistory.myId].curBuyOffer[1]);
             this.drawMarket(graphRefr, dataHistory.playerData[user].pastBuyOffers, p, "my-buy-offer");
+            this.currentTick[user] = p;
+            //console.log(this.currentTick);
          }
+      };
+
+      graph.drawTransactions = function (graphRefr, historyDataSet, myId, currentTick) {
+         graphRefr.marketSVG.selectAll("line.my-positive-transactions line.my-negative-transactions line.other-transactions")
+            .data(historyDataSet)
+            .enter()
+            .append("line")
+            .attr("x1", graphRefr.elementWidth / 2)
+            .attr("x2", function (d) {
+               return graphRefr.elementWidth / 2 + (currentTick[d.subjectID] * graphRefr.elementWidth / graphRefr.priceRange);
+            })
+            .attr("y1", this.elementHeight / 2)// + 5)   //for visibility testing
+            .attr("y2", this.elementHeight / 2)// + 5)
+            .attr("class", function (d) {
+               if (d.buyerID == myId) {
+                  return d.FPC - d.price > 0 ? "my-positive-transactions" : "my-negative-transactions";
+               }
+               else if (d.sellerID == myId) {
+                  return d.price - d.FPC > 0 ? "my-positive-transactions" : "my-negative-transactions";
+               }
+               else return "other-transactions";
+            });
       };
 
       graph.drawAllProfit = function (graphRefr, dataHistory) {
@@ -327,33 +354,7 @@ RedwoodHighFrequencyTrading.factory("Graphing", function () {
             });
       };
 
-      graph.drawTransactions = function (graphRefr, historyDataSet, myId) {
-         graphRefr.marketSVG.selectAll("line.my-positive-transactions line.my-negative-transactions line.other-transactions")
-            .data(historyDataSet)
-            .enter()
-            .append("line")
-            .attr("x1", function (d) {
-               return graphRefr.mapTimeToXAxis(d[0]);
-            })
-            .attr("x2", function (d) {
-               return graphRefr.mapTimeToXAxis(d[0]);
-            })
-            .attr("y1", function (d) {
-               return graphRefr.mapMarketPriceToYAxis(d[1]);
-            })
-            .attr("y2", function (d) {
-               return graphRefr.mapMarketPriceToYAxis(d[2]);
-            })
-            .attr("class", function (d) {
-               if (d[3] == myId) {
-                  return d[2] - d[1] > 0 ? "my-positive-transactions" : "my-negative-transactions";
-               }
-               else if (d[4] == myId) {
-                  return d[1] - d[2] > 0 ? "my-positive-transactions" : "my-negative-transactions";
-               }
-               else return "other-transactions";
-            });
-      };
+      
 
       graph.calcPriceBounds = function (dHistory) {
          // calc bounds for market graph
@@ -460,7 +461,7 @@ RedwoodHighFrequencyTrading.factory("Graphing", function () {
 
          //this.drawMarket(graphRefr, dataHistory.pastFundPrices, dataHistory.curFundPrice, "price-line");
          this.drawOffers(graphRefr, dataHistory);
-         //this.drawTransactions(graphRefr, dataHistory.transactions, dataHistory.myId);
+         this.drawTransactions(graphRefr, dataHistory.transactions, dataHistory.myId, this.currentTick);
 
          //this.drawPriceAxis(graphRefr, this.marketPriceLines, this.marketSVG, this.mapMarketPriceToYAxis);
          this.drawPriceAxis(graphRefr, this.profitPriceLines, this.profitSVG, this.mapProfitPriceToYAxis);

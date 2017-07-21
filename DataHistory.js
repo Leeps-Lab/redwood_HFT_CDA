@@ -26,9 +26,6 @@ RedwoodHighFrequencyTrading.factory("DataHistory", function () {
       dataHistory.debugMode = debugMode;
 
       dataHistory.recvMessage = function (msg) {
-
-         console.log("[DEBUG] Data History recieved msg: ");
-
          switch (msg.msgType) {
             case "FPC"      :
                this.recordFPCchange(msg);
@@ -112,7 +109,7 @@ RedwoodHighFrequencyTrading.factory("DataHistory", function () {
          if (fpcMsg.msgData[1] > this.highestMarketPrice) this.highestMarketPrice = fpcMsg.msgData[1];
          if (fpcMsg.msgData[1] < this.lowestMarketPrice) this.lowestMarketPrice = fpcMsg.msgData[1];
 
-         console.log(printTime(getTime()) + " Player: " + this.myId + " in DataHistory price change\n");
+         //console.log(printTime(getTime()) + " Player: " + this.myId + " in DataHistory price change\n");
          this.storeFundPrice(fpcMsg.msgData[0]);
          this.curFundPrice = [fpcMsg.msgData[0], fpcMsg.msgData[1], 0];
       };
@@ -125,8 +122,6 @@ RedwoodHighFrequencyTrading.factory("DataHistory", function () {
       //records a new buy offer
       dataHistory.recordBuyOffer = function (buyMsg) {
          if(buyMsg.subjectID > 0){
-            console.log(buyMsg.subjectID);
-            console.log(this.playerData[buyMsg.subjectID].state);
             if(this.playerData[buyMsg.subjectID].state == 'Snipe'){                                   //TEST -> don't want to graph snipe offer
                console.log("Tried to record buy offer, state: "  + this.playerData[buyMsg.subjectID].state);
                return;
@@ -148,8 +143,6 @@ RedwoodHighFrequencyTrading.factory("DataHistory", function () {
       // Records a new Sell offer
       dataHistory.recordSellOffer = function (sellMsg) {
          if(sellMsg.subjectID > 0){                            //TEST 7/20/17 
-            console.log(sellMsg.subjectID);
-            console.log(this.playerData[sellMsg.subjectID].state);
             if(this.playerData[sellMsg.subjectID].state == 'Snipe'){                                 //TEST -> don't want to graph snipe offer
                console.log("Tried to record sell offer, state: "  + this.playerData[sellMsg.subjectID].state);
                return;
@@ -188,11 +181,12 @@ RedwoodHighFrequencyTrading.factory("DataHistory", function () {
       dataHistory.storeTransaction = function (msg) {
          if (msg.buyerID == this.myId) {                                            // if I'm the buyer
             this.profit += msg.FPC - msg.price;                                     //fundPrice - myPrice
+            console.log(msg.buyerID, msg.FPC - msg.price);
          }
          else if (msg.sellerID == this.myId) {                                      //if I'm the seller
             this.profit += msg.price - msg.FPC;
+            console.log(msg.sellerID, msg.price - msg.FPC);
          }
-
          if (msg.buyerID != 0) {
             if (this.playerData[msg.buyerID].curBuyOffer !== null) this.storeBuyOffer(msg.timeStamp, msg.buyerID);
 
@@ -207,7 +201,10 @@ RedwoodHighFrequencyTrading.factory("DataHistory", function () {
             var curProfit = this.playerData[uid].curProfitSegment[1] - ((msg.timeStamp - this.playerData[uid].curProfitSegment[0]) * this.playerData[uid].curProfitSegment[2] / 1000000000); //changed from 1000
             this.recordProfitSegment(curProfit + msg.price - msg.FPC, msg.timeStamp, this.playerData[uid].curProfitSegment[2], uid, this.playerData[uid].state);
          }
-         this.transactions.push(msg.msgData);
+
+         if(msg.subjectID > 0){                 //ADDED 7/21/17 to fix transaction horizontal lines
+            this.transactions.push(msg);  
+         }
       };
 
       dataHistory.storeSpeedChange = function (msg) { //("USER", "USPEED", [rs.user_id, $scope.using_speed, $scope.tradingGraph.getCurOffsetTime()])
@@ -225,7 +222,7 @@ RedwoodHighFrequencyTrading.factory("DataHistory", function () {
             this.storeProfitSegment(startTime, uid);
          }
          this.playerData[uid].curProfitSegment = [startTime, price, slope, state];
-         console.log("player: " + uid + " state: " + state + " price:" + price + " \n");
+         //console.log("player: " + uid + " state: " + state + " price:" + price + " \n");
       };
 
       dataHistory.storeProfitSegment = function (endTime, uid) {

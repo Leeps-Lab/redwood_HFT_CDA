@@ -363,17 +363,6 @@ function ouchToLeepsMsg(ouchMsg){
     }
     msg.msgId = msgId;
 
-    //console.log(msg);
-    return msg;
-  }
-
-  if(ouchMsg.charAt(0) === 'S'){
-    var batchType = ouchMsg.charAt(9);  //B for start of batch, P for end of batch
-    var timeStamp = string256ToInt(ouchMsg.substring(1,9));  
-    //var msg = new Message("ITCH", "BATCH", [batchType, timeStamp]);
-    var msg = new ItchMessage("BATCH", null, null, timeStamp, null, null);
-    msg.batchType = batchType;
-    //if B -> make isBatch true (6/30/17)
     return msg;
   }
 

@@ -31,7 +31,9 @@ RedwoodHighFrequencyTrading.factory("DataHistory", function () {
                this.recordFPCchange(msg);
                break;
             case "C_TRA"    :
-               this.storeTransaction(msg);
+               if(msg.subjectID > 0) {             //added 7/24/17 to stop sending redundant messages to be stored
+                  this.storeTransaction(msg);
+               }
                break;
             case "USPEED" :
                this.storeSpeedChange(msg);
@@ -179,13 +181,14 @@ RedwoodHighFrequencyTrading.factory("DataHistory", function () {
 
 
       dataHistory.storeTransaction = function (msg) {
+         //console.log(msg);
          if (msg.buyerID == this.myId) {                                            // if I'm the buyer
             this.profit += msg.FPC - msg.price;                                     //fundPrice - myPrice
-            console.log(msg.buyerID, msg.FPC - msg.price);
+            //console.log(msg.buyerID, msg.FPC - msg.price, msg.sellerID);
          }
          else if (msg.sellerID == this.myId) {                                      //if I'm the seller
             this.profit += msg.price - msg.FPC;
-            console.log(msg.sellerID, msg.price - msg.FPC);
+            //console.log(msg.sellerID, msg.price - msg.FPC, msg.buyerID);
          }
          if (msg.buyerID != 0) {
             if (this.playerData[msg.buyerID].curBuyOffer !== null) this.storeBuyOffer(msg.timeStamp, msg.buyerID);
@@ -203,7 +206,9 @@ RedwoodHighFrequencyTrading.factory("DataHistory", function () {
          }
 
          if(msg.subjectID > 0){                 //ADDED 7/21/17 to fix transaction horizontal lines
-            this.transactions.push(msg);  
+            console.log(msg.msgId);
+            //this.transactions.push(msg);  
+            this.transactions[0] = msg;            //added 7/24/17 -> we only need to graph the most recent transaction
          }
       };
 

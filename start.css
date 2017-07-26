@@ -77,7 +77,7 @@ body {
 }
 
 #buttons-container {
-    text-align: center;
+    text-align: left;
     float: left;
     width: 70%;
     height: 100%;
@@ -98,7 +98,7 @@ body {
 
 .status-table {
     margin-top: 20px;
-    height: 60%;
+    height: 50%;
     background-color: white;
     /*overflow: auto;*/
     border: 1px solid rgb(200, 200, 200);
@@ -167,6 +167,11 @@ body {
     background-color: rgb(230, 230, 230);
 }
 
+.graph-screen-wrapper {
+    height: 225px;  /*changed from 450 on 7/26/17 for displaying a smaller graph*/
+    margin: 40px;
+}
+
 .screen-wrapper {
     height: 450px;
     margin: 40px;
@@ -178,14 +183,14 @@ body {
 }
 
 .button-container-state {
-    margin-top: 20px;
+    margin-top: 20px;   
     border: 1px solid rgb(200, 200, 200);
     padding: 10px;
     display: inline-block;
 }
 
 .button-container-speed {
-    margin-top: 50px;
+    margin-top: 10px;
     border: 1px solid rgb(200, 200, 200);
     padding: 10px;
     display: inline-block;

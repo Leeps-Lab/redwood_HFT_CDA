@@ -62,7 +62,7 @@ RedwoodHighFrequencyTrading.factory("Graphing", function () {
       graph.op = 1;                    //added 7/24/17 for adding opacity to transaction lines
       graph.currentTransaction = null;    //added 7/24/17 for ensuring only the correct orders are drawn as transacted
       graph.currTransactionID = null;     //added 7/24/17 for ensuring only the correct orders are drawn as transacted
-
+      graph.heightScale = .3;          //added 7/26/17 to shift the height of the graph to fit buttons under
          graph.getCurOffsetTime = function () {
          return Date.now() - this.timeOffset;
       };
@@ -247,10 +247,10 @@ RedwoodHighFrequencyTrading.factory("Graphing", function () {
                      return graphRefr.elementWidth / 2 + (currentData * graphRefr.elementWidth / graphRefr.priceRange);
                })
                .attr("y1", function(d) {
-                     return styleClassName == "others-buy-offer" ? (graphRefr.elementHeight / 2 + 10) : (graphRefr.elementHeight / 2 + 20);
+                     return styleClassName == "others-buy-offer" ? (graphRefr.elementHeight * graphRefr.heightScale + 10) : (graphRefr.elementHeight * graphRefr.heightScale + 20);
                })
                .attr("y2", function(d) {
-                     return styleClassName == "others-buy-offer" ? (graphRefr.elementHeight / 2 - 10) : (graphRefr.elementHeight / 2 - 20);
+                     return styleClassName == "others-buy-offer" ? (graphRefr.elementHeight * graphRefr.heightScale - 10) : (graphRefr.elementHeight * graphRefr.heightScale - 20);
                })
                .attr("class", styleClassName);
          }
@@ -339,8 +339,8 @@ RedwoodHighFrequencyTrading.factory("Graphing", function () {
                   return graphRefr.elementWidth / 2 + (graphRefr.currentTick[d.subjectID] * graphRefr.elementWidth / graphRefr.priceRange);
                }
             })
-            .attr("y1", this.elementHeight / 2)// + 5)   //for visibility in testing
-            .attr("y2", this.elementHeight / 2)// + 5)
+            .attr("y1", this.elementHeight * graphRefr.heightScale)
+            .attr("y2", this.elementHeight * graphRefr.heightScale)
             .attr("class", function (d) {
                if (d.buyerID == myId) {
                   return d.FPC - d.price > 0 ? "my-positive-transactions" : "my-negative-transactions";
@@ -472,8 +472,8 @@ RedwoodHighFrequencyTrading.factory("Graphing", function () {
          this.marketSVG.append("line").attr({
                x1: 0,
                x2: this.elementWidth,
-               y1: this.elementHeight / 2,
-               y2: this.elementHeight / 2,
+               y1: this.elementHeight * graphRefr.heightScale, //this.elementHeight / 2,
+               y2: this.elementHeight * graphRefr.heightScale, //this.elementHeight / 2,
                class: "price-line"
             });
 
@@ -481,8 +481,8 @@ RedwoodHighFrequencyTrading.factory("Graphing", function () {
          this.marketSVG.append("line").attr({
                x1: this.elementWidth / 2,
                x2: this.elementWidth / 2,
-               y1: this.elementHeight / 2 - 30,//- 10,    //changed 7/26/17
-               y2: this.elementHeight / 2 + 30,//+ 10,
+               y1: this.elementHeight * graphRefr.heightScale - 30,//this.elementHeight / 2 - 30,//- 10,    //changed 7/26/17
+               y2: this.elementHeight * graphRefr.heightScale + 30,//this.elementHeight / 2 + 30,//+ 10,
                class: "my-profit-out"
             });
 

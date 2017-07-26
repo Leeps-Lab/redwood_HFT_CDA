@@ -62,7 +62,9 @@ RedwoodHighFrequencyTrading.factory("Graphing", function () {
       graph.op = 1;                    //added 7/24/17 for adding opacity to transaction lines
       graph.currentTransaction = null;    //added 7/24/17 for ensuring only the correct orders are drawn as transacted
       graph.currTransactionID = null;     //added 7/24/17 for ensuring only the correct orders are drawn as transacted
-      graph.heightScale = .3;          //added 7/26/17 to shift the height of the graph to fit buttons under
+      graph.heightScale = .4;          //added 7/26/17 to shift the height of the graph to fit buttons under
+
+      
          graph.getCurOffsetTime = function () {
          return Date.now() - this.timeOffset;
       };

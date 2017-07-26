@@ -6,16 +6,46 @@
 
             <!--Top two screens-->
             <div class="row" style="margin-bottom:20px;">
-                <!--Top left screen-->
-                <div class="col-xs-8 graph-screen-wrapper">
-                    <div class="screen top-left-screen">
-                        <svg width="100%" height="100%" id="graph1">
-                            <span class="zoom-in" id="market-zoom-in" ng-class="{'zoom-disabled': tradingGraph.expandedGraph}">+</span>
-                            <span class="zoom-out" id="market-zoom-out" ng-class="{'zoom-disabled': tradingGraph.expandedGraph}">-</span>
-                        </svg>
-                    </div>
+                <!--Top screen-->
+                <div class="screen top-left-screen">
+                    <svg width="100%" height="100%" id="graph1">
+
+                    <!-- Spread Slider -->
+                        <input id="slider-val" type="number" min="0" max="{{maxSpread}}" step=".01" value="{{sliderVal}}">
+                        <div id="slider">
+                            <div class="slider-spread-indicators"
+                                 ng-repeat="(player, data) in dHistory.playerData"
+                                 ng-show="player != dHistory.myId && data.state == 'Maker'"
+                                 style="width: {{data.spread / dHistory.maxSpread * 100}}%">
+                            </div>
+                        </div>
+
+                    <!-- Speed Button -->
+                        <div class="button-container-speed">
+                            <!--<div class="speed-label">
+                                Speed
+                            </div>-->
+                            <div class="material-switch">
+                                <input id="speed-switch" type="checkbox" ng-disabled="state=='state_out'"/>
+                                <label for="speed-switch"></label>
+                            </div>
+                        </div>
+
+                    <!-- User Buttons -->
+                        <button id="state_out" ng-disabled="state=='state_out'" class="btn" type="button">
+                            Out
+                        </button>
+                        <button id="state_snipe" ng-disabled="state=='state_snipe'" class="btn" type="button">
+                            Snipe
+                        </button>
+                        <button id="state_maker" ng-disabled="state=='state_maker'" class="btn" type="button">
+                            Maker
+                        </button>
+                    </svg>
                 </div>
+            </div>
                 <!--Top right screen-->
+                <!--
                 <div class="col-xs-4 graph-screen-wrapper">
                     <div class="screen top-right-screen">
 
@@ -46,17 +76,17 @@
                                 </button>
                             </div>
 
-                            <!--<div id="graph-controls">
+                            <div id="graph-controls">
                                 <button id="expand-graph" ng-disabled="tradingGraph.expandedGraph" class="btn" type="button">
                                     Expand
                                 </button>
                                 <button id="contract-graph" ng-disabled="!tradingGraph.expandedGraph" class="btn" type="button">
                                     Contract
                                 </button>
-                            </div>-->
+                            </div>
                         </div>
 
-                        <!--<div id="slider-container">
+                        <div id="slider-container">
                             <div class="button-container-spread">
                                 <div class="spread-label">
                                     Spread
@@ -70,10 +100,11 @@
                                     </div>
                                 </div>
                             </div>
-                        </div>-->
+                        </div>
 
                     </div>
                 </div>
+                -->
                 
 
             <!--Bottom two screens-->

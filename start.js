@@ -138,7 +138,7 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
 
          $("#slider")
             .slider({
-               orientation: "vertical",
+               orientation: "horizontal",
                step: .01,
                range: "min",
                slide: function (event, ui) {

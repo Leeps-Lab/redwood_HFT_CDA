@@ -236,6 +236,7 @@ RedwoodHighFrequencyTrading.factory("Graphing", function () {
       };
 
       //draws FP and offers
+      //graphRefr.marketSVG.selectAll("line.my-positive-transactions line.my-negative-transactions line.other-transactions")
       graph.drawMarket = function (graphRefr, historyDataSet, currentData, styleClassName) {
          if (currentData != null) {
             this.marketSVG.append("line")
@@ -245,8 +246,12 @@ RedwoodHighFrequencyTrading.factory("Graphing", function () {
                .attr("x2", function(d) {
                      return graphRefr.elementWidth / 2 + (currentData * graphRefr.elementWidth / graphRefr.priceRange);
                })
-               .attr("y1", this.elementHeight / 2 + 5)
-               .attr("y2", this.elementHeight / 2 - 5)
+               .attr("y1", function(d) {
+                     return styleClassName == "others-buy-offer" ? (graphRefr.elementHeight / 2 + 10) : (graphRefr.elementHeight / 2 + 20);
+               })
+               .attr("y2", function(d) {
+                     return styleClassName == "others-buy-offer" ? (graphRefr.elementHeight / 2 - 10) : (graphRefr.elementHeight / 2 - 20);
+               })
                .attr("class", styleClassName);
          }
       };
@@ -317,31 +322,25 @@ RedwoodHighFrequencyTrading.factory("Graphing", function () {
                if(graphRefr.currTransactionID == null) graphRefr.currTransactionID = d.msgId;
                if(graphRefr.currentTick[d.subjectID] != graphRefr.currentTransaction && graphRefr.currTransactionID == d.msgId){                //The user's tick shifted from a FPC, but hasnt transacted
                   graphRefr.op -= .05; 
-                  //console.log(graphRefr.op);                                                                                                  //Decrement opacity to let line fade
-                  //console.log("case1",graphRefr.currentTick[d.subjectID],graphRefr.currentTransaction,graphRefr.currTransactionID, d.msgId);
                   return graphRefr.elementWidth / 2 + (graphRefr.currentTransaction * graphRefr.elementWidth / graphRefr.priceRange);           //Let old transaction line fade out at same spot
                }  
                else if(graphRefr.currentTick[d.subjectID] != graphRefr.currentTransaction && graphRefr.currTransactionID != d.msgId){           //The user's tick shifted from a FPC and immediately transacted
                   graphRefr.currTransactionID = d.msgId;                                                                                        //update variable saving msgID of current transaction
                   graphRefr.currentTransaction = graphRefr.currentTick[d.subjectID];                                                            //update variable saving current tick location
                   graphRefr.op = 1;                                                                                                             //reset the opacity
-                  //console.log("case2",graphRefr.currentTick[d.subjectID],graphRefr.currentTransaction,graphRefr.currTransactionID, d.msgId);
                   return graphRefr.elementWidth / 2 + (graphRefr.currentTick[d.subjectID] * graphRefr.elementWidth / graphRefr.priceRange);     //Let old transaction line fade out at same spot
                }
                else if(graphRefr.currentTick[d.subjectID] == graphRefr.currentTransaction && graphRefr.currTransactionID != d.msgId){           //Redraw the transaction line at the same point
                   graphRefr.op = 1;                                                                                                             //reset the opacity
-                  //console.log("case3",graphRefr.currentTick[d.subjectID],graphRefr.currentTransaction,graphRefr.currTransactionID, d.msgId);
                   graphRefr.currTransactionID = d.msgId;                                                                                        //update msgID
                }
                else{//currentTick[d.subjectID] == this.currentTransaction && this.currTransactionID == d.msgID                                  //No FPC, so continue to graph user's transaction
-                  graphRefr.op -= .05;                                                                                                       //Decrement opacity to let line fade
-                  //console.log(graphRefr.op);
-                  //console.log("case4",graphRefr.currentTick[d.subjectID],graphRefr.currentTransaction,graphRefr.currTransactionID, d.msgId);
+                  graphRefr.op -= .05;                                                                                                          //Decrement opacity to let line fade
                   return graphRefr.elementWidth / 2 + (graphRefr.currentTick[d.subjectID] * graphRefr.elementWidth / graphRefr.priceRange);
                }
             })
-            .attr("y1", this.elementHeight / 2 + 5)   //for visibility in testing
-            .attr("y2", this.elementHeight / 2 + 5)
+            .attr("y1", this.elementHeight / 2)// + 5)   //for visibility in testing
+            .attr("y2", this.elementHeight / 2)// + 5)
             .attr("class", function (d) {
                if (d.buyerID == myId) {
                   return d.FPC - d.price > 0 ? "my-positive-transactions" : "my-negative-transactions";
@@ -482,15 +481,14 @@ RedwoodHighFrequencyTrading.factory("Graphing", function () {
          this.marketSVG.append("line").attr({
                x1: this.elementWidth / 2,
                x2: this.elementWidth / 2,
-               y1: this.elementHeight / 2 - 10,
-               y2: this.elementHeight / 2 + 10,
+               y1: this.elementHeight / 2 - 30,//- 10,    //changed 7/26/17
+               y2: this.elementHeight / 2 + 30,//+ 10,
                class: "my-profit-out"
             });
 
          //this.drawMarket(graphRefr, dataHistory.pastFundPrices, dataHistory.curFundPrice, "price-line");
          this.drawOffers(graphRefr, dataHistory);
          this.drawTransactions(graphRefr, dataHistory.transactions, dataHistory.myId);
-
          //this.drawPriceAxis(graphRefr, this.marketPriceLines, this.marketSVG, this.mapMarketPriceToYAxis);
          this.drawPriceAxis(graphRefr, this.profitPriceLines, this.profitSVG, this.mapProfitPriceToYAxis);
 

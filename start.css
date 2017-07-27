@@ -91,8 +91,9 @@ body {
 }
 
 #buttons-container {
-    text-align: left;
-    float: left;
+    /*text-align: left;*/
+    /*float: left;*/
+    float: center;
     width: 70%;
     height: 100%;
     padding: 10px;
@@ -169,7 +170,8 @@ body {
 
 .top-left-screen {
     border: rgb(200, 200, 200) 2px solid;
-    background-color: rgb(230, 230, 230);
+    /*background-color: rgb(230, 230, 230);*/
+    background-color: white;
     z-index: 100;                           /*test for adding invisible slider*/
 }
 
@@ -206,17 +208,24 @@ body {
 }
 
 .button-container-state {
-    margin-top: 20px;   
-    border: 1px solid rgb(200, 200, 200);
+    display: block;
+    text-align: center;
+    float: center;
+    position: relative;
+    background-color: white;
+    margin: auto;
     padding: 10px;
-    display: inline-block;
 }
 
 .button-container-speed {
-    margin-left: 500px;
-    border: 1px solid rgb(200, 200, 200);
-    padding: 10px;
-    display: inline-block;
+    display: block;
+    text-align: right;
+    float: right;
+    position: relative;
+    background-color: white;
+    padding: 10px;                          /*THIS PADDING FOR SWITCH WITHIN THE CONTAINER!!*/
+    margin: auto;
+    z-index: 1;
 }
 
 .button-container-spread {

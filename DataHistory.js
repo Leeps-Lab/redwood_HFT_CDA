@@ -183,24 +183,19 @@ RedwoodHighFrequencyTrading.factory("DataHistory", function () {
 
 
       dataHistory.storeTransaction = function (msg) {
+         //We send the transaction to graph before recording profit so the currentBuy/Sell offer remains alive
          if(msg.subjectID > 0){                                               //ADDED 7/21/17 to fix transaction horizontal lines
             if (this.NoPatchYet == true) {                                    //this will be removed in the future (7/27/17)
                if (msg.price == 0) {                                          //lower limit transacation
-                  console.log(msg.price);
                   msg.price = this.playerData[msg.buyerID].curBuyOffer[1];    //extract users current buy offer for profit
-                  console.log(msg.price);
                }
                else if (msg.price == 214748.3647) {                           //upper limit transaction
-                  console.log(msg.price);
                   msg.price = this.playerData[msg.sellerID].curSellOffer[1];  //extract users current sell offer for profit
-                  console.log(msg.price);
                }
-               this.transactions[0] = msg;            //added 7/24/17 -> we only need to graph the most recent transaction
             }
-            else{
-               this.transactions[0] = msg;            //added 7/24/17 -> we only need to graph the most recent transaction
-            }
+            this.transactions[0] = msg;                                       //added 7/24/17 -> we only need to graph the most recent transaction
          }
+
          if (msg.buyerID == this.myId) {                                            // if I'm the buyer
             this.profit += msg.FPC - msg.price;                                     //fundPrice - myPrice
             //console.log(msg.buyerID, msg.FPC - msg.price, msg.sellerID);
@@ -223,8 +218,6 @@ RedwoodHighFrequencyTrading.factory("DataHistory", function () {
             var curProfit = this.playerData[uid].curProfitSegment[1] - ((msg.timeStamp - this.playerData[uid].curProfitSegment[0]) * this.playerData[uid].curProfitSegment[2] / 1000000000); //changed from 1000
             this.recordProfitSegment(curProfit + msg.price - msg.FPC, msg.timeStamp, this.playerData[uid].curProfitSegment[2], uid, this.playerData[uid].state);
          }
-
-         
       };
 
       dataHistory.storeSpeedChange = function (msg) { //("USER", "USPEED", [rs.user_id, $scope.using_speed, $scope.tradingGraph.getCurOffsetTime()])

@@ -16,8 +16,10 @@ RedwoodHighFrequencyTrading.factory("Graphing", function () {
 
       graph.marketElementId = marketSVGElementID;  //id of the market graph svg element
       graph.profitElementId = profitSVGElementID;  //id of the profit graph svg element
-      graph.elementWidth = 0;          //Width and Height of both svg elements
+      graph.elementWidth = 0;          //Width and Height of the graph svg element
       graph.elementHeight = 0;         //    (use calculateSize to determine)
+      graph.profitElementWidth = 0;    //Width and height of the profit svg element
+      graph.profitElementHeight = 0;    
       graph.axisLabelWidth = 40;       //Width of area where price axis labels are drawn
       graph.graphPaddingRight = 20;    // how far from the x axis label that the line stops moving
       graph.marketSVG = d3.select('#' + graph.marketElementId); //market svg element
@@ -66,7 +68,8 @@ RedwoodHighFrequencyTrading.factory("Graphing", function () {
 
       
          graph.getCurOffsetTime = function () {
-         return Date.now() - this.timeOffset;
+            return Date.now() - this.timeOffset;
+            //return getTime() - this.timeOffset;
       };
 
       graph.setExpandedGraph = function () {
@@ -123,11 +126,13 @@ RedwoodHighFrequencyTrading.factory("Graphing", function () {
       graph.calculateSize = function () {
          this.elementWidth = $('#' + this.marketElementId).width();
          this.elementHeight = $('#' + this.marketElementId).height();
+         this.profitElementWidth = $('#' + this.profitElementId).width();
+         this.profitElementHeight = $('#' + this.profitElementId).height();
       };
 
       graph.mapProfitPriceToYAxis = function (price) {
          var percentOffset = (this.maxPriceProfit - price) / (this.maxPriceProfit - this.minPriceProfit);
-         return this.elementHeight * percentOffset;
+         return this.profitElementHeight * percentOffset;      //changed 7/27/17 to fix profit graph
       };
 
       graph.mapMarketPriceToYAxis = function (price) {
@@ -143,7 +148,7 @@ RedwoodHighFrequencyTrading.factory("Graphing", function () {
          else {
             percentOffset = (timeStamp - this.adminStartTime) / (this.timeInterval * 1000);
          }
-         return (this.elementWidth - this.axisLabelWidth - this.graphPaddingRight) * percentOffset;
+         return (this.profitElementWidth - this.axisLabelWidth - this.graphPaddingRight) * percentOffset;   //changed 7/27/17
       };
 
       graph.millisToTime = function (timeStamp) {
@@ -195,7 +200,7 @@ RedwoodHighFrequencyTrading.factory("Graphing", function () {
                return graphRefr.mapTimeToXAxis(d);
             })
             .attr("y", 0)
-            .attr("width", this.timeIncrement / this.timeInterval * (this.elementWidth - this.axisLabelWidth - this.graphPaddingRight))
+            .attr("width", this.timeIncrement / this.timeInterval * (this.profitElementWidth - this.axisLabelWidth - this.graphPaddingRight))   //changed 7/27/17 (width)
             .attr("height", this.elementHeight)
             .attr("class", "time-grid-box-dark");
 
@@ -225,7 +230,7 @@ RedwoodHighFrequencyTrading.factory("Graphing", function () {
             .enter()
             .append("line")
             .attr("x1", 0)
-            .attr("x2", this.elementWidth - this.axisLabelWidth)
+            .attr("x2", this.profitElementWidth - this.axisLabelWidth)        //changed 7/27/17
             .attr("y1", function (d) {
                return priceMapFunction(d);
             })
@@ -373,8 +378,8 @@ RedwoodHighFrequencyTrading.factory("Graphing", function () {
             .enter()
             .append("text")
             .attr("text-anchor", "start")
-            .attr("x", this.elementWidth - this.axisLabelWidth + 12)
-            .attr("y", function (d) {
+            .attr("x", this.profitElementWidth - this.axisLabelWidth + 12)    //changed 7/27/17
+            .attr("y", function (d) {  
                return priceMapFunction(d) + 3;
             })
             .attr("class", "price-grid-line-text")
@@ -507,7 +512,7 @@ RedwoodHighFrequencyTrading.factory("Graphing", function () {
          this.centerPriceProfit = (graph.maxPriceProfit + graph.minPriceProfit) / 2;
 
          this.calculateSize();
-         this.timePerPixel = graph.timeInterval * 1000 / (graph.elementWidth - graph.axisLabelWidth - graph.graphPaddingRight);
+         this.timePerPixel = graph.timeInterval * 1000 / (graph.profitElementWidth - graph.axisLabelWidth - graph.graphPaddingRight);     //changed 7/27/17
          this.advanceTimeShown = graph.timePerPixel * (graph.axisLabelWidth + graph.graphPaddingRight);
 
          this.zoomAmount = maxSpread / 2;

@@ -15,6 +15,7 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
          $scope.spread = 0;
          $scope.maxSpread = 1;
          $scope.lastTime = 0;          // the last time that the update loop ran. used for calculating profit decreases.
+         $scope.mousePressed = false;
 
          //Loops at speed CLOCK_FREQUENCY in Hz, updates the graph
          $scope.update = function () {
@@ -135,6 +136,45 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
                   $scope.setState("state_maker");
                }
             });
+
+         $("#graph1")
+            .mousedown( function(event){
+               $scope.mousePressed = true;                                       //set the flag so in case we leave the svg element we know it was a press
+               if ($scope.state != "state_maker") {
+                     var msg = new Message("USER", "UMAKER", [rs.user_id, $scope.tradingGraph.getCurOffsetTime()]);
+                     $scope.sendToGroupManager(msg);
+                     $scope.setState("state_maker");
+               }  
+            })
+            .mouseleave( function(event){
+               if ($scope.mousePressed) {                                        //only set the spread if svg has been clicked on
+                  $scope.mousePressed = false;                                   //reset the flag
+                  if (event.offsetX >= $scope.tradingGraph.elementWidth / 2) {      //you left the svg right of the center tick
+                     $scope.spread = ((10 * event.offsetX / $scope.tradingGraph.elementWidth) - 5).toPrecision(2); //.1 increments
+                     console.log($scope.spread);
+               } 
+               else {                                                            //you clicked left of the center tick
+                  $scope.spread = 0;                                             // min spread subject to future changes
+                  console.log($scope.spread);
+               }
+               var msg = new Message("USER", "UUSPR", [rs.user_id, $scope.spread, $scope.tradingGraph.getCurOffsetTime()]);
+                  $scope.sendToGroupManager(msg);
+               }
+            })
+            .mouseup( function(event) {
+               $scope.mousePressed = false;                                      //reset the flag
+               if (event.offsetX >= $scope.tradingGraph.elementWidth / 2) {      //you clicked right of the center tick
+                  $scope.spread = ((10 * event.offsetX / $scope.tradingGraph.elementWidth) - 5).toPrecision(2); //.1 increments
+                  console.log($scope.spread);
+               } 
+               else {                                                            //you clicked left of the center tick
+                  $scope.spread = 0;                                             // min spread subject to future changes
+                  console.log($scope.spread);
+               }
+               var msg = new Message("USER", "UUSPR", [rs.user_id, $scope.spread, $scope.tradingGraph.getCurOffsetTime()]);
+                  $scope.sendToGroupManager(msg);
+            });
+
 
          $("#slider")
             .slider({

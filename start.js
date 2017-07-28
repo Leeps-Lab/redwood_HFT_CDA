@@ -151,7 +151,8 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
                   $scope.mousePressed = false;                                   //reset the flag
                   if (event.offsetX >= $scope.tradingGraph.elementWidth / 2) {      //you left the svg right of the center tick
                      $scope.spread = ((10 * event.offsetX / $scope.tradingGraph.elementWidth) - 5).toPrecision(2); //.1 increments
-                     console.log($scope.spread);
+                     if($scope.spread > 5) $scope.spread = 5;                       //cap max spread to 5
+                     // console.log($scope.spread);
                } 
                else {                                                            //you clicked left of the center tick
                   $scope.spread = 0;                                             // min spread subject to future changes
@@ -165,14 +166,15 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
                $scope.mousePressed = false;                                      //reset the flag
                if (event.offsetX >= $scope.tradingGraph.elementWidth / 2) {      //you clicked right of the center tick
                   $scope.spread = ((10 * event.offsetX / $scope.tradingGraph.elementWidth) - 5).toPrecision(2); //.1 increments
-                  console.log($scope.spread);
+                  if($scope.spread > 5) $scope.spread = 5;                       //cap max spread to 5
+                  // console.log($scope.spread);
                } 
                else {                                                            //you clicked left of the center tick
                   $scope.spread = 0;                                             // min spread subject to future changes
-                  console.log($scope.spread);
+                  // console.log($scope.spread);
                }
                var msg = new Message("USER", "UUSPR", [rs.user_id, $scope.spread, $scope.tradingGraph.getCurOffsetTime()]);
-                  $scope.sendToGroupManager(msg);
+               $scope.sendToGroupManager(msg);
             });
 
 

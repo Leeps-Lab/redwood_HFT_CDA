@@ -223,8 +223,8 @@ body {
     float: right;
     position: relative;
     background-color: white;
-    padding: 10px;                          /*THIS PADDING FOR SWITCH WITHIN THE CONTAINER!!*/
     margin: auto;
+    padding-right: 5px;
     z-index: 1;
 }
 

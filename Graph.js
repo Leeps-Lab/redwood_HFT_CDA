@@ -65,11 +65,10 @@ RedwoodHighFrequencyTrading.factory("Graphing", function () {
       graph.currentTransaction = null;    //added 7/24/17 for ensuring only the correct orders are drawn as transacted
       graph.currTransactionID = null;     //added 7/24/17 for ensuring only the correct orders are drawn as transacted
       graph.heightScale = .4;          //added 7/26/17 to shift the height of the graph to fit buttons under
-
+      graph.widthScale = 2;            //added 7/28/17 to widen the graphs of ticks to be better fit spread 
       
          graph.getCurOffsetTime = function () {
-            return Date.now() - this.timeOffset;
-            //return getTime() - this.timeOffset;
+            return getTime() - this.timeOffset;
       };
 
       graph.setExpandedGraph = function () {
@@ -89,7 +88,7 @@ RedwoodHighFrequencyTrading.factory("Graphing", function () {
 
          this.expandedGraph = false;
          this.timeInterval = this.contractedTimeInterval;
-         this.timePerPixel = graph.timeInterval * 1000 / (graph.elementWidth - graph.axisLabelWidth - graph.graphPaddingRight);
+         this.timePerPixel = graph.timeInterval * 1000000000 / (graph.elementWidth - graph.axisLabelWidth - graph.graphPaddingRight);
          this.advanceTimeShown = graph.timePerPixel * (graph.axisLabelWidth + graph.graphPaddingRight);
       };
 
@@ -143,16 +142,16 @@ RedwoodHighFrequencyTrading.factory("Graphing", function () {
       graph.mapTimeToXAxis = function (timeStamp) {
          var percentOffset;
          if (this.timeSinceStart >= this.timeInterval) {
-            percentOffset = (timeStamp - (this.currentTime - (this.timeInterval * 1000))) / (this.timeInterval * 1000);
+            percentOffset = (timeStamp - (this.currentTime - (this.timeInterval * 1000000000))) / (this.timeInterval * 1000000000);
          }
          else {
-            percentOffset = (timeStamp - this.adminStartTime) / (this.timeInterval * 1000);
+            percentOffset = (timeStamp - this.adminStartTime) / (this.timeInterval * 1000000000);
          }
          return (this.profitElementWidth - this.axisLabelWidth - this.graphPaddingRight) * percentOffset;   //changed 7/27/17
       };
 
       graph.millisToTime = function (timeStamp) {
-         var secs = (timeStamp - this.adminStartTime) / 1000;
+         var secs = (timeStamp - this.adminStartTime) / 1000000000;
          var mins = Math.trunc(secs / 60);
          secs %= 60;
          return mins + ":" + ("00" + secs).substr(-2, 2);
@@ -181,7 +180,7 @@ RedwoodHighFrequencyTrading.factory("Graphing", function () {
       };
 
       graph.getTimeGridClass = function (timeStamp) {
-         if (timeStamp % (this.timeIncrement * 2000) == 0)
+         if (timeStamp % (this.timeIncrement * 2000000000) == 0)        //was 2000 7/28/17
             return "time-grid-box-light";
          else return "time-grid-box-dark";
       };
@@ -194,14 +193,14 @@ RedwoodHighFrequencyTrading.factory("Graphing", function () {
             .append("rect")
             .filter(function (d) {
                // only draw elements that are an even number of increments from the start
-               return ((d - graphRefr.adminStartTime) / (graphRefr.timeIncrement * 1000)) % 2 == 0;
+               return ((d - graphRefr.adminStartTime) / (graphRefr.timeIncrement * 1000000000)) % 2 == 0;      //was 1000 7/27/17
             })
             .attr("x", function (d) {
                return graphRefr.mapTimeToXAxis(d);
             })
             .attr("y", 0)
             .attr("width", this.timeIncrement / this.timeInterval * (this.profitElementWidth - this.axisLabelWidth - this.graphPaddingRight))   //changed 7/27/17 (width)
-            .attr("height", this.elementHeight)
+            .attr("height", this.profitElementHeight)
             .attr("class", "time-grid-box-dark");
 
          //Draw labels for time grid lines
@@ -213,7 +212,7 @@ RedwoodHighFrequencyTrading.factory("Graphing", function () {
             .attr("x", function (d) {
                return graphRefr.mapTimeToXAxis(d) + 5;
             })
-            .attr("y", this.elementHeight - 5)
+            .attr("y", this.profitElementHeight - 5)
             .text(function (d) {
                return graphRefr.millisToTime(d)
             })
@@ -272,7 +271,7 @@ RedwoodHighFrequencyTrading.factory("Graphing", function () {
             .enter()
             .append("line")
             .filter(function (d) {
-               return d[1] >= (graphRefr.currentTime - graphRefr.timeInterval * 1000);
+               return d[1] >= (graphRefr.currentTime - graphRefr.timeInterval * 1000000000);
             })
             .attr("x1", function (d) {
                return graphRefr.mapTimeToXAxis(d[0]);
@@ -292,7 +291,7 @@ RedwoodHighFrequencyTrading.factory("Graphing", function () {
             });
 
          if (currentData != null) {
-            var pricefinal = currentData[1] - ((graphRefr.currentTime - currentData[0]) * currentData[2] / 1000); //determines how far down the line has moved
+            var pricefinal = currentData[1] - ((graphRefr.currentTime - currentData[0]) * currentData[2] / 1000000000); //determines how far down the line has moved
             this.profitSVG.append("line")
                .attr("x1", this.mapTimeToXAxis(currentData[0]))
                .attr("x2", this.curTimeX)
@@ -305,13 +304,13 @@ RedwoodHighFrequencyTrading.factory("Graphing", function () {
       graph.drawOffers = function (graphRefr, dataHistory) {
          for (var user of dataHistory.group) {
             if (user !== dataHistory.myId && dataHistory.playerData[user].curBuyOffer !== null && dataHistory.playerData[user].curSellOffer !== null) {
-               let p = Math.min(dataHistory.playerData[user].curSellOffer[1] - dataHistory.curFundPrice[1], dataHistory.curFundPrice[1] - dataHistory.playerData[user].curBuyOffer[1]);
+               let p = Math.min(dataHistory.playerData[user].curSellOffer[1] - dataHistory.curFundPrice[1], dataHistory.curFundPrice[1] - dataHistory.playerData[user].curBuyOffer[1]) * graphRefr.widthScale;  //added width scale 7/27/17
                this.drawMarket(graphRefr, dataHistory.playerData[user].pastBuyOffers, p, "others-buy-offer");
                graphRefr.currentTick[user] = p;
             }
          }
          if (dataHistory.playerData[dataHistory.myId].curBuyOffer !== null && dataHistory.playerData[dataHistory.myId].curSellOffer !== null) {
-            let p = Math.min(dataHistory.playerData[dataHistory.myId].curSellOffer[1] - dataHistory.curFundPrice[1], dataHistory.curFundPrice[1] - dataHistory.playerData[dataHistory.myId].curBuyOffer[1]);
+            let p = Math.min(dataHistory.playerData[dataHistory.myId].curSellOffer[1] - dataHistory.curFundPrice[1], dataHistory.curFundPrice[1] - dataHistory.playerData[dataHistory.myId].curBuyOffer[1]) * graphRefr.widthScale;    //added width scale 7/27/17
             this.drawMarket(graphRefr, dataHistory.playerData[user].pastBuyOffers, p, "my-buy-offer");
             graphRefr.currentTick[user] = p;
          }
@@ -442,10 +441,10 @@ RedwoodHighFrequencyTrading.factory("Graphing", function () {
          var graphRefr = this;
 
          this.currentTime = this.getCurOffsetTime();
-         this.timeSinceStart = (this.currentTime - dataHistory.startTime) / 1000;
+         this.timeSinceStart = (this.currentTime - dataHistory.startTime) / 1000000000;
          if (this.expandedGraph) {
             this.timeInterval = this.timeSinceStart;
-            this.timePerPixel = this.timeInterval * 1000 / (this.elementWidth - this.axisLabelWidth - this.graphPaddingRight);
+            this.timePerPixel = this.timeInterval * 1000000000 / (this.elementWidth - this.axisLabelWidth - this.graphPaddingRight);
             this.advanceTimeShown = this.timePerPixel * (this.axisLabelWidth + this.graphPaddingRight);
 
             this.maxPriceMarket = Math.max(dataHistory.highestMarketPrice + 1, this.prevMaxPriceMarket);
@@ -464,8 +463,8 @@ RedwoodHighFrequencyTrading.factory("Graphing", function () {
          // or if left edge is more than a batch length past first batch line
          // Math.max expression finds time at left edge of screen
          if (this.currentTime + this.advanceTimeShown > this.timeLines[this.timeLines.length - 1] + this.timeIncrement ||
-             Math.max(this.adminStartTime, this.currentTime - this.timeInterval * 1000) < this.timeLines[0] - this.timeIncrement) {
-            this.timeLines = this.calcTimeGridLines(this.currentTime - this.timeInterval * 1000, this.currentTime + this.advanceTimeShown, this.timeIncrement * 1000);
+             Math.max(this.adminStartTime, this.currentTime - this.timeInterval * 1000000000) < this.timeLines[0] - this.timeIncrement) {
+            this.timeLines = this.calcTimeGridLines(this.currentTime - this.timeInterval * 1000000000, this.currentTime + this.advanceTimeShown, this.timeIncrement * 1000000000);
          }
 
          //Invoke all of the draw functions
@@ -519,7 +518,7 @@ RedwoodHighFrequencyTrading.factory("Graphing", function () {
 
          this.marketPriceLines = this.calcPriceGridLines(this.maxPriceMarket, this.minPriceMarket, this.marketPriceGridIncrement);
          this.profitPriceLines = this.calcPriceGridLines(this.maxPriceProfit, this.minPriceProfit, this.profitPriceGridIncrement);
-         this.timeLines = this.calcTimeGridLines(this.adminStartTime, this.adminStartTime + this.timeInterval * 1000 + this.advanceTimeShown, this.timeIncrement * 1000);
+         this.timeLines = this.calcTimeGridLines(this.adminStartTime, this.adminStartTime + this.timeInterval * 1000000000 + this.advanceTimeShown, this.timeIncrement * 1000000000);
       };
 
       return graph;

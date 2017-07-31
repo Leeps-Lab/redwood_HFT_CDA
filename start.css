@@ -1,5 +1,7 @@
 body {
-    padding-top: 73px;
+    padding: 10px;
+    /*height: 100%;*/
+    /*width: 100%;*/
     /*background-color: red;*/
 }
 .zoom-in, .zoom-out {
@@ -71,12 +73,6 @@ body {
     width: 10px;
 }
 
-/*#slider-container {
-    float: right;
-    width: 30%;
-    height: 100%;
-    padding-top: 10px
-}*/
 #slider-container {
     float: center;
     width: 100%;
@@ -99,23 +95,14 @@ body {
     padding: 10px;
 }
 
-/*#buttons-container {
-    text-align: left;
-    float: left;
-    width: 70%;
-    height: 100%;
-    padding: 10px;
-}*/
 
 #graph-controls {
     margin-top: 20px;
 }
 
 #data-container {
-    margin: auto;
-    width: 85%;
+    width: 100%;
     height: 100%;
-    margin-top: 0px;
     border: 1px solid transparent;
 }
 
@@ -186,10 +173,51 @@ body {
     background-color: rgb(230, 230, 230);
 }
 
-.bottom-right-screen {
-    margin-left: 25px;
+.top-banner {
+    margin-bottom: 5px;
     border: rgb(200, 200, 200) 2px solid;
     background-color: rgb(230, 230, 230);
+    width: 100%;
+}
+
+.profit-graph-container {
+    height: 500px;
+    margin: 40px;
+    width: 60%;
+    border: rgb(200, 200, 200) 1px solid;
+    background-color: rgb(230, 230, 230);
+}
+
+.user-graph-container {
+    height: 500px;
+    margin: 20px;
+    width: 30%;
+    border: rgb(200, 200, 200) 1px solid;
+    background-color: rgb(230, 230, 230);
+}
+
+.control-container {
+    height: 500px;
+    width: 10%;
+    border: rgb(200, 200, 200) 1px solid;
+    background-color: rgb(230, 230, 230);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.button-container-state {
+    background-color: rgb(230, 230, 230);
+    padding-bottom: 5px;
+    flex: 1 1 auto;
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+}
+
+.button-container-speed {
+    background-color: rgb(230, 230, 230);
+    flex: 1 1 auto;
 }
 
 .graph-screen-wrapper {
@@ -207,20 +235,6 @@ body {
     height: 100%;
 }
 
-.button-container-state {
-    display: inline-block;
-    background-color: white;
-    position: relative;
-    padding-bottom: 5px;
-    left: 215px;
-}
-
-.button-container-speed {
-    display: inline-block;
-    background-color: white;
-    position: relative;
-    left: 600px;
-}
 
 .button-container-spread {
     border: 1px solid rgb(200, 200, 200);

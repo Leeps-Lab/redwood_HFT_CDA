@@ -182,6 +182,7 @@ Redwood.factory("GroupManager", function () {
 
       groupManager.sendToRemoteMarket = function(leepsMsg){
          var msg = leepsMsgToOuch(leepsMsg);
+         console.log(leepsMsg);
          this.socket.send(msg);
       }
 
@@ -195,7 +196,7 @@ Redwood.factory("GroupManager", function () {
       groupManager.recvFromMarket = function (msg) {
          //console.log("Inbound Message", msg);                //debug incoming ITCH messages
          if(msg.msgType === "C_TRA"){
-            //console.log(msg);
+            console.log(msg);
             this.sendToMarketAlgorithms(msg);
          }
          else {

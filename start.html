@@ -10,16 +10,7 @@
                 <div class="screen top-left-screen">
                     <svg width="100%" height="100%" id="graph1">
 
-                    <!-- Speed Button -->
-                        <div class="button-container-speed">
-                            <div class="speed-label" p style="font-size:15px">
-                                Speed
-                            </div>
-                            <div class="material-switch">
-                                <input id="speed-switch" type="checkbox" ng-disabled="state=='state_out'"/>
-                                <label for="speed-switch"></label>
-                            </div>
-                        </div>
+                    
                         
                     <!-- User Buttons -->
                         <div class="button-container-state">
@@ -33,6 +24,17 @@
                                 Maker
                             </button>
                         </div>
+
+                    <!-- Speed Button -->
+                        <div class="button-container-speed">
+                            <div class="speed-label" p style="font-size:15px">
+                                Speed
+                            </div>
+                            <div class="material-switch">
+                                <input id="speed-switch" type="checkbox" ng-disabled="state=='state_out'"/>
+                                <label for="speed-switch"></label>
+                            </div>
+                        </div>    
                     </svg>
                 </div>
             </div>
@@ -52,7 +54,7 @@
                 <div class="col-xs-4 screen-wrapper">
                     <div class="screen bottom-right-screen">
                         <div id="data-container">
-                            <div class="status-table">
+                            <!-- <div class="status-table">
                                 <table class="table">
                                     <thead>
                                         <tr>
@@ -71,10 +73,13 @@
                                         </tr>
                                     </tbody>
                                 </table>
-                            </div>
-                            <h5 class="status-display">Best Spread: {{dHistory.lowestSpread}}</h5>
+                            </div> -->
+                            <!-- <h5 class="status-display">Best Spread: {{dHistory.lowestSpread}}</h5> -->
                             <h5 class="status-display">Your Profit: ${{dHistory.profit | number : 2}}</h5>
                             <h5 class="status-display">Speed Cost: ${{dHistory.speedCost | number : 2}} / Second</h5>
+                            <h5 class="status-display">Number of Traders: {{dHistory.totalTraders}}</h5>
+                            <h5 class="status-display">Number of Makers: {{dHistory.totalMakers}} , {{dHistory.fastMakers}} fast</h5>
+                            <h5 class="status-display">Number of Snipers: {{dHistory.totalSnipers}} , {{dHistory.fastSnipers}} fast</h5>
                         </div>
                     </div>
                 </div>

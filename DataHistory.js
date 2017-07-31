@@ -25,7 +25,13 @@ RedwoodHighFrequencyTrading.factory("DataHistory", function () {
 
       dataHistory.debugMode = debugMode;
 
-      dataHistory.NoPatchYet = true;      //patch until darrell fixes upper and lower bound transactions
+      dataHistory.NoPatchYet = false;      //patch until darrell fixes upper and lower bound transactions
+
+      dataHistory.totalMakers = 0;
+      dataHistory.totalSnipers = 0;
+      dataHistory.fastMakers = 0;
+      dataHistory.fastSnipers = 0;
+      dataHistory.totalTraders = 0;
 
       dataHistory.recvMessage = function (msg) {
          switch (msg.msgType) {
@@ -184,17 +190,17 @@ RedwoodHighFrequencyTrading.factory("DataHistory", function () {
 
       dataHistory.storeTransaction = function (msg) {
          //We send the transaction to graph before recording profit so the currentBuy/Sell offer remains alive
-         if(msg.subjectID > 0){                                               //ADDED 7/21/17 to fix transaction horizontal lines
-            if (this.NoPatchYet == true) {                                    //this will be removed in the future (7/27/17)
-               if (msg.price == 0) {                                          //lower limit transacation
-                  msg.price = this.playerData[msg.buyerID].curBuyOffer[1];    //extract users current buy offer for profit
-               }
-               else if (msg.price == 214748.3647) {                           //upper limit transaction
-                  msg.price = this.playerData[msg.sellerID].curSellOffer[1];  //extract users current sell offer for profit
-               }
-            }
-            this.transactions[0] = msg;                                       //added 7/24/17 -> we only need to graph the most recent transaction
-         }
+         // if(msg.subjectID > 0){                                               //ADDED 7/21/17 to fix transaction horizontal lines
+         //    if (this.NoPatchYet == true) {                                    //this will be removed in the future (7/27/17)
+         //       if (msg.price == 0) {                                          //lower limit transacation
+         //          msg.price = this.playerData[msg.buyerID].curBuyOffer[1];    //extract users current buy offer for profit
+         //       }
+         //       else if (msg.price == 214748.3647) {                           //upper limit transaction
+         //          msg.price = this.playerData[msg.sellerID].curSellOffer[1];  //extract users current sell offer for profit
+         //       }
+         //    }
+         //    this.transactions[0] = msg;                                       //added 7/24/17 -> we only need to graph the most recent transaction
+         // }
 
          if (msg.buyerID == this.myId) {                                            // if I'm the buyer
             this.profit += msg.FPC - msg.price;                                     //fundPrice - myPrice
@@ -217,6 +223,10 @@ RedwoodHighFrequencyTrading.factory("DataHistory", function () {
             var uid = msg.sellerID;
             var curProfit = this.playerData[uid].curProfitSegment[1] - ((msg.timeStamp - this.playerData[uid].curProfitSegment[0]) * this.playerData[uid].curProfitSegment[2] / 1000000000); //changed from 1000
             this.recordProfitSegment(curProfit + msg.price - msg.FPC, msg.timeStamp, this.playerData[uid].curProfitSegment[2], uid, this.playerData[uid].state);
+         }
+
+         if(msg.subjectID > 0){                                               //ADDED 7/21/17 to fix transaction horizontal lines
+            this.transactions[0] = msg;                                       //added 7/24/17 -> we only need to graph the most recent transaction
          }
       };
 
@@ -246,6 +256,33 @@ RedwoodHighFrequencyTrading.factory("DataHistory", function () {
          var endPrice = this.playerData[uid].curProfitSegment[1] - ((endTime - this.playerData[uid].curProfitSegment[0]) * this.playerData[uid].curProfitSegment[2] / 1000000000); //changed from 1000
          this.playerData[uid].pastProfitSegments.push([this.playerData[uid].curProfitSegment[0], endTime, this.playerData[uid].curProfitSegment[1], endPrice, this.playerData[uid].curProfitSegment[3]]);
          this.playerData[uid].curProfitSegment = null;
+      };
+
+      dataHistory.CalculatePlayerInfo = function() {        //calculates info on players for UI
+         dataHistory.totalMakers = 0;
+         dataHistory.totalSnipers = 0;
+         dataHistory.fastMakers = 0;
+         dataHistory.fastSnipers = 0;
+         dataHistory.totalTraders = 0;
+         for (var uid of this.group){
+            if(this.playerData[uid].state === "Maker"){
+               dataHistory.totalMakers++;
+               dataHistory.totalTraders++;
+               // console.log(dataHistory.totalMakers, "totalMakers");
+               if(this.playerData[uid].speed == true){
+                  dataHistory.fastMakers++;
+               }
+            }
+            if(this.playerData[uid].state === "Snipe"){
+               dataHistory.totalSnipers++;
+               dataHistory.totalTraders++;
+               // console.log(dataHistory.totalSnipers, "totalSnipers");
+               if(this.playerData[uid].speed == true){
+                  dataHistory.fastSnipers++;
+               }
+            }
+         }
+         console.log("makers:",dataHistory.totalMakers,"snipers:",dataHistory.totalSnipers,"total:",dataHistory.totalTraders);
       };
 
       return dataHistory;

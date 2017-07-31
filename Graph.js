@@ -66,6 +66,10 @@ RedwoodHighFrequencyTrading.factory("Graphing", function () {
       graph.currTransactionID = null;     //added 7/24/17 for ensuring only the correct orders are drawn as transacted
       graph.heightScale = .4;          //added 7/26/17 to shift the height of the graph to fit buttons under
       graph.widthScale = 2;            //added 7/28/17 to widen the graphs of ticks to be better fit spread 
+      graph.oldFundPrice = 0;
+      graph.FPCop = 1;
+      graph.currSpreadTick = 0;
+
       
          graph.getCurOffsetTime = function () {
             return getTime() - this.timeOffset;
@@ -307,12 +311,14 @@ RedwoodHighFrequencyTrading.factory("Graphing", function () {
                let p = Math.min(dataHistory.playerData[user].curSellOffer[1] - dataHistory.curFundPrice[1], dataHistory.curFundPrice[1] - dataHistory.playerData[user].curBuyOffer[1]) * graphRefr.widthScale;  //added width scale 7/27/17
                this.drawMarket(graphRefr, dataHistory.playerData[user].pastBuyOffers, p, "others-buy-offer");
                graphRefr.currentTick[user] = p;
+               //console.log(p/graphRefr.widthScale,dataHistory.curFundPrice[1]);
             }
          }
          if (dataHistory.playerData[dataHistory.myId].curBuyOffer !== null && dataHistory.playerData[dataHistory.myId].curSellOffer !== null) {
             let p = Math.min(dataHistory.playerData[dataHistory.myId].curSellOffer[1] - dataHistory.curFundPrice[1], dataHistory.curFundPrice[1] - dataHistory.playerData[dataHistory.myId].curBuyOffer[1]) * graphRefr.widthScale;    //added width scale 7/27/17
             this.drawMarket(graphRefr, dataHistory.playerData[user].pastBuyOffers, p, "my-buy-offer");
             graphRefr.currentTick[user] = p;
+            //console.log(p/graphRefr.widthScale,dataHistory.curFundPrice[1]);
          }
       };
 
@@ -326,6 +332,7 @@ RedwoodHighFrequencyTrading.factory("Graphing", function () {
             .attr("x2", function (d) {
                if(graphRefr.currentTransaction == null) graphRefr.currentTransaction = graphRefr.currentTick[d.subjectID];
                if(graphRefr.currTransactionID == null) graphRefr.currTransactionID = d.msgId;
+
                if(graphRefr.currentTick[d.subjectID] != graphRefr.currentTransaction && graphRefr.currTransactionID == d.msgId){                //The user's tick shifted from a FPC, but hasnt transacted
                   graphRefr.op -= .05; 
                   return graphRefr.elementWidth / 2 + (graphRefr.currentTransaction * graphRefr.elementWidth / graphRefr.priceRange);           //Let old transaction line fade out at same spot
@@ -356,6 +363,45 @@ RedwoodHighFrequencyTrading.factory("Graphing", function () {
                }
                else return "other-transactions";
             })
+      };
+
+      graph.drawFundamentalValue = function (graphRefr, dataHistory) {  //append a flashing yellow line every jump
+         this.marketSVG.append("line")
+            .attr("opacity", graphRefr.FPCop)
+            .attr("x1", this.elementWidth / 2)
+            .attr("x2", this.elementWidth / 2)
+            .attr("y1", this.elementHeight * graphRefr.heightScale - 30)
+            .attr("y2", this.elementHeight * graphRefr.heightScale + 30)
+            .attr("class", function (d) {
+               graphRefr.FPCop -= .05;
+               return "my-fpc-flash";
+            })
+      };
+
+      graph.DrawSpreadTick = function (graphRefr, rawSpread, myId) {            //draws a tick where the user clicks on the 
+         if(dataHistory.playerData[myId].state != "Snipe"){
+            this.marketSVG.append("line")
+               .attr("opacity", .5)
+               .attr("x1", function (d) {
+                  if(rawSpread <= graphRefr.elementWidth / 2){        //dont want a "negative" spread
+                     return graphRefr.elementWidth / 2 + 1;           //+1 for "minimum visual spread"
+                  }
+                  else{
+                     return rawSpread;
+                  } 
+               })
+               .attr("x2", function (d) {
+                  if(rawSpread <= graphRefr.elementWidth / 2){        //dont want a "negative" spread
+                     return graphRefr.elementWidth / 2 + 1;           //+1 for "minimum visual spread"
+                  }
+                  else{
+                     return rawSpread;
+                  }
+               })
+               .attr("y1", graphRefr.elementHeight * graphRefr.heightScale - 20)    //same height as my offer
+               .attr("y2", graphRefr.elementHeight * graphRefr.heightScale + 20)
+               .attr("class", "my-buy-offer")
+            }
       };
 
       graph.drawAllProfit = function (graphRefr, dataHistory) {
@@ -483,7 +529,7 @@ RedwoodHighFrequencyTrading.factory("Graphing", function () {
                class: "price-line"
             });
 
-         // draw static current price tick
+         // // draw static current price tick
          this.marketSVG.append("line").attr({
                x1: this.elementWidth / 2,
                x2: this.elementWidth / 2,
@@ -492,8 +538,21 @@ RedwoodHighFrequencyTrading.factory("Graphing", function () {
                class: "my-profit-out"
             });
 
-         //this.drawMarket(graphRefr, dataHistory.pastFundPrices, dataHistory.curFundPrice, "price-line");
          this.drawOffers(graphRefr, dataHistory);
+         
+         if(this.oldFundPrice != dataHistory.curFundPrice[1]){               //the value jumped, draw the yellow line
+            if(this.FPCop > 0){
+               this.drawFundamentalValue(graphRefr, dataHistory);
+            }
+            else{
+               this.oldFundPrice = dataHistory.curFundPrice[1];                 //update our checker
+               this.FPCop = 1;            
+            }                                     //reset opacity
+         }
+
+         this.DrawSpreadTick(graphRefr, this.currSpreadTick, dataHistory.myId);                 //draws where the user clicks on the graph
+
+         //this.drawMarket(graphRefr, dataHistory.pastFundPrices, dataHistory.curFundPrice, "price-line");
          this.drawTransactions(graphRefr, dataHistory.transactions, dataHistory.myId);
          //this.drawPriceAxis(graphRefr, this.marketPriceLines, this.marketSVG, this.mapMarketPriceToYAxis);
          this.drawPriceAxis(graphRefr, this.profitPriceLines, this.profitSVG, this.mapProfitPriceToYAxis);

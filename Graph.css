@@ -104,6 +104,11 @@ svg {
     stroke-width: 3;
 }
 
+.my-fpc-flash {
+    stroke: rgb(255,255,0);
+    stroke-width: 5;
+}
+
 .my-profit-snipe {
     stroke: rgb(200, 79, 34);
     stroke-width: 3;

@@ -208,30 +208,23 @@ body {
 }
 
 .button-container-state {
-    display: block;
-    text-align: center;
-    float: center;
-    position: relative;
+    display: inline-block;
     background-color: white;
-    margin: auto;
-    padding: 10px;
+    position: relative;
+    padding-bottom: 5px;
+    left: 215px;
 }
 
 .button-container-speed {
-    display: block;
-    text-align: right;
-    float: right;
-    position: relative;
+    display: inline-block;
     background-color: white;
-    margin: auto;
-    padding-right: 5px;
-    z-index: 1;
+    position: relative;
+    left: 600px;
 }
 
 .button-container-spread {
     border: 1px solid rgb(200, 200, 200);
     padding: 10px;
-    /*display: inline-block;*/                  /*removed for invisible slider*/
 }
 
 .state-selected {

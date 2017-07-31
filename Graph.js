@@ -69,6 +69,8 @@ RedwoodHighFrequencyTrading.factory("Graphing", function () {
       graph.oldFundPrice = 0;
       graph.FPCop = 1;
       graph.currSpreadTick = 0;
+      graph.startTime = 0;
+      graph.tickAnimationID = 0;
 
       
          graph.getCurOffsetTime = function () {
@@ -375,12 +377,29 @@ RedwoodHighFrequencyTrading.factory("Graphing", function () {
             })
       };
 
-      graph.DrawSpreadTick = function (graphRefr, rawSpread, myId) {            //draws a tick where the user clicks on the 
-         if(dataHistory.playerData[myId].state != "Snipe"){
+      graph.callDrawSpreadTick = function (rawSpread, speed){         
+         graph.startTime = window.performance.now();          //this is the timestamp format that rAF returns
+         if(speed){
+            this.DrawSpreadTick(this, rawSpread, dataHistory.myId, window.performance.now(), this.elementWidth / 2, 50);  //move tick over QUICKLY
+         }
+         else{
+            this.DrawSpreadTick(this, rawSpread, dataHistory.myId, window.performance.now(), this.elementWidth / 2, 1000);  //move tick over in 500ms
+         }
+      };
+
+      graph.DrawSpreadTick = function (graphRefr, rawSpread, myId, timestamp, distance, duration) {            //draws a tick where the user clicks on the 
+         if(dataHistory.playerData[myId].state != "Snipe" || dataHistory.playerData[myId].state != "Out"){
+            var runtime = timestamp - graph.startTime;                //time since tick was first drawn
+            var progress = Math.min(runtime / duration, 1);           //percentage of duration ms
+
             this.marketSVG.append("line")
                .attr("opacity", .5)
-               .attr("x1", graphRefr.elementWidth / 2 - 20)    //same height as my offer
-               .attr("x2", graphRefr.elementWidth / 2 + 20)
+               .attr("x1", function (d) {
+                  return (graphRefr.elementWidth / 2 - 20) + distance - (distance * progress).toFixed(2);    //same height as my offer
+               })
+               .attr("x2", function(d) {
+                  return graphRefr.elementWidth / 2 + 20 + distance - (distance * progress).toFixed(2);
+               })
                .attr("y1", function (d) {
                   if(rawSpread >= graphRefr.elementHeight / 2){        //dont want a "negative" spread
                      return graphRefr.elementHeight / 2 - 1;           //+1 for "minimum visual spread"
@@ -397,10 +416,22 @@ RedwoodHighFrequencyTrading.factory("Graphing", function () {
                      return rawSpread;
                   }
                })
-               
                .attr("class", "my-buy-offer")
             }
+            if(runtime < duration){                                     //move until duration completed
+               graph.tickAnimationID = requestAnimationFrame(function (timestamp){
+                  graph.DrawSpreadTick(graphRefr, rawSpread, myId, timestamp, distance, duration);  //300 pixels over 500ms  
+               }); 
+            }
+            else{
+               graph.tickAnimationID = requestAnimationFrame(function (timestamp){
+                  graph.DrawSpreadTick(graphRefr, rawSpread, myId, timestamp, 0, 0);  //300 pixels over 500ms  
+               }); 
+            }
+           
       };
+
+
 
       graph.drawAllProfit = function (graphRefr, dataHistory) {
          for (var user of dataHistory.group) {
@@ -548,7 +579,7 @@ RedwoodHighFrequencyTrading.factory("Graphing", function () {
             }                                     //reset opacity
          }
 
-         this.DrawSpreadTick(graphRefr, this.currSpreadTick, dataHistory.myId);                 //draws where the user clicks on the graph
+         //this.DrawSpreadTick(graphRefr, this.currSpreadTick, dataHistory.myId);                 //draws where the user clicks on the graph
 
          //this.drawMarket(graphRefr, dataHistory.pastFundPrices, dataHistory.curFundPrice, "price-line");
          this.drawTransactions(graphRefr, dataHistory.transactions, dataHistory.myId);

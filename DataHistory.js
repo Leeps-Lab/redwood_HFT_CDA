@@ -139,8 +139,6 @@ RedwoodHighFrequencyTrading.factory("DataHistory", function () {
             //Check if current buy offer needs to be stored
             if (this.playerData[buyMsg.subjectID].curBuyOffer != null) {
                this.storeBuyOffer(buyMsg.timeStamp, buyMsg.subjectID);
-               console.log("Data being stored: " + buyMsg.timeStamp + " : " + buyMsg.subjectID);
-               console.log("Local timestamp: " + getTime());
             }
             //Push on new buy offer
             this.playerData[buyMsg.subjectID].curBuyOffer = [buyMsg.timeStamp, buyMsg.price];   // [timestamp, price]

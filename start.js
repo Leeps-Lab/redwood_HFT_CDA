@@ -17,6 +17,9 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
          $scope.lastTime = 0;          // the last time that the update loop ran. used for calculating profit decreases.
          $scope.mousePressed = false;
          $scope.animationID = null;
+         $scope.oldOffsetY = null;
+         $scope.oldUsingSpeed = 0;
+         $scope.overWriteID = [];
 
          //Loops at speed CLOCK_FREQUENCY in Hz, updates the graph
          $scope.update = function () {
@@ -151,12 +154,6 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
                      $scope.sendToGroupManager(msg);
                      $scope.setState("state_maker");
                }  
-               if($scope.animationID != null){
-                  cancelAnimationFrame($scope.animationID);
-               }
-               if($scope.tradingGraph.tickAnimationID != null){
-                  cancelAnimationFrame($scope.tradingGraph.tickAnimationID);
-               }
             })
             .mouseleave( function(event){
                if ($scope.mousePressed) {                                        //only set the spread if svg has been clicked on
@@ -166,22 +163,24 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
                      if($scope.spread > 5){
                         $scope.spread = 5;                                       //cap max spread to 5
                      }
-               } 
-               else {                                                            //you clicked left of the center tick
-                  $scope.spread = 0.1;                                             // min spread subject to future changes
-               }
-               var msg = new Message("USER", "UUSPR", [rs.user_id, $scope.spread, $scope.tradingGraph.getCurOffsetTime()]);
+                  } 
+                  else {                                                            //you clicked left of the center tick
+                     $scope.spread = 0.1;                                             // min spread subject to future changes
+                  }
+                  var msg = new Message("USER", "UUSPR", [rs.user_id, $scope.spread, $scope.tradingGraph.getCurOffsetTime()]);
                   $scope.sendToGroupManager(msg);
                   $scope.tradingGraph.currSpreadTick = event.offsetY;            //sets the location to be graphed
-                  if($scope.animationID != null){
-                     cancelAnimationFrame($scope.animationID);                   //cancel a traveling tick mark
+
+                  for(var id of $scope.tradingGraph.IDArray){
+                     cancelAnimationFrame(id);                   //cancel all the animations
+                     $scope.tradingGraph.IDArray = [];            //reset for speed purposes
                   }
-                  if($scope.tradingGraph.tickAnimationID != null){
-                     cancelAnimationFrame($scope.tradingGraph.tickAnimationID);   //cancel a tick mark thats already traveled
+                  if($scope.oldOffsetY != null){                    //Dont overwrite on first click
+                     $scope.tradingGraph.callDrawSpreadTick($scope.oldOffsetY, $scope.oldUsingSpeed, true);    //overwrite old tick
                   }
-                  $scope.animationID = requestAnimationFrame(function(){
-                     $scope.tradingGraph.callDrawSpreadTick(event.offsetY, $scope.using_speed)  //start animating a tick
-                  });
+                  $scope.tradingGraph.callDrawSpreadTick(event.offsetY, $scope.using_speed, false);  //start animating a tick
+                  $scope.oldOffsetY = event.offsetY;
+                  $scope.oldUsingSpeed = $scope.using_speed;
                }
             })
             .mouseup( function(event) {
@@ -198,15 +197,22 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
                var msg = new Message("USER", "UUSPR", [rs.user_id, $scope.spread, $scope.tradingGraph.getCurOffsetTime()]);
                $scope.sendToGroupManager(msg);
                $scope.tradingGraph.currSpreadTick = event.offsetY;               //sets the location to be graphed
-               if($scope.animationID != null){
-                  cancelAnimationFrame($scope.animationID);                      //cancel a traveling tick mark
+               
+               if($scope.tradingGraph.laser){
+                  $scope.tradingGraph.callDrawSpreadTick(event.offsetY, $scope.using_speed, false);
                }
-               if($scope.tradingGraph.tickAnimationID != null){
-                  cancelAnimationFrame($scope.tradingGraph.tickAnimationID);     //cancel a tick mark thats already traveled
+               else{
+                  for(var id of $scope.tradingGraph.IDArray){
+                  cancelAnimationFrame(id);                   //cancel all the animations
+                  $scope.tradingGraph.IDArray = [];            //reset for speed purposes
                }
-               $scope.animationID = requestAnimationFrame(function(){
-                     $scope.tradingGraph.callDrawSpreadTick(event.offsetY, $scope.using_speed)  //start animating a tick
-                  });
+               if($scope.oldOffsetY != null){                    //Dont overwrite on first click
+                  $scope.tradingGraph.callDrawSpreadTick($scope.oldOffsetY, $scope.oldUsingSpeed, true);    //overwrite old tick
+               }
+               $scope.tradingGraph.callDrawSpreadTick(event.offsetY, $scope.using_speed, false);  //start animating a tick
+               $scope.oldOffsetY = event.offsetY;
+               $scope.oldUsingSpeed = $scope.using_speed;
+               }
             });
 
 

@@ -71,9 +71,14 @@ RedwoodHighFrequencyTrading.factory("Graphing", function () {
       graph.currSpreadTick = 0;
       graph.startTime = 0;
       graph.tickAnimationID = 0;
+      graph.staticTickAnimationID = 0;
+      graph.laser = false;
+      graph.removeStartTime = 0;
+      graph.removeAnimationID = 0;
+      graph.removeStaticAnimationID = 0;
+      graph.IDArray = [];
 
-      
-         graph.getCurOffsetTime = function () {
+      graph.getCurOffsetTime = function () {
             return getTime() - this.timeOffset;
       };
 
@@ -377,17 +382,36 @@ RedwoodHighFrequencyTrading.factory("Graphing", function () {
             })
       };
 
-      graph.callDrawSpreadTick = function (rawSpread, speed){         
+      graph.callDrawSpreadTick = function (rawSpread, speed, overwrite){         
          graph.startTime = window.performance.now();          //this is the timestamp format that rAF returns
-         if(speed){
-            this.DrawSpreadTick(this, rawSpread, dataHistory.myId, window.performance.now(), this.elementWidth / 2, 50);  //move tick over QUICKLY
+         graph.removeStartTime = window.performance.now();
+         if(graph.laser){
+            if(speed){
+               this.DrawSpreadTick(this, rawSpread, dataHistory.myId, window.performance.now(), 3 * this.elementWidth / 5, 200, false);  //move tick over QUICKLY
+            }
+            else{
+               this.DrawSpreadTick(this, rawSpread, dataHistory.myId, window.performance.now(), 7 * this.elementWidth / 8, 2000, false);  //move tick over in 500ms
+            }
+         }
+         if(overwrite){
+            if(speed){
+               this.RemoveSpreadTick(this, rawSpread, dataHistory.myId, window.performance.now(), 3 * this.elementWidth / 5, 1200, false);  //move tick over QUICKLY
+            }
+            else{
+               this.RemoveSpreadTick(this, rawSpread, dataHistory.myId, window.performance.now(), 7 * this.elementWidth / 8, 2000, false);  //move tick over in 500ms
+            }
          }
          else{
-            this.DrawSpreadTick(this, rawSpread, dataHistory.myId, window.performance.now(), this.elementWidth / 2, 1000);  //move tick over in 500ms
+            if(speed){
+               this.DrawSpreadTick(this, rawSpread, dataHistory.myId, window.performance.now(), 3 * this.elementWidth / 5, 1200, false);  //move tick over QUICKLY
+            }
+            else{
+               this.DrawSpreadTick(this, rawSpread, dataHistory.myId, window.performance.now(), 7 * this.elementWidth / 8, 2000, false);  //move tick over in 500ms
+            }
          }
       };
 
-      graph.DrawSpreadTick = function (graphRefr, rawSpread, myId, timestamp, distance, duration) {            //draws a tick where the user clicks on the 
+      graph.DrawSpreadTick = function (graphRefr, rawSpread, myId, timestamp, distance, duration, static) {            //draws a tick where the user clicks on the 
          if(dataHistory.playerData[myId].state != "Snipe" || dataHistory.playerData[myId].state != "Out"){
             var runtime = timestamp - graph.startTime;                //time since tick was first drawn
             var progress = Math.min(runtime / duration, 1);           //percentage of duration ms
@@ -395,10 +419,25 @@ RedwoodHighFrequencyTrading.factory("Graphing", function () {
             this.marketSVG.append("line")
                .attr("opacity", .5)
                .attr("x1", function (d) {
-                  return (graphRefr.elementWidth / 2 - 20) + distance - (distance * progress).toFixed(2);    //same height as my offer
+                  if(static){
+                     return 0;                                                   
+                  }
+                  else{
+                     if(graph.laser){
+                        return graphRefr.elementWidth / 2 + distance - (distance * progress).toFixed(2) - 20;
+                     }
+                     else{
+                        return distance - (distance * progress).toFixed(2);    //shrinks and moves left
+                     }
+                  }
                })
                .attr("x2", function(d) {
-                  return graphRefr.elementWidth / 2 + 20 + distance - (distance * progress).toFixed(2);
+                  if(graph.laser){
+                     return graphRefr.elementWidth / 2 + distance - (distance * progress).toFixed(2) + 20;
+                  }
+                  else{
+                     return distance;
+                  }
                })
                .attr("y1", function (d) {
                   if(rawSpread >= graphRefr.elementHeight / 2){        //dont want a "negative" spread
@@ -420,13 +459,73 @@ RedwoodHighFrequencyTrading.factory("Graphing", function () {
             }
             if(runtime < duration){                                     //move until duration completed
                graph.tickAnimationID = requestAnimationFrame(function (timestamp){
-                  graph.DrawSpreadTick(graphRefr, rawSpread, myId, timestamp, distance, duration);  //300 pixels over 500ms  
+                  graph.IDArray.push(graph.tickAnimationID);
+                  graph.DrawSpreadTick(graphRefr, rawSpread, myId, timestamp, distance, duration, false);  //300 pixels over 500ms  
                }); 
             }
             else{
-               graph.tickAnimationID = requestAnimationFrame(function (timestamp){
-                  graph.DrawSpreadTick(graphRefr, rawSpread, myId, timestamp, 0, 0);  //300 pixels over 500ms  
+               graph.staticTickAnimationID = requestAnimationFrame(function (timestamp){
+                 graph.IDArray.push(graph.staticTickAnimationID);
+                 graph.DrawSpreadTick(graphRefr, rawSpread, myId, timestamp, distance, duration, true);  //300 pixels over 500ms  
+               });
+            }
+      }; 
+
+
+      graph.RemoveSpreadTick = function (graphRefr, rawSpread, myId, timestamp, distance, duration, static) {            //draws a tick where the user clicks on the 
+         if(dataHistory.playerData[myId].state != "Snipe" || dataHistory.playerData[myId].state != "Out"){
+            var runtime = timestamp - graph.removeStartTime;                //time since tick was first drawn
+            var progress = Math.min(runtime / duration, 1);           //percentage of duration ms
+
+            this.marketSVG.append("line")
+               .attr("opacity", .5)
+               .attr("x1", function (d) {
+                  if(static){
+                     return 0;                                                   
+                  }
+                  else{
+                     if(graph.laser){
+                        return distance - (distance * progress).toFixed(2) - 20;    //shrinks and moves left
+                     }
+                  }
+               })
+               .attr("x2", function(d) {
+                  if(graph.laser){                       
+                     return distance - (distance * progress).toFixed(2) + 20;
+                  }
+                  else{                                           //the line has been drawn and is static
+                     return distance - (distance * progress).toFixed(2);
+                  }
+               })
+               .attr("y1", function (d) {
+                  if(rawSpread >= graphRefr.elementHeight / 2){        //dont want a "negative" spread
+                     return graphRefr.elementHeight / 2 - 1;           //+1 for "minimum visual spread"
+                  }
+                  else{
+                     return rawSpread;
+                  } 
+               })
+               .attr("y2", function (d) {
+                  if(rawSpread >= graphRefr.elementHeight / 2){        //dont want a "negative" spread
+                     return graphRefr.elementHeight / 2 - 1;           //+1 for "minimum visual spread"
+                  }
+                  else{
+                     return rawSpread;
+                  }
+               })
+               .attr("class", "my-buy-offer")
+            }
+            if(runtime < duration){                                     //move until duration completed
+               graph.removeAnimationID = requestAnimationFrame(function (timestamp){
+                  graph.IDArray.push(graph.removeAnimationID);
+                  graph.RemoveSpreadTick(graphRefr, rawSpread, myId, timestamp, distance, duration, false);  //300 pixels over 500ms  
                }); 
+            }
+            else{
+               graph.removeStaticAnimationID = requestAnimationFrame(function (timestamp){
+                  graph.IDArray.push(graph.removeStaticAnimationID);
+                  graph.RemoveSpreadTick(graphRefr, rawSpread, myId, timestamp, distance, duration, true);  //300 pixels over 500ms  
+               });
             }
            
       };

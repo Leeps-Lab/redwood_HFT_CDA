@@ -412,11 +412,10 @@ RedwoodHighFrequencyTrading.factory("Graphing", function () {
             .attr("id", elementID)
             .attr("opacity", .5)
             .attr("x1", function () {
-               return xPos - (xPos * progress).toFixed(2);
+               return graphRefr.elementWidth - (graphRefr.elementWidth * progress).toFixed(2);
             })
             .attr("x2", function() {
-               //return xPos - (xPos * progress).toFixed(2) - 5;
-               return 0;
+               return graphRefr.elementWidth - xPos - (graphRefr.elementWidth * progress).toFixed(2);
             })
             .attr("y1", function () {
                if(yPos >= graphRefr.elementHeight / 2){        //dont want a "negative" spread

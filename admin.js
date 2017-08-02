@@ -337,9 +337,12 @@ Redwood.controller("AdminCtrl",
                }
                console.log("number 1: " + $scope.investorArrivals[$scope.groupManagers[groupNum].investorIndex][0]);
                console.log("number 2: " + getTime());
-               var investorDelayTime = ($scope.startTime + $scope.investorArrivals[$scope.groupManagers[groupNum].investorIndex][0]) - getTime();
-               console.log("Initial Delay: " + investorDelayTime);
-               window.setTimeout($scope.groupManagers[groupNum].sendNextInvestorArrival, investorDelayTime / 1000000);
+               if ($scope.investorArrivals.length > 1) {
+                  var investorDelayTime = ($scope.startTime + $scope.investorArrivals[$scope.groupManagers[groupNum].investorIndex][0]) - getTime();
+                  console.log("Initial Delay: " + investorDelayTime);
+                  window.setTimeout($scope.groupManagers[groupNum].sendNextInvestorArrival, investorDelayTime / 1000000);
+               }
+               
             }
          });
 

@@ -66,7 +66,7 @@ RedwoodHighFrequencyTrading.factory("Graphing", function () {
       graph.currTransactionID = null;     //added 7/24/17 for ensuring only the correct orders are drawn as transacted
       graph.heightScale = .4;          //added 7/26/17 to shift the height of the graph to fit buttons under
       graph.widthScale = 2;            //added 7/28/17 to widen the graphs of ticks to be better fit spread 
-      graph.oldFundPrice = 0;
+      graph.oldFundPrice = null;
       graph.FPCop = 1;
       graph.currSpreadTick = 0;
       graph.startTime = 0;
@@ -79,6 +79,7 @@ RedwoodHighFrequencyTrading.factory("Graphing", function () {
       graph.IDArray = [];
       graph.slowDelay = 2000;
       graph.fastDelay = 1000;
+      graph.FPCswing = null;              //used for shifting spread ticks with FPC's
 
       graph.getCurOffsetTime = function () {
          return getTime() - this.timeOffset;
@@ -387,10 +388,13 @@ RedwoodHighFrequencyTrading.factory("Graphing", function () {
             })
       };
 
-      graph.callDrawSpreadTick = function (yPos, speed, event, runtime, static, elementID, remove, xPos){
+      graph.callDrawSpreadTick = function (yPos, speed, runtime, static, elementID, remove, xPos, segment){
          if(speed){
             if(remove){
-               graph.RemoveLine(this, yPos, xPos, this.fastDelay, runtime, static, elementID);
+               graph.RemoveLine(this, yPos, xPos, this.fastDelay, runtime, elementID);
+            }
+            else if(segment){
+               graph.DrawSegment(this, yPos, xPos, this.fastDelay, runtime, elementID);
             }
             else{
                graph.DrawLine(this, yPos, this.elementWidth, this.fastDelay, runtime, static, elementID);
@@ -398,7 +402,10 @@ RedwoodHighFrequencyTrading.factory("Graphing", function () {
          }
          else{
             if(remove){
-               graph.RemoveLine(this, yPos, xPos, this.slowDelay, runtime, static, elementID);
+               graph.RemoveLine(this, yPos, xPos, this.slowDelay, runtime, elementID);
+            }
+            else if(segment){
+               graph.DrawSegment(this, yPos, xPos, this.slowDelay, runtime, elementID);
             }
             else{
                graph.DrawLine(this, yPos, this.elementWidth, this.slowDelay, runtime, static, elementID);
@@ -406,12 +413,42 @@ RedwoodHighFrequencyTrading.factory("Graphing", function () {
          }         
       };
 
-      graph.RemoveLine = function (graphRefr, yPos, xPos, duration, runtime, static, elementID) {
+      graph.DrawSegment = function (graphRefr, yPos, xOffset, duration, runtime, elementID) {
+         let progress = Math.min(runtime / duration, 1);           //percentage of duration ms
+         let x1 = graphRefr.elementWidth / 2 + xOffset - (graphRefr.elementWidth * progress).toFixed(2);        //XPOS OF 0 GRAPHS FROM RHS, WIDTH/2 FROM MIDPOINT
+         let x2 = xOffset - (graphRefr.elementWidth * progress).toFixed(2);
+         if(x2 < 0) x2 = 0;
+         this.marketSVG.append("line")
+            .attr("id", elementID)
+            .attr("opacity", .5)
+            .attr("x1", x1)
+            .attr("x2", x2)
+            .attr("y1", yPos)
+            .attr("y2", yPos)
+            //    function () {
+            //    if(yPos >= graphRefr.elementHeight / 2){        //dont want a "negative" spread
+            //       return graphRefr.elementHeight / 2 - 1;           //+1 for "minimum visual spread"
+            //    }
+            //    else{
+            //       return yPos;
+            //    } 
+            // })
+            // .attr("y2", function () {
+            //    if(yPos >= graphRefr.elementHeight / 2){        //dont want a "negative" spread
+            //       return graphRefr.elementHeight / 2 - 1;           //+1 for "minimum visual spread"
+            //    }
+            //    else{
+            //       return yPos;
+            //    } 
+            // })
+            .attr("class", "my-buy-offer");
+      };
+
+      graph.RemoveLine = function (graphRefr, yPos, xPos, duration, runtime, elementID) {
          let progress = Math.min(runtime / duration, 1);           //percentage of duration ms
          let x1 = graphRefr.elementWidth - (graphRefr.elementWidth * progress).toFixed(2);
          let x2 = graphRefr.elementWidth - xPos - (graphRefr.elementWidth * progress).toFixed(2);
          if(x2 < 0) x2 = 0;
-         // console.log(xPos,progress,x1,x2);
          this.marketSVG.append("line")
             .attr("id", elementID)
             .attr("opacity", .5)
@@ -609,15 +646,21 @@ RedwoodHighFrequencyTrading.factory("Graphing", function () {
 
          this.drawOffers(graphRefr, dataHistory);
          
-         if(this.oldFundPrice != dataHistory.curFundPrice[1]){               //the value jumped, draw the yellow line
-            if(this.FPCop > 0){
+         if(this.oldFundPrice == null){
+            this.oldFundPrice = dataHistory.curFundPrice[1];   //initialize
+            this.FPCswing = 0;
+         }
+         else if(this.oldFundPrice != dataHistory.curFundPrice[1]){               //the value jumped, draw the yellow line
+            this.FPCswing = ((dataHistory.curFundPrice[1] - this.oldFundPrice) * graphRefr.elementHeight / graphRefr.priceRange).toFixed(2);
+            if(this.FPCop > 0){                                                 //while still visible
                this.drawFundamentalValue(graphRefr, dataHistory);
             }
             else{
                this.oldFundPrice = dataHistory.curFundPrice[1];                 //update our checker
                this.FPCop = 1;            
             }                                     //reset opacity
-         }
+         }  
+
 
 
          //this.drawMarket(graphRefr, dataHistory.pastFundPrices, dataHistory.curFundPrice, "price-line");

@@ -267,7 +267,7 @@ RedwoodHighFrequencyTrading.factory("DataHistory", function () {
                }
             }
          }
-         console.log("makers:",dataHistory.totalMakers,"snipers:",dataHistory.totalSnipers,"total:",dataHistory.totalTraders);
+         // console.log("makers:",dataHistory.totalMakers,"snipers:",dataHistory.totalSnipers,"total:",dataHistory.totalTraders);
       };
 
       return dataHistory;

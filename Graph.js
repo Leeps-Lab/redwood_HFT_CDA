@@ -77,9 +77,11 @@ RedwoodHighFrequencyTrading.factory("Graphing", function () {
       graph.removeAnimationID = 0;
       graph.removeStaticAnimationID = 0;
       graph.IDArray = [];
+      graph.slowDelay = 2000;
+      graph.fastDelay = 1000;
 
       graph.getCurOffsetTime = function () {
-            return getTime() - this.timeOffset;
+         return getTime() - this.timeOffset;
       };
 
       graph.setExpandedGraph = function () {
@@ -256,6 +258,7 @@ RedwoodHighFrequencyTrading.factory("Graphing", function () {
       graph.drawMarket = function (graphRefr, historyDataSet, currentData, styleClassName) {
          if (currentData != null) {
             this.marketSVG.append("line")
+               .attr("id","REMOVE")
                .attr("x1", function(d) {
                      return styleClassName == "others-buy-offer" ? (graphRefr.elementWidth / 2 + 10) : (graphRefr.elementWidth / 2 + 20);
                })
@@ -332,6 +335,7 @@ RedwoodHighFrequencyTrading.factory("Graphing", function () {
             .data(historyDataSet)
             .enter()
             .append("line")
+            .attr("id","REMOVE")
             .attr("opacity", graphRefr.op)
             .attr("x1", graphRefr.elementWidth / 2)
             .attr("x2", graphRefr.elementWidth / 2)
@@ -371,166 +375,102 @@ RedwoodHighFrequencyTrading.factory("Graphing", function () {
       };
       graph.drawFundamentalValue = function (graphRefr, dataHistory) {  //append a flashing yellow line every jump
          this.marketSVG.append("line")
+            .attr("id","REMOVE")
             .attr("opacity", graphRefr.FPCop)
             .attr("x1", this.elementWidth / 2 - 30)
             .attr("x2", this.elementWidth / 2 + 30)
-            .attr("y1", this.elementHeight / 2)// * graphRefr.heightScale - 30)
-            .attr("y2", this.elementHeight / 2)// * graphRefr.heightScale + 30)
+            .attr("y1", this.elementHeight / 2)
+            .attr("y2", this.elementHeight / 2)
             .attr("class", function (d) {
                graphRefr.FPCop -= .05;
                return "my-fpc-flash";
             })
       };
 
-      graph.callDrawSpreadTick = function (rawSpread, speed, overwrite){         
-         graph.startTime = window.performance.now();          //this is the timestamp format that rAF returns
-         graph.removeStartTime = window.performance.now();
-         if(graph.laser){
-            if(speed){
-               this.DrawSpreadTick(this, rawSpread, dataHistory.myId, window.performance.now(), 3 * this.elementWidth / 5, 200, false);  //move tick over QUICKLY
+      graph.callDrawSpreadTick = function (yPos, speed, event, runtime, static, elementID, remove, xPos){
+         if(speed){
+            if(remove){
+               graph.RemoveLine(this, yPos, xPos, this.fastDelay, runtime, static, elementID);
             }
             else{
-               this.DrawSpreadTick(this, rawSpread, dataHistory.myId, window.performance.now(), 7 * this.elementWidth / 8, 2000, false);  //move tick over in 500ms
-            }
-         }
-         if(overwrite){
-            if(speed){
-               this.RemoveSpreadTick(this, rawSpread, dataHistory.myId, window.performance.now(), 3 * this.elementWidth / 5, 1200, false);  //move tick over QUICKLY
-            }
-            else{
-               this.RemoveSpreadTick(this, rawSpread, dataHistory.myId, window.performance.now(), 7 * this.elementWidth / 8, 2000, false);  //move tick over in 500ms
+               graph.DrawLine(this, yPos, this.elementWidth, this.fastDelay, runtime, static, elementID);
             }
          }
          else{
-            if(speed){
-               this.DrawSpreadTick(this, rawSpread, dataHistory.myId, window.performance.now(), 3 * this.elementWidth / 5, 1200, false);  //move tick over QUICKLY
+            if(remove){
+               graph.RemoveLine(this, yPos, xPos, this.slowDelay, runtime, static, elementID);
             }
             else{
-               this.DrawSpreadTick(this, rawSpread, dataHistory.myId, window.performance.now(), 7 * this.elementWidth / 8, 2000, false);  //move tick over in 500ms
+               graph.DrawLine(this, yPos, this.elementWidth, this.slowDelay, runtime, static, elementID);
             }
-         }
+         }         
       };
 
-      graph.DrawSpreadTick = function (graphRefr, rawSpread, myId, timestamp, distance, duration, static) {            //draws a tick where the user clicks on the 
-         if(dataHistory.playerData[myId].state != "Snipe" || dataHistory.playerData[myId].state != "Out"){
-            var runtime = timestamp - graph.startTime;                //time since tick was first drawn
-            var progress = Math.min(runtime / duration, 1);           //percentage of duration ms
-
-            this.marketSVG.append("line")
-               .attr("opacity", .5)
-               .attr("x1", function (d) {
-                  if(static){
-                     return 0;                                                   
-                  }
-                  else{
-                     if(graph.laser){
-                        return graphRefr.elementWidth / 2 + distance - (distance * progress).toFixed(2) - 20;
-                     }
-                     else{
-                        return distance - (distance * progress).toFixed(2);    //shrinks and moves left
-                     }
-                  }
-               })
-               .attr("x2", function(d) {
-                  if(graph.laser){
-                     return graphRefr.elementWidth / 2 + distance - (distance * progress).toFixed(2) + 20;
-                  }
-                  else{
-                     return distance;
-                  }
-               })
-               .attr("y1", function (d) {
-                  if(rawSpread >= graphRefr.elementHeight / 2){        //dont want a "negative" spread
-                     return graphRefr.elementHeight / 2 - 1;           //+1 for "minimum visual spread"
-                  }
-                  else{
-                     return rawSpread;
-                  } 
-               })
-               .attr("y2", function (d) {
-                  if(rawSpread >= graphRefr.elementHeight / 2){        //dont want a "negative" spread
-                     return graphRefr.elementHeight / 2 - 1;           //+1 for "minimum visual spread"
-                  }
-                  else{
-                     return rawSpread;
-                  }
-               })
-               .attr("class", "my-buy-offer")
-            }
-            if(runtime < duration){                                     //move until duration completed
-               graph.tickAnimationID = requestAnimationFrame(function (timestamp){
-                  graph.IDArray.push(graph.tickAnimationID);
-                  graph.DrawSpreadTick(graphRefr, rawSpread, myId, timestamp, distance, duration, false);  //300 pixels over 500ms  
-               }); 
-            }
-            else{
-               graph.staticTickAnimationID = requestAnimationFrame(function (timestamp){
-                 graph.IDArray.push(graph.staticTickAnimationID);
-                 graph.DrawSpreadTick(graphRefr, rawSpread, myId, timestamp, distance, duration, true);  //300 pixels over 500ms  
-               });
-            }
-      }; 
-
-
-      graph.RemoveSpreadTick = function (graphRefr, rawSpread, myId, timestamp, distance, duration, static) {            //draws a tick where the user clicks on the 
-         if(dataHistory.playerData[myId].state != "Snipe" || dataHistory.playerData[myId].state != "Out"){
-            var runtime = timestamp - graph.removeStartTime;                //time since tick was first drawn
-            var progress = Math.min(runtime / duration, 1);           //percentage of duration ms
-
-            this.marketSVG.append("line")
-               .attr("opacity", .5)
-               .attr("x1", function (d) {
-                  if(static){
-                     return 0;                                                   
-                  }
-                  else{
-                     if(graph.laser){
-                        return distance - (distance * progress).toFixed(2) - 20;    //shrinks and moves left
-                     }
-                  }
-               })
-               .attr("x2", function(d) {
-                  if(graph.laser){                       
-                     return distance - (distance * progress).toFixed(2) + 20;
-                  }
-                  else{                                           //the line has been drawn and is static
-                     return distance - (distance * progress).toFixed(2);
-                  }
-               })
-               .attr("y1", function (d) {
-                  if(rawSpread >= graphRefr.elementHeight / 2){        //dont want a "negative" spread
-                     return graphRefr.elementHeight / 2 - 1;           //+1 for "minimum visual spread"
-                  }
-                  else{
-                     return rawSpread;
-                  } 
-               })
-               .attr("y2", function (d) {
-                  if(rawSpread >= graphRefr.elementHeight / 2){        //dont want a "negative" spread
-                     return graphRefr.elementHeight / 2 - 1;           //+1 for "minimum visual spread"
-                  }
-                  else{
-                     return rawSpread;
-                  }
-               })
-               .attr("class", "my-buy-offer")
-            }
-            if(runtime < duration){                                     //move until duration completed
-               graph.removeAnimationID = requestAnimationFrame(function (timestamp){
-                  graph.IDArray.push(graph.removeAnimationID);
-                  graph.RemoveSpreadTick(graphRefr, rawSpread, myId, timestamp, distance, duration, false);  //300 pixels over 500ms  
-               }); 
-            }
-            else{
-               graph.removeStaticAnimationID = requestAnimationFrame(function (timestamp){
-                  graph.IDArray.push(graph.removeStaticAnimationID);
-                  graph.RemoveSpreadTick(graphRefr, rawSpread, myId, timestamp, distance, duration, true);  //300 pixels over 500ms  
-               });
-            }
-           
+      graph.RemoveLine = function (graphRefr, yPos, xPos, duration, runtime, static, elementID) {
+         let progress = Math.min(runtime / duration, 1);           //percentage of duration ms
+         this.marketSVG.append("line")
+            .attr("id", elementID)
+            .attr("opacity", .5)
+            .attr("x1", function () {
+               return xPos - (xPos * progress).toFixed(2);
+            })
+            .attr("x2", function() {
+               //return xPos - (xPos * progress).toFixed(2) - 5;
+               return 0;
+            })
+            .attr("y1", function () {
+               if(yPos >= graphRefr.elementHeight / 2){        //dont want a "negative" spread
+                  return graphRefr.elementHeight / 2 - 1;           //+1 for "minimum visual spread"
+               }
+               else{
+                  return yPos;
+               } 
+            })
+            .attr("y2", function () {
+               if(yPos >= graphRefr.elementHeight / 2){        //dont want a "negative" spread
+                  return graphRefr.elementHeight / 2 - 1;           //+1 for "minimum visual spread"
+               }
+               else{
+                  return yPos;
+               } 
+            })
+            .attr("class", "my-buy-offer");
       };
 
-
+      graph.DrawLine = function (graphRefr, yPos, xPos, duration, runtime, static, elementID) {
+         let progress = Math.min(runtime / duration, 1);           //percentage of duration ms
+         this.marketSVG.append("line")
+            .attr("id", elementID)
+            .attr("opacity", .5)
+            .attr("x1", function () {
+               if(static){
+                  return 0;
+               }
+               else{
+                  return xPos - (xPos * progress).toFixed(2);
+               }
+            })
+            .attr("x2", function() {
+               return xPos;
+            })
+            .attr("y1", function () {
+               if(yPos >= graphRefr.elementHeight / 2){        //dont want a "negative" spread
+                  return graphRefr.elementHeight / 2 - 1;           //+1 for "minimum visual spread"
+               }
+               else{
+                  return yPos;
+               } 
+            })
+            .attr("y2", function () {
+               if(yPos >= graphRefr.elementHeight / 2){        //dont want a "negative" spread
+                  return graphRefr.elementHeight / 2 - 1;           //+1 for "minimum visual spread"
+               }
+               else{
+                  return yPos;
+               } 
+            })
+            .attr("class", "my-buy-offer");
+      };
 
       graph.drawAllProfit = function (graphRefr, dataHistory) {
          for (var user of dataHistory.group) {
@@ -609,7 +549,7 @@ RedwoodHighFrequencyTrading.factory("Graphing", function () {
 
       graph.draw = function (dataHistory) {
          //Clear the svg elements
-         this.marketSVG.selectAll("*").remove();
+         this.marketSVG.selectAll("#REMOVE").remove();             //FUCK THIS LINE OF CODE WOW! (ASK JAMES AND MORGAN)
          this.profitSVG.selectAll("*").remove();
 
          var graphRefr = this;
@@ -654,7 +594,8 @@ RedwoodHighFrequencyTrading.factory("Graphing", function () {
                x2: this.elementWidth / 2,
                y1: 0, 
                y2: this.elementHeight, //this.elementHeight / 2,
-               class: "price-line"
+               class: "price-line",
+               id: "REMOVE"
             });
 
          // // draw static current price tick
@@ -663,7 +604,8 @@ RedwoodHighFrequencyTrading.factory("Graphing", function () {
                x2: this.elementWidth / 2 + 30,
                y1: this.elementHeight / 2,// * graphRefr.heightScale - 30,//this.elementHeight / 2 - 30,//- 10,    //changed 7/26/17
                y2: this.elementHeight / 2,//* graphRefr.heightScale + 30,//this.elementHeight / 2 + 30,//+ 10,
-               class: "my-profit-out"
+               class: "my-profit-out",
+               id: "REMOVE"
             });
 
          this.drawOffers(graphRefr, dataHistory);
@@ -678,7 +620,6 @@ RedwoodHighFrequencyTrading.factory("Graphing", function () {
             }                                     //reset opacity
          }
 
-         //this.DrawSpreadTick(graphRefr, this.currSpreadTick, dataHistory.myId);                 //draws where the user clicks on the graph
 
          //this.drawMarket(graphRefr, dataHistory.pastFundPrices, dataHistory.curFundPrice, "price-line");
          this.drawTransactions(graphRefr, dataHistory.transactions, dataHistory.myId);

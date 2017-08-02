@@ -20,17 +20,40 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
          $scope.oldOffsetY = null;
          $scope.oldUsingSpeed = 0;
          $scope.overWriteID = [];
+         $scope.curOffsetY = null;
+         $scope.startTime = 0;
+         $scope.removeStartTime = 0;
+         $scope.offsetX = 0;
+
+         $scope.s = {
+            NO_LINES: 0,
+            DRAW_FIRST: 1,
+            FIRST_DRAWN: 2,
+            DRAW_SECOND: 3,
+            SECOND_DRAWN: 4
+         };
+
+         $scope.e = {
+            NO_EVENT: 0,
+            JUMP: 1,
+            CLICK: 2,
+            TIMEOUT: 3
+         };
+
+         $scope.event = $scope.e.NO_EVENT;
+         $scope.tickState = $scope.s.NO_LINES;
 
          //Loops at speed CLOCK_FREQUENCY in Hz, updates the graph
-         $scope.update = function () {
+         $scope.update = function (timestamp) {
+            $scope.FSM($scope.tickState, $scope.event, timestamp);
+
             $scope.tradingGraph.draw($scope.dHistory);
 
             if ($scope.using_speed) {
                $scope.dHistory.profit -= (getTime() - $scope.lastTime) * $scope.dHistory.speedCost / 1000000000;
             }
-
             $scope.lastTime = getTime();
-            requestAnimationFrame($scope.update);        //added 7/31/17 for smoother graphing
+            requestAnimationFrame($scope.update);
          };
 
          // Sends a message to the Group Manager
@@ -86,7 +109,6 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
             $scope.lastTime = getTime();
             // $interval($scope.update, CLOCK_FREQUENCY);
             requestAnimationFrame($scope.update);                 //added 7/31/17 for smoother graphing
-
             // if input data was provided, setup automatic input system
             if (data.hasOwnProperty("input_addresses")) {
                // get unique index for this player
@@ -146,8 +168,170 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
                }
             });
 
+         $scope.CalculateXPOS = function (runtime){        //for implementation purposes, both fast and slow lines take the whole width
+            if($scope.using_speed){        
+               $scope.tradingGraph.elementWidth - ($scope.tradingGraph.elementWidth * Math.min(runtime / $scope.tradingGraph.fastDelay, 1)).toFixed(2);
+            }
+            else{             
+               return $scope.tradingGraph.elementWidth - ($scope.tradingGraph.elementWidth * Math.min(runtime / $scope.tradingGraph.slowDelay, 1)).toFixed(2);
+            }
+         };  
+
+         $scope.FSM = function (state, event, timestamp) {
+            switch(state){ 
+               case $scope.s.NO_LINES:
+                  switch(event){ 
+                     case $scope.e.CLICK:                                                       //user's first click on the graph
+                        $scope.startTime = window.performance.now();                            //reset start time for the new line1
+                        $scope.tradingGraph.callDrawSpreadTick($scope.curOffsetY, $scope.using_speed, event, timestamp - $scope.startTime, false, "line1");
+                        $scope.oldOffsetY = $scope.curOffsetY;                                  //save our Y position for the next receding line
+                        $scope.event = $scope.e.NO_EVENT;                                       //clear event
+                        $scope.tickState = $scope.s.DRAW_FIRST;                                 //transition to DRAW_FIRST
+                        break;
+
+                     default:
+                        console.log("pay jason more");
+                        break;
+                  }
+                  break;
+               case $scope.s.DRAW_FIRST:
+                  switch(event){
+                     case $scope.e.CLICK:                                                       //user clicked before line1 was fully drawn
+                        $scope.offsetX = $scope.CalculateXPOS(timestamp - $scope.startTime);    //calculate the x offset before startTime is reset
+                        $scope.removeStartTime = $scope.startTime;                              //receding line will continue from old startTime
+                        $scope.startTime = window.performance.now();                            //reset start time for the new line2
+                        $scope.tradingGraph.callDrawSpreadTick($scope.curOffsetY, $scope.using_speed, event, timestamp - $scope.startTime, false, "line2", false);                         //draw new line2
+                        $scope.tradingGraph.callDrawSpreadTick($scope.oldOffsetY, $scope.using_speed, event, timestamp - $scope.removeStartTime, false, "line3", true, $scope.offsetX);    //insert receding line3 @ old y position
+                        $scope.tradingGraph.marketSVG.selectAll("#line1").remove();             //line1 has been replaced by line3
+                        $scope.event = $scope.e.NO_EVENT;                                       //clear event
+                        $scope.tickState = $scope.s.DRAW_SECOND;                                //transition to DRAW_SECOND
+                        break;
+
+                     case $scope.e.JUMP:
+                     
+                        break;
+
+                     default:                                                                   //no event, so continue drawing the line
+                        if($scope.using_speed){
+                           if(timestamp - $scope.startTime < $scope.tradingGraph.fastDelay){    //line1 hasnt reached the end
+                              $scope.tradingGraph.callDrawSpreadTick($scope.curOffsetY, $scope.using_speed, event, timestamp - $scope.startTime, false, "line1", false);                         //continue drawing current spread
+                              $scope.tradingGraph.callDrawSpreadTick($scope.oldOffsetY, $scope.using_speed, event, timestamp - $scope.removeStartTime, false, "line3", true, $scope.offsetX);    //continue drawing receding line3
+                           }
+                           else{                                                                //line1 reached the end
+                              $scope.tradingGraph.marketSVG.selectAll("#line3").remove();       //safely delete receding line
+                              $scope.oldOffsetY = $scope.curOffsetY;                            //save a new offset for the next receding line
+                              $scope.tickState = $scope.s.FIRST_DRAWN;                          //transition to FIRST_DRAWN
+                           }
+                        }
+                        else {                                                                  //no event, so continue drawing the line
+                           if(timestamp - $scope.startTime < $scope.tradingGraph.slowDelay){    //line1 hasnt reached the end 
+                              $scope.tradingGraph.callDrawSpreadTick($scope.curOffsetY, $scope.using_speed, event, timestamp - $scope.startTime, false, "line1", false);                         //continue drawing current spread
+                              $scope.tradingGraph.callDrawSpreadTick($scope.oldOffsetY, $scope.using_speed, event, timestamp - $scope.removeStartTime, false, "line3", true, $scope.offsetX);    //continue drawing receing line 3
+                           }
+                           else{                                                                //line1 reached the end
+                              $scope.tradingGraph.marketSVG.selectAll("#line3").remove();       //safely delete receding line
+                              $scope.oldOffsetY = $scope.curOffsetY;                            //save a new offset for the next receding line
+                              $scope.tickState = $scope.s.FIRST_DRAWN;                          //line drawn without another event -> transition to FIRST_DRAWN
+                           }
+                        }
+                        
+                        break;
+                  }
+                  break;
+               case $scope.s.FIRST_DRAWN:
+                  switch(event){
+                     case $scope.e.CLICK:                                                       //user clicked once line1 was fully drawn
+                        $scope.startTime = window.performance.now();                            //reset start time for the new line2
+                        $scope.tradingGraph.callDrawSpreadTick($scope.curOffsetY, $scope.using_speed, event, timestamp - $scope.startTime, false, "line2", false);                     
+                        $scope.tradingGraph.marketSVG.selectAll("#line1").remove();
+                        $scope.event = $scope.e.NO_EVENT;                                       //clear event   
+                        $scope.tickState = $scope.s.DRAW_SECOND;                                //transition to DRAW_SECOND 
+                        break;
+
+                     case $scope.e.JUMP:
+
+                        break;
+
+                     default:
+                        $scope.tradingGraph.callDrawSpreadTick($scope.curOffsetY, $scope.using_speed, event, timestamp - $scope.startTime, true, "line1", false); 
+                        break;
+                  }
+                  break;
+               case $scope.s.DRAW_SECOND:
+                  switch(event){
+                     case $scope.e.CLICK:                                                       //user clicked before the line was fully drawn
+                        $scope.tradingGraph.marketSVG.selectAll("#line3").remove();             //user clicked while a receding line was being drawn
+                        $scope.oldOffsetY = $scope.curOffsetY;                                  //save a new offset for the next receding line
+                        $scope.offsetX = $scope.CalculateXPOS(timestamp - $scope.startTime);    //calculate the x offset before time is reset
+                        $scope.removeStartTime = $scope.startTime;                              //continutation of the previous time
+                        $scope.startTime = window.performance.now();                            //reset start time for the new line1
+                        $scope.tradingGraph.callDrawSpreadTick($scope.curOffsetY, $scope.using_speed, event, timestamp - $scope.startTime, false, "line1", false);                         //draw the most recent line  
+                        $scope.tradingGraph.callDrawSpreadTick($scope.oldOffsetY, $scope.using_speed, event, timestamp - $scope.removeStartTime, false, "line3", true, $scope.offsetX);    //insert receding line3 @ old y position
+                        $scope.tradingGraph.marketSVG.selectAll("#line2").remove();             //cancel the last line
+                        $scope.event = $scope.e.NO_EVENT;                                       //clear event
+                        $scope.tickState = $scope.s.DRAW_FIRST;                                 //transition to DRAW_FIRST
+                        break;
+
+                     case $scope.e.JUMP:
+
+                        break;
+
+                     default:
+                        if($scope.using_speed){
+                           if(timestamp - $scope.startTime < $scope.tradingGraph.fastDelay){
+                              $scope.tradingGraph.callDrawSpreadTick($scope.curOffsetY, $scope.using_speed, event, timestamp - $scope.startTime, false, "line2", false);                         //continue drawing line 2
+                              $scope.tradingGraph.callDrawSpreadTick($scope.oldOffsetY, $scope.using_speed, event, timestamp - $scope.removeStartTime, false, "line3", true, $scope.offsetX);    //insert receding line3 @ old y position
+                           }
+                           else{
+                              $scope.tradingGraph.marketSVG.selectAll("#line3").remove();       //safely delete receding line
+                              $scope.oldOffsetY = $scope.curOffsetY;                            //save a new offset for the next receding line
+                              $scope.tickState = $scope.s.SECOND_DRAWN;                         //duration expired without another event -> transition to SECOND_DRAWN
+                           }
+                        }
+                        else{
+                           if(timestamp - $scope.startTime < $scope.tradingGraph.slowDelay){
+                              $scope.tradingGraph.callDrawSpreadTick($scope.curOffsetY, $scope.using_speed, event, timestamp - $scope.startTime, false, "line2", false);
+                              $scope.tradingGraph.callDrawSpreadTick($scope.oldOffsetY, $scope.using_speed, event, timestamp - $scope.removeStartTime, false, "line3", true, $scope.offsetX);    //insert receding line3 @ old y position
+                           }
+                           else{
+                              $scope.tradingGraph.marketSVG.selectAll("#line3").remove();       //safely delete receding line
+                              $scope.oldOffsetY = $scope.curOffsetY;                            //save a new offset for the next receding line
+                              $scope.tickState = $scope.s.SECOND_DRAWN;                         //duration expired without another event -> transition to SECOND_DRAWN
+                           }
+                        }
+                        
+                        break;
+                  }
+                  break;
+
+               case $scope.s.SECOND_DRAWN:                                 //user clicked once a line was drawn
+                  switch(event){
+                     case $scope.e.CLICK:
+                        $scope.startTime = window.performance.now();       //draw line1 @ mouse pointer
+                        $scope.tradingGraph.callDrawSpreadTick($scope.curOffsetY, $scope.using_speed, event, timestamp - $scope.startTime, false, "line1");
+                        $scope.tradingGraph.marketSVG.selectAll("#line2").remove();
+                        $scope.event = $scope.e.NO_EVENT;                  //clear event   
+                        $scope.tickState = $scope.s.DRAW_FIRST;           //transition to DRAW_FIRST 
+                        break;
+
+                     case $scope.e.JUMP:
+                     
+                        break;
+
+                     default:
+                        $scope.tradingGraph.callDrawSpreadTick($scope.curOffsetY, $scope.using_speed, event, timestamp - $scope.startTime, true, "line2");
+                        break;      
+                  }
+                  break;         
+
+               default:
+                  console.log("in default state");
+                  break;
+            }
+         };
+
          $("#graph1")
-            .mousedown( function(event){
+            .mousedown( function(event) {
                $scope.mousePressed = true;                                       //set the flag so in case we leave the svg element we know it was a press
                if ($scope.state != "state_maker") {
                      var msg = new Message("USER", "UMAKER", [rs.user_id, $scope.tradingGraph.getCurOffsetTime()]);
@@ -155,7 +339,7 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
                      $scope.setState("state_maker");
                }  
             })
-            .mouseleave( function(event){
+            .mouseleave( function(event) {
                if ($scope.mousePressed) {                                        //only set the spread if svg has been clicked on
                   $scope.mousePressed = false;                                   //reset the flag
                   if (event.offsetY <= $scope.tradingGraph.elementHeight / 2) {      //you left the svg right of the center tick
@@ -171,16 +355,8 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
                   $scope.sendToGroupManager(msg);
                   $scope.tradingGraph.currSpreadTick = event.offsetY;            //sets the location to be graphed
 
-                  for(var id of $scope.tradingGraph.IDArray){
-                     cancelAnimationFrame(id);                   //cancel all the animations
-                     $scope.tradingGraph.IDArray = [];            //reset for speed purposes
-                  }
-                  if($scope.oldOffsetY != null){                    //Dont overwrite on first click
-                     $scope.tradingGraph.callDrawSpreadTick($scope.oldOffsetY, $scope.oldUsingSpeed, true);    //overwrite old tick
-                  }
-                  $scope.tradingGraph.callDrawSpreadTick(event.offsetY, $scope.using_speed, false);  //start animating a tick
-                  $scope.oldOffsetY = event.offsetY;
-                  $scope.oldUsingSpeed = $scope.using_speed;
+                  $scope.curOffsetY = event.offsetY;                             //set event to be handled in FSM
+                  $scope.event = $scope.e.CLICK;
                }
             })
             .mouseup( function(event) {
@@ -198,21 +374,8 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
                $scope.sendToGroupManager(msg);
                $scope.tradingGraph.currSpreadTick = event.offsetY;               //sets the location to be graphed
                
-               if($scope.tradingGraph.laser){
-                  $scope.tradingGraph.callDrawSpreadTick(event.offsetY, $scope.using_speed, false);
-               }
-               else{
-                  for(var id of $scope.tradingGraph.IDArray){
-                  cancelAnimationFrame(id);                   //cancel all the animations
-                  $scope.tradingGraph.IDArray = [];            //reset for speed purposes
-               }
-               if($scope.oldOffsetY != null){                    //Dont overwrite on first click
-                  $scope.tradingGraph.callDrawSpreadTick($scope.oldOffsetY, $scope.oldUsingSpeed, true);    //overwrite old tick
-               }
-               $scope.tradingGraph.callDrawSpreadTick(event.offsetY, $scope.using_speed, false);  //start animating a tick
-               $scope.oldOffsetY = event.offsetY;
-               $scope.oldUsingSpeed = $scope.using_speed;
-               }
+               $scope.curOffsetY = event.offsetY;                                //set event to be handled in FSM
+               $scope.event = $scope.e.CLICK;
             });
 
 

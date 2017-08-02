@@ -408,15 +408,15 @@ RedwoodHighFrequencyTrading.factory("Graphing", function () {
 
       graph.RemoveLine = function (graphRefr, yPos, xPos, duration, runtime, static, elementID) {
          let progress = Math.min(runtime / duration, 1);           //percentage of duration ms
+         let x1 = graphRefr.elementWidth - (graphRefr.elementWidth * progress).toFixed(2);
+         let x2 = graphRefr.elementWidth - xPos - (graphRefr.elementWidth * progress).toFixed(2);
+         if(x2 < 0) x2 = 0;
+         // console.log(xPos,progress,x1,x2);
          this.marketSVG.append("line")
             .attr("id", elementID)
             .attr("opacity", .5)
-            .attr("x1", function () {
-               return graphRefr.elementWidth - (graphRefr.elementWidth * progress).toFixed(2);
-            })
-            .attr("x2", function() {
-               return graphRefr.elementWidth - xPos - (graphRefr.elementWidth * progress).toFixed(2);
-            })
+            .attr("x1", x1)
+            .attr("x2", x2)
             .attr("y1", function () {
                if(yPos >= graphRefr.elementHeight / 2){        //dont want a "negative" spread
                   return graphRefr.elementHeight / 2 - 1;           //+1 for "minimum visual spread"

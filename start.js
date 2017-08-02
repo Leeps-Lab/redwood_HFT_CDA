@@ -188,7 +188,8 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
                         $scope.startTime = window.performance.now();                            //reset start time for the new line1
                         $scope.tradingGraph.callDrawSpreadTick($scope.curOffsetY, $scope.using_speed, event, timestamp - $scope.startTime, false, "line1");
                         $scope.removeStartTime = $scope.startTime;                              //save the start time for the next receding line
-                        $scope.oldOffsetY = $scope.curOffsetY;                                  //save our Y position for the next receding line
+                        $scope.oldOffsetY == null ? $scope.curOffsetY : $scope.oldOffsetY;       //save our Y position for the next receding line
+                        console.log($scope.oldOffsetY);
                         $scope.event = $scope.e.NO_EVENT;                                       //clear event
                         $scope.tickState = $scope.s.DRAW_FIRST;                                 //transition to DRAW_FIRST
                         break;
@@ -220,6 +221,7 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
                            if(timestamp - $scope.startTime < $scope.tradingGraph.fastDelay){    //line1 hasnt reached the end
                               $scope.tradingGraph.callDrawSpreadTick($scope.curOffsetY, $scope.using_speed, event, timestamp - $scope.startTime, false, "line1", false);                         //continue drawing current spread
                               $scope.tradingGraph.callDrawSpreadTick($scope.oldOffsetY, $scope.using_speed, event, timestamp - $scope.removeStartTime, false, "line3", true, $scope.offsetX);    //continue drawing receding line3
+                              $scope.tradingGraph.marketSVG.select("#line3").remove();          //delete history of line3 so it appears moving
                            }
                            else{                                                                //line1 reached the end
                               $scope.tradingGraph.marketSVG.selectAll("#line3").remove();       //safely delete receding line
@@ -231,6 +233,7 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
                            if(timestamp - $scope.startTime < $scope.tradingGraph.slowDelay){    //line1 hasnt reached the end 
                               $scope.tradingGraph.callDrawSpreadTick($scope.curOffsetY, $scope.using_speed, event, timestamp - $scope.startTime, false, "line1", false);                         //continue drawing current spread
                               $scope.tradingGraph.callDrawSpreadTick($scope.oldOffsetY, $scope.using_speed, event, timestamp - $scope.removeStartTime, false, "line3", true, $scope.offsetX);    //continue drawing receding line 3
+                              $scope.tradingGraph.marketSVG.select("#line3").remove();          //delete history of line3 so it appears moving                        
                            }
                            else{                                                                //line1 reached the end
                               $scope.tradingGraph.marketSVG.selectAll("#line3").remove();       //safely delete receding line
@@ -286,6 +289,7 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
                            if(timestamp - $scope.startTime < $scope.tradingGraph.fastDelay){    //line2 hasnt reached the end
                               $scope.tradingGraph.callDrawSpreadTick($scope.curOffsetY, $scope.using_speed, event, timestamp - $scope.startTime, false, "line2", false);                         //continue drawing line2
                               $scope.tradingGraph.callDrawSpreadTick($scope.oldOffsetY, $scope.using_speed, event, timestamp - $scope.removeStartTime, false, "line3", true, $scope.offsetX);    //continue drawing receding line3
+                              $scope.tradingGraph.marketSVG.select("#line3").remove();          //delete history of line3 so it appears moving
                            }
                            else{                                                                //line2 reached the end
                               $scope.tradingGraph.marketSVG.selectAll("#line3").remove();       //safely delete receding line
@@ -297,6 +301,7 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
                            if(timestamp - $scope.startTime < $scope.tradingGraph.slowDelay){    //line2 hasnt reached the end
                               $scope.tradingGraph.callDrawSpreadTick($scope.curOffsetY, $scope.using_speed, event, timestamp - $scope.startTime, false, "line2", false);                        //continue drawing line2
                               $scope.tradingGraph.callDrawSpreadTick($scope.oldOffsetY, $scope.using_speed, event, timestamp - $scope.removeStartTime, false, "line3", true, $scope.offsetX);   //continue drawing receding line3
+                              $scope.tradingGraph.marketSVG.select("#line3").remove();          //delete history of line3 so it appears moving 
                            }
                            else{                                                                //line2 reached the end
                               $scope.tradingGraph.marketSVG.selectAll("#line3").remove();       //safely delete receding line
@@ -361,6 +366,7 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
                   $scope.sendToGroupManager(msg);
                   $scope.tradingGraph.currSpreadTick = event.offsetY;            //sets the location to be graphed
 
+                  $scope.oldOffsetY = $scope.curOffsetY;                                //update our last y position for receding lines
                   $scope.curOffsetY = event.offsetY;                             //set event to be handled in FSM
                   $scope.event = $scope.e.CLICK;
                }
@@ -379,7 +385,7 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
                var msg = new Message("USER", "UUSPR", [rs.user_id, $scope.spread, $scope.tradingGraph.getCurOffsetTime()]);
                $scope.sendToGroupManager(msg);
                $scope.tradingGraph.currSpreadTick = event.offsetY;               //sets the location to be graphed
-               
+               $scope.oldOffsetY = $scope.curOffsetY;                                   //update our last y position for receding lines
                $scope.curOffsetY = event.offsetY;                                //set event to be handled in FSM
                $scope.event = $scope.e.CLICK;
             });

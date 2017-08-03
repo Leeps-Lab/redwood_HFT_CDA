@@ -425,22 +425,6 @@ RedwoodHighFrequencyTrading.factory("Graphing", function () {
             .attr("x2", x2)
             .attr("y1", yPos)
             .attr("y2", yPos)
-            //    function () {
-            //    if(yPos >= graphRefr.elementHeight / 2){        //dont want a "negative" spread
-            //       return graphRefr.elementHeight / 2 - 1;           //+1 for "minimum visual spread"
-            //    }
-            //    else{
-            //       return yPos;
-            //    } 
-            // })
-            // .attr("y2", function () {
-            //    if(yPos >= graphRefr.elementHeight / 2){        //dont want a "negative" spread
-            //       return graphRefr.elementHeight / 2 - 1;           //+1 for "minimum visual spread"
-            //    }
-            //    else{
-            //       return yPos;
-            //    } 
-            // })
             .attr("class", "my-buy-offer");
       };
 

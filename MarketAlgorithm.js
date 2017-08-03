@@ -44,16 +44,12 @@ Redwood.factory("MarketAlgorithm", function () {
       marketAlgorithm.enterMarket = function () {
          this.sendToGroupManager(this.enterBuyOfferMsg());
          this.sendToGroupManager(this.enterSellOfferMsg());
-         this.buyEntered = true;
-         this.sellEntered = true;
       };
 
       // sends out remove buy and sell messages for exiting market
       marketAlgorithm.exitMarket = function () {
          this.sendToGroupManager(this.removeBuyOfferMsg());
          this.sendToGroupManager(this.removeSellOfferMsg());
-         this.buyEntered = false;
-         this.sellEntered = false;
       };
 
       // Handle message sent to the market algorithm
@@ -177,7 +173,6 @@ Redwood.factory("MarketAlgorithm", function () {
          //User updated their spread
          if (msg.msgType === "UUSPR") {
             this.spread = msg.msgData[1];
-
             //See if there are existing orders that need to be updated
             if (this.buyEntered) {
                this.sendToGroupManager(this.updateBuyOfferMsg());
@@ -269,6 +264,7 @@ Redwood.factory("MarketAlgorithm", function () {
          nMsg.msgId = this.currentMsgId;
          this.currentBuyId = this.currentMsgId;
          this.currentMsgId++;
+         this.buyEntered = true;
          return nMsg;
       };
 
@@ -279,6 +275,7 @@ Redwood.factory("MarketAlgorithm", function () {
          nMsg.msgId = this.currentMsgId;
          this.currentSellId = this.currentMsgId;
          this.currentMsgId++;
+         this.sellEntered = true;
          return nMsg;
       };
 
@@ -287,6 +284,7 @@ Redwood.factory("MarketAlgorithm", function () {
          nMsg.delay = !this.using_speed;
          nMsg.senderId = this.myId;
          nMsg.msgId = this.currentBuyId;
+         this.buyEntered = false;
          return nMsg;
       }
 
@@ -295,10 +293,12 @@ Redwood.factory("MarketAlgorithm", function () {
          nMsg.delay = !this.using_speed;
          nMsg.senderId = this.myId;
          nMsg.msgId = this.currentSellId;
+         this.sellEntered = false;
          return nMsg;
       }
 
       marketAlgorithm.updateBuyOfferMsg = function () {
+         // console.log("updateBuy");
          var nMsg = new OuchMessage("UBUY", this.myId, this.fundamentalPrice - this.spread / 2, false);
          nMsg.delay = !this.using_speed;
          nMsg.senderId = this.myId;
@@ -306,10 +306,12 @@ Redwood.factory("MarketAlgorithm", function () {
          nMsg.prevMsgId = this.currentBuyId;
          this.currentBuyId = this.currentMsgId;
          this.currentMsgId++;
+         this.buyEntered = true;
          return nMsg;
       }
 
       marketAlgorithm.updateSellOfferMsg = function () {
+         // console.log("updateSell");
          var nMsg = new OuchMessage("USELL", this.myId, this.fundamentalPrice + this.spread / 2, false);
          nMsg.delay = !this.using_speed;
          nMsg.senderId = this.myId;
@@ -317,6 +319,7 @@ Redwood.factory("MarketAlgorithm", function () {
          nMsg.prevMsgId = this.currentSellId;
          this.currentSellId = this.currentMsgId;
          this.currentMsgId++;
+         this.sellEntered = true;
          return nMsg;
       };
 

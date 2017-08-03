@@ -31,6 +31,8 @@ Redwood.factory("GroupManager", function () {
       groupManager.outboundMarketLog = "";          // string of debug info for messages outbound to market
       groupManager.inboundMarketLog = "";           // string of debug info for messages inbound from market
 
+      groupManager.nubuy = 0;
+      groupManager.nusell = 0;
       // only open websockets connection if running in REMOTE mode
       if(groupManager.marketFlag === "REMOTE"/*ZACH, D/N MODIFY!*/){
 
@@ -127,9 +129,16 @@ Redwood.factory("GroupManager", function () {
                   playerOrder.push(this.FPMsgList[index].msgData[0]);
                   for (var rmsg of this.FPMsgList[index].msgData[2]) {
                      //console.log("SYNC_FP Message: " + rmsg.asString());
+                     if(rmsg.msgType == "UBUY"){
+                        console.log("num UBUY",++this.nubuy);
+                     }
+                     if(rmsg.msgType == "USELL"){
+                        console.log("num USELL",++this.nusell);
+                     }
                      this.sendToMarket(rmsg);
                   }
                }
+               
                
                this.dataStore.storePlayerOrder(msg.timeStamp, playerOrder);
 
@@ -138,6 +147,8 @@ Redwood.factory("GroupManager", function () {
                this.syncFPArray = new SynchronizeArray(this.memberIDs);
             }
          }
+
+
 
          // general message that needs to be passed on to marketManager
          if (msg.protocol === "OUCH") {
@@ -195,6 +206,9 @@ Redwood.factory("GroupManager", function () {
       // handles a message from the market
       groupManager.recvFromMarket = function (msg) {
          //console.log("Inbound Message", msg);                //debug incoming ITCH messages
+         // if(msg.msgType === "C_USELL"){   //msg.msgType === "C_UBUY" || 
+         //    console.log(msg);
+         // }
          if(msg.msgType === "C_TRA"){
             //console.log(msg);
             this.sendToMarketAlgorithms(msg);

@@ -72,7 +72,7 @@ RedwoodHighFrequencyTrading.factory("Graphing", function () {
       graph.startTime = 0;
       graph.tickAnimationID = 0;
       graph.staticTickAnimationID = 0;
-      graph.laser = true;                       //magic
+      graph.laser = false;                       //magic
       graph.removeStartTime = 0;
       graph.removeAnimationID = 0;
       graph.removeStaticAnimationID = 0;
@@ -526,10 +526,20 @@ RedwoodHighFrequencyTrading.factory("Graphing", function () {
       graph.callDrawSpreadTick = function (yPos, speed, runtime, static, elementID, remove, xPos, segment){
          if(graph.laser){
             if(speed){
-               graph.DrawLaser(this, yPos, xPos, this.fastDelay, runtime, elementID, static, this.elementWidth / 2);
+               if(remove){
+                  graph.DrawLaser(this, yPos, xPos, this.fastDelay, runtime, elementID, static, this.elementWidth);  //draw line off of the screen
+               }
+               else{
+                  graph.DrawLaser(this, yPos, xPos, this.fastDelay, runtime, elementID, static, this.elementWidth / 2);
+               }
             }
             else{
-               graph.DrawLaser(this, yPos, xPos, this.slowDelay, runtime, elementID, static, this.elementWidth / 2);
+               if(remove){
+                  graph.DrawLaser(this, yPos, xPos, this.slowDelay, runtime, elementID, static, this.elementWidth);  //draw line off of the screen
+               }
+               else{
+                  graph.DrawLaser(this, yPos, xPos, this.slowDelay, runtime, elementID, static, this.elementWidth / 2);
+               }
             }
          }
          else{
@@ -573,7 +583,7 @@ RedwoodHighFrequencyTrading.factory("Graphing", function () {
          if(x2 < 0) x2 = 0;
          this.marketSVG.append("line")
             .attr("id", elementID)
-            .attr("opacity", .5)
+            .attr("opacity", .3)
             .attr("x1", x1)
             .attr("x2", x2)
             .attr("y1", yPos)

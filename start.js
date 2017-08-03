@@ -49,10 +49,15 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
 
          //Loops at speed CLOCK_FREQUENCY in Hz, updates the graph
          $scope.update = function (timestamp) {
-            //$scope.FSM($scope.tickState, $scope.event, timestamp);
-            $scope.FSM2($scope.tickState, $scope.event, timestamp);
+
+            if($scope.tradingGraph.laser){
+               $scope.FSM2($scope.tickState, $scope.event, timestamp);
+            }
+            else{
+               $scope.FSM($scope.tickState, $scope.event, timestamp);
+               $scope.FPCpoll();
+            }
             $scope.tradingGraph.draw($scope.dHistory);
-            //$scope.FPCpoll();
 
             if ($scope.using_speed) {
                $scope.dHistory.profit -= (getTime() - $scope.lastTime) * $scope.dHistory.speedCost / 1000000000;
@@ -224,10 +229,17 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
                case $scope.s.DRAW_FIRST:
                   switch(event){
                      case $scope.e.CLICK:                                                       //user clicked before line1 was fully drawn
+                        $scope.offsetX = $scope.CalculateXPOS(timestamp - $scope.startTime);    //calculate the x offset before startTime is reset
+                        //$scope.removeStartTime = $scope.startTime;                              //receding line will continue from old startTime
+                        $scope.startTime = window.performance.now();                            //reset start time for the new line2
+                        $scope.tradingGraph.marketSVG.selectAll("#current").remove();           //line1 has been replaced by line3
+                        $scope.tradingGraph.callDrawSpreadTick($scope.curOffsetY, $scope.using_speed, timestamp - $scope.startTime, false, "current", false, 0);     //new top line at new spread
+                        $scope.tradingGraph.callDrawSpreadTick($scope.CalculateYPOS($scope.curOffsetY), $scope.using_speed, timestamp - $scope.startTime, false, "current", false, 0); //new bot line at new spread
+                        $scope.tradingGraph.callDrawSpreadTick($scope.oldOffsetY, $scope.using_speed, timestamp - $scope.startTime, false, "receding", true, $scope.offsetX); //keep drawing the top receding line
+                        $scope.tradingGraph.callDrawSpreadTick($scope.CalculateYPOS($scope.oldOffsetY), $scope.using_speed, timestamp - $scope.startTime, false, "receding", true, $scope.offsetX);  //keep drawing the bottom receding line 
                         $scope.lastEvent = $scope.event;                                        //keep track of the last event
                         $scope.event = $scope.e.NO_EVENT;                                       //clear event
                         $scope.tickState = $scope.s.DRAW_SECOND;                                //transition to DRAW_SECOND
-                        break;
 
                      case $scope.e.JUMP:
                         $scope.lastEvent = $scope.event;                                        //keep track of the last event
@@ -293,15 +305,25 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
                      default:                                                                   //continue to draw static current spread until the next event
                         $scope.tradingGraph.callDrawSpreadTick($scope.curOffsetY, $scope.using_speed, timestamp - $scope.startTime, true, "current", false , 0);
                         $scope.tradingGraph.callDrawSpreadTick($scope.CalculateYPOS($scope.curOffsetY), $scope.using_speed, timestamp - $scope.startTime, true, "current", false, 0);
+                        $scope.tradingGraph.callDrawSpreadTick($scope.oldOffsetY, $scope.using_speed, timestamp - $scope.startTime, false, "receding", true, $scope.offsetX); //keep drawing the top receding line
+                        $scope.tradingGraph.callDrawSpreadTick($scope.CalculateYPOS($scope.oldOffsetY), $scope.using_speed, timestamp - $scope.startTime, false, "receding", true, $scope.offsetX);  //keep drawing the bottom receding line 
                         break;
                   }
                   break;
                case $scope.s.DRAW_SECOND:
                   switch(event){
                      case $scope.e.CLICK:                                                       //user clicked before the line was fully drawn
+                        scope.offsetX = $scope.CalculateXPOS(timestamp - $scope.startTime);    //calculate the x offset before startTime is reset
+                        //$scope.removeStartTime = $scope.startTime;                              //receding line will continue from old startTime
+                        $scope.startTime = window.performance.now();                            //reset start time for the new line2
+                        $scope.tradingGraph.marketSVG.selectAll("#current").remove();           //line1 has been replaced by line3
+                        $scope.tradingGraph.callDrawSpreadTick($scope.curOffsetY, $scope.using_speed, timestamp - $scope.startTime, false, "current", false, 0);     //new top line at new spread
+                        $scope.tradingGraph.callDrawSpreadTick($scope.CalculateYPOS($scope.curOffsetY), $scope.using_speed, timestamp - $scope.startTime, false, "current", false, 0); //new bot line at new spread
+                        $scope.tradingGraph.callDrawSpreadTick($scope.oldOffsetY, $scope.using_speed, timestamp - $scope.startTime, false, "receding", true, $scope.offsetX); //keep drawing the top receding line
+                        $scope.tradingGraph.callDrawSpreadTick($scope.CalculateYPOS($scope.oldOffsetY), $scope.using_speed, timestamp - $scope.startTime, false, "receding", true, $scope.offsetX);  //keep drawing the bottom receding line 
                         $scope.lastEvent = $scope.event;                                        //keep track of the last event
                         $scope.event = $scope.e.NO_EVENT;                                       //clear event
-                        $scope.tickState = $scope.s.DRAW_FIRST;                                 //transition to DRAW_FIRST
+                        $scope.tickState = $scope.s.DRAW_FIRST;                                //transition to DRAW_FIRST
                         break;
 
                      case $scope.e.JUMP:
@@ -316,8 +338,8 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
                               $scope.tradingGraph.marketSVG.selectAll("#receding").remove();       //delete line history so appear moving
                               $scope.tradingGraph.callDrawSpreadTick($scope.curOffsetY, $scope.using_speed, timestamp - $scope.startTime, false, "current", false, 0);
                               $scope.tradingGraph.callDrawSpreadTick($scope.CalculateYPOS($scope.curOffsetY), $scope.using_speed, timestamp - $scope.startTime, false, "current", false, 0);
-                              $scope.tradingGraph.callDrawSpreadTick($scope.oldOffsetY, $scope.using_speed, timestamp - $scope.startTime, false, "receding", false, $scope.offsetX); //keep drawing the top receding line
-                              $scope.tradingGraph.callDrawSpreadTick($scope.CalculateYPOS($scope.oldOffsetY), $scope.using_speed, timestamp - $scope.startTime, false, "receding", false, $scope.offsetX);  //keep drawing the bottom receding line 
+                              $scope.tradingGraph.callDrawSpreadTick($scope.oldOffsetY, $scope.using_speed, timestamp - $scope.startTime, false, "receding", true, $scope.offsetX); //keep drawing the top receding line
+                              $scope.tradingGraph.callDrawSpreadTick($scope.CalculateYPOS($scope.oldOffsetY), $scope.using_speed, timestamp - $scope.startTime, false, "receding", true, $scope.offsetX);  //keep drawing the bottom receding line 
                            }
                            else{
                               $scope.tickState = $scope.s.SECOND_DRAWN;                          //line drawn without another event -> transition to FIRST_DRAWN
@@ -329,8 +351,8 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
                               $scope.tradingGraph.marketSVG.selectAll("#receding").remove();       //delete line history so appear moving
                               $scope.tradingGraph.callDrawSpreadTick($scope.curOffsetY, $scope.using_speed, timestamp - $scope.startTime, false, "current", false, 0);
                               $scope.tradingGraph.callDrawSpreadTick($scope.CalculateYPOS($scope.curOffsetY), $scope.using_speed, timestamp - $scope.startTime, false, "current", false, 0);
-                              $scope.tradingGraph.callDrawSpreadTick($scope.oldOffsetY, $scope.using_speed, timestamp - $scope.startTime, false, "receding", false, $scope.offsetX); //keep drawing the top receding line
-                              $scope.tradingGraph.callDrawSpreadTick($scope.CalculateYPOS($scope.oldOffsetY), $scope.using_speed, timestamp - $scope.startTime, false, "receding", false, $scope.offsetX);  //keep drawing the bottom receding line 
+                              $scope.tradingGraph.callDrawSpreadTick($scope.oldOffsetY, $scope.using_speed, timestamp - $scope.startTime, false, "receding", true, $scope.offsetX); //keep drawing the top receding line
+                              $scope.tradingGraph.callDrawSpreadTick($scope.CalculateYPOS($scope.oldOffsetY), $scope.using_speed, timestamp - $scope.startTime, false, "receding", true, $scope.offsetX);  //keep drawing the bottom receding line 
                            }
                            else{
                               $scope.tickState = $scope.s.SECOND_DRAWN;                          //line drawn without another event -> transition to FIRST_DRAWN
@@ -364,6 +386,8 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
                      default:                                                                   //continue to draw static current spread until the next event
                         $scope.tradingGraph.callDrawSpreadTick($scope.curOffsetY, $scope.using_speed, timestamp - $scope.startTime, true, "current",false, 0);
                         $scope.tradingGraph.callDrawSpreadTick($scope.CalculateYPOS($scope.curOffsetY), $scope.using_speed, timestamp - $scope.startTime, true, "current", false, 0);
+                        $scope.tradingGraph.callDrawSpreadTick($scope.oldOffsetY, $scope.using_speed, timestamp - $scope.startTime, false, "receding", true, $scope.offsetX); //keep drawing the top receding line
+                        $scope.tradingGraph.callDrawSpreadTick($scope.CalculateYPOS($scope.oldOffsetY), $scope.using_speed, timestamp - $scope.startTime, false, "receding", true, $scope.offsetX);  //keep drawing the bottom receding line 
                         break;      
                   }
                   break;         

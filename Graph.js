@@ -72,7 +72,7 @@ RedwoodHighFrequencyTrading.factory("Graphing", function () {
       graph.startTime = 0;
       graph.tickAnimationID = 0;
       graph.staticTickAnimationID = 0;
-      graph.laser = false;                       //magic
+      graph.laser = true;                       //magic
       graph.removeStartTime = 0;
       graph.removeAnimationID = 0;
       graph.removeStaticAnimationID = 0;
@@ -84,8 +84,8 @@ RedwoodHighFrequencyTrading.factory("Graphing", function () {
       graph.currentBuyTick = [];
 
       if(graph.laser){
-         graph.fastDelay = 200;
-         graph.slowDelay = 1000;
+         graph.fastDelay = 100;
+         graph.slowDelay = 500;
       }
 
       graph.getCurOffsetTime = function () {
@@ -301,7 +301,8 @@ RedwoodHighFrequencyTrading.factory("Graphing", function () {
                      return graphRefr.elementHeight / 2 + (currentBuy * graphRefr.elementHeight / graphRefr.priceRange);
                })
                
-               .attr("class", styleClassName);
+               .attr("class", styleClassName)
+
          }
          if (currentSell != null){
             this.marketSVG.append("line")
@@ -319,7 +320,8 @@ RedwoodHighFrequencyTrading.factory("Graphing", function () {
                      return graphRefr.elementHeight / 2 - (currentSell * graphRefr.elementHeight / graphRefr.priceRange);
                })
                
-               .attr("class", styleClassName);
+               .attr("class", styleClassName)  
+
          }
       };
 
@@ -464,7 +466,7 @@ RedwoodHighFrequencyTrading.factory("Graphing", function () {
                   return d.price - d.FPC > 0 ? "my-positive-transactions" : "my-negative-transactions";
                }
                else return "other-transactions";
-            })
+            })            
       }
       graph.drawTransactions = function (graphRefr, historyDataSet, myId) {
          graphRefr.marketSVG.selectAll("line.my-positive-transactions line.my-negative-transactions line.other-transactions")
@@ -523,11 +525,50 @@ RedwoodHighFrequencyTrading.factory("Graphing", function () {
             })
       };
 
+      graph.NewLine = function (x1, x2, yOffset, lineID, destination) { //generates new line and stores to corresponding grup
+         var NewLine = {
+            "x1": x1,
+            "x2": x2,
+            "y1": yOffset,
+            "y2": yOffset,
+            "id": lineID,
+            "class": "my-buy-offer"
+         };
+         if(destination == "past"){
+            this.PastLines.push(NewLine);
+         }
+         if(destination == "present"){
+            this.PresentLines.push(NewLine);
+         }
+         if(destination == "future"){
+            this.FutureLines.push(NewLine);
+         }
+      };
+
+      // graph.Shift
+
+      graph.ManageLines = function (line, destination, append) {
+         if(destination == "past"){
+            if(append){                   //add to past group
+               this.PastLines.push(line);
+            }
+            else{                         
+
+            }
+         }
+         if(destination == "present"){
+            this.PresentLines.push(line);
+         }
+         if(destination == "future"){
+            this.FutureLines.push(line);
+         }
+      };
+
       graph.callDrawSpreadTick = function (yPos, speed, runtime, static, elementID, remove, xPos, segment){
          if(graph.laser){
             if(speed){
                if(remove){
-                  graph.DrawLaser(this, yPos, xPos, this.fastDelay, runtime, elementID, static, this.elementWidth);  //draw line off of the screen
+                  graph.DrawLaser(this, yPos, xPos, this.fastDelay, runtime, elementID, static, 50 + this.elementWidth);  //draw line off of the screen
                }
                else{
                   graph.DrawLaser(this, yPos, xPos, this.fastDelay, runtime, elementID, static, this.elementWidth / 2);
@@ -535,7 +576,7 @@ RedwoodHighFrequencyTrading.factory("Graphing", function () {
             }
             else{
                if(remove){
-                  graph.DrawLaser(this, yPos, xPos, this.slowDelay, runtime, elementID, static, this.elementWidth);  //draw line off of the screen
+                  graph.DrawLaser(this, yPos, xPos, this.slowDelay, runtime, elementID, static, 50 + this.elementWidth);  //draw line off of the screen
                }
                else{
                   graph.DrawLaser(this, yPos, xPos, this.slowDelay, runtime, elementID, static, this.elementWidth / 2);
@@ -568,26 +609,47 @@ RedwoodHighFrequencyTrading.factory("Graphing", function () {
          }         
       };
 
+      graph.DrawBox = function (graphRefr, y1, shift, y2, elementID) {
+         let height = Math.abs(y1 - y2);
+         let yPos = (y1 + y2) / 2;
+         //let yPos = y1 > y2 ? y1 : y2;
+         // console.log(y1, y2, yPos, shift, graphRefr.elementHeight);
+         this.marketSVG.append("rect")
+            .attr("id", elementID)
+            .attr("opacity", .2)
+            .attr("x", graphRefr.elementWidth / 2 - 20)
+            .attr("width", 40)
+            // .attr("y", (yPos - shift) / 2)
+            .attr("y", (graphRefr.elementHeight / 2 ) - (height / 2) + (shift * 2))
+            .attr("height", height)
+            .style("fill", "Aqua")
+      };
+
       graph.DrawLaser = function (graphRefr, yPos, xOffset, duration, runtime, elementID, static, distance) {
          let progress = Math.min(runtime / duration, 1);           //percentage of duration ms
-         let x1,x2;
+         let x1,x2, color, op;
          if(static){
-            x1 = graphRefr.elementWidth / 2 + 20;        //xOffset OF 0 GRAPHS FROM RHS, WIDTH/2 FROM MIDPOINT
-            x2 = graphRefr.elementWidth / 2 - 20;
+            // color = "magenta";
+            op = .25;
+            x1 = graphRefr.elementWidth / 2 + 10;        //xOffset OF 0 GRAPHS FROM RHS, WIDTH/2 FROM MIDPOINT
+            x2 = graphRefr.elementWidth / 2 - 10;
          }
          else{
-            x1 = graphRefr.elementWidth - xOffset - (distance * progress).toFixed(2) + 20;        //xOffset OF 0 GRAPHS FROM RHS, WIDTH/2 FROM MIDPOINT
-            x2 = graphRefr.elementWidth - xOffset - (distance * progress).toFixed(2) - 20;
+            // color = "blue";
+            op = .25;
+            x1 = graphRefr.elementWidth - xOffset - (distance * progress).toFixed(2) - 10;        //xOffset OF 0 GRAPHS FROM RHS, WIDTH/2 FROM MIDPOINT
+            x2 = graphRefr.elementWidth - xOffset - (distance * progress).toFixed(2) + 10;
          }
-         
+         if(yPos < 0) yPos = 0;
          if(x2 < 0) x2 = 0;
          this.marketSVG.append("line")
             .attr("id", elementID)
-            .attr("opacity", .3)
+            .attr("opacity", op)
             .attr("x1", x1)
             .attr("x2", x2)
             .attr("y1", yPos)
             .attr("y2", yPos)
+            .style("stroke", color)
             .attr("class", "my-buy-offer");
       };
 

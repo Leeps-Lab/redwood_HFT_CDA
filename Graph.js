@@ -284,7 +284,7 @@ RedwoodHighFrequencyTrading.factory("Graphing", function () {
          }
       };
 
-      graph.drawLaserMarket = function (graphRefr, historyDataSet, currentSell, currentBuy, styleClassName) {
+      graph.drawLaserMarket = function (graphRefr, currentSell, currentBuy, styleClassName) {
          if (currentBuy != null) {
             this.marketSVG.append("line")
                .attr("id","REMOVE")
@@ -382,26 +382,44 @@ RedwoodHighFrequencyTrading.factory("Graphing", function () {
       };
 
       graph.drawLaserOffers = function (graphRefr, dataHistory){
+         var p,q;
          for (var user of dataHistory.group) {
-            if (user !== dataHistory.myId && dataHistory.playerData[user].curBuyOffer !== null && dataHistory.playerData[user].curSellOffer !== null) {
-               let p = (dataHistory.playerData[user].curSellOffer[1] - dataHistory.curFundPrice[1]) * graphRefr.widthScale;  //added width scale 7/27/17
-               let q = (dataHistory.curFundPrice[1] - dataHistory.playerData[user].curBuyOffer[1]) * graphRefr.widthScale;
-               this.drawLaserMarket(graphRefr, dataHistory.playerData[user].pastBuyOffers, p, q, "others-buy-offer");
-               graphRefr.currentSellTick[user] = p;
+            if (user !== dataHistory.myId && dataHistory.playerData[user].curBuyOffer !== null) {
+               q = (dataHistory.curFundPrice[1] - dataHistory.playerData[user].curBuyOffer[1]) * graphRefr.widthScale;
                graphRefr.currentBuyTick[user] = q;
             }
+            else if(user !== dataHistory.myId && dataHistory.playerData[user].curBuyOffer == null){
+               q = null;
+            }
+            if (user !== dataHistory.myId && dataHistory.playerData[user].curSellOffer !== null) {
+               p = (dataHistory.playerData[user].curSellOffer[1] - dataHistory.curFundPrice[1]) * graphRefr.widthScale;  //added width scale 7/27/17
+               graphRefr.currentSellTick[user] = p;
+            }
+            else if(user !== dataHistory.myId && dataHistory.playerData[user].curSellOffer == null){
+               p = null;
+            }
+
+            this.drawLaserMarket(graphRefr, p, q, "others-buy-offer");
          }
-         if (dataHistory.playerData[dataHistory.myId].curBuyOffer !== null && dataHistory.playerData[dataHistory.myId].curSellOffer !== null) {
-            let p = (dataHistory.playerData[dataHistory.myId].curSellOffer[1] - dataHistory.curFundPrice[1]) * graphRefr.widthScale;  //added width scale 7/27/17
-            let q = (dataHistory.curFundPrice[1] - dataHistory.playerData[dataHistory.myId].curBuyOffer[1]) * graphRefr.widthScale;
-            this.drawLaserMarket(graphRefr, dataHistory.playerData[dataHistory.myId].pastBuyOffers, p, q, "my-buy-offer");
-            graphRefr.currentSellTick[dataHistory.myId] = p;
+         if (dataHistory.playerData[dataHistory.myId].curBuyOffer !== null) {
+            q = (dataHistory.curFundPrice[1] - dataHistory.playerData[dataHistory.myId].curBuyOffer[1]) * graphRefr.widthScale;
             graphRefr.currentBuyTick[dataHistory.myId] = q;
          }
+         else{
+            q = null;
+         }
+         if (dataHistory.playerData[dataHistory.myId].curSellOffer !== null) {
+            p = (dataHistory.playerData[dataHistory.myId].curSellOffer[1] - dataHistory.curFundPrice[1]) * graphRefr.widthScale;  //added width scale 7/27/17
+            graphRefr.currentSellTick[dataHistory.myId] = p;
+         }
+         else{
+            p = null;
+         }
+         this.drawLaserMarket(graphRefr, p, q, "my-buy-offer");
       }
 
       graph.drawLaserTransactions = function (graphRefr, historyDataSet, myId){
-         graphRefr.marketSVG.selectAll("line.my-positive-transactions line.my-negative-transactions line.other-transactions")
+         graphRefr.marketSVG.selectAll("line.my-positive-transactions line.my-negative-transactions line.other-negative-transactions line.other-positive-transactions")
             .data(historyDataSet)
             .enter()
             .append("line")
@@ -422,11 +440,21 @@ RedwoodHighFrequencyTrading.factory("Graphing", function () {
                   else if(graphRefr.currentBuyTick[d.subjectID] != graphRefr.currentTransaction && graphRefr.currTransactionID != d.msgId){           //The user's tick shifted from a FPC and immediately transacted
                      graphRefr.currTransactionID = d.msgId;                                                                                        //update variable saving msgID of current transaction
                      graphRefr.currentTransaction = graphRefr.currentBuyTick[d.subjectID];                                                            //update variable saving current tick location
-                     graphRefr.op = 1;                                                                                                             //reset the opacity
+                     if(d.buyerID != myId && d.sellerID != myId){    //other transactions should be lighter
+                        graphRefr.op = .5;
+                     }
+                     else{
+                        graphRefr.op = 1; 
+                     }                                                                                                               //reset the opacity
                      return graphRefr.elementHeight / 2 - (graphRefr.currentBuyTick[d.subjectID] * graphRefr.elementHeight / graphRefr.priceRange);     //Let old transaction line fade out at same spot
                   }
                   else if(graphRefr.currentBuyTick[d.subjectID] == graphRefr.currentTransaction && graphRefr.currTransactionID != d.msgId){           //Redraw the transaction line at the same point
-                     graphRefr.op = 1;                                                                                                             //reset the opacity
+                     if(d.buyerID != myId && d.sellerID != myId){    //other transactions should be lighter
+                        graphRefr.op = .5;
+                     }
+                     else{
+                        graphRefr.op = 1; 
+                     }                                                                                                               //reset the opacity
                      graphRefr.currTransactionID = d.msgId;                                                                                        //update msgID
                   }
                   else{//currentBuyTick[d.subjectID] == this.currentTransaction && this.currTransactionID == d.msgID                                  //No FPC, so continue to graph user's transaction
@@ -445,11 +473,21 @@ RedwoodHighFrequencyTrading.factory("Graphing", function () {
                   else if(graphRefr.currentSellTick[d.subjectID] != graphRefr.currentTransaction && graphRefr.currTransactionID != d.msgId){           //The user's tick shifted from a FPC and immediately transacted
                      graphRefr.currTransactionID = d.msgId;                                                                                        //update variable saving msgID of current transaction
                      graphRefr.currentTransaction = graphRefr.currentSellTick[d.subjectID];                                                            //update variable saving current tick location
-                     graphRefr.op = 1;                                                                                                             //reset the opacity
+                     if(d.buyerID != myId && d.sellerID != myId){    //other transactions should be lighter
+                        graphRefr.op = .5;
+                     }
+                     else{
+                        graphRefr.op = 1; 
+                     }                                                                                                              //reset the opacity
                      return graphRefr.elementHeight / 2 - (graphRefr.currentSellTick[d.subjectID] * graphRefr.elementHeight / graphRefr.priceRange);     //Let old transaction line fade out at same spot
                   }
                   else if(graphRefr.currentSellTick[d.subjectID] == graphRefr.currentTransaction && graphRefr.currTransactionID != d.msgId){           //Redraw the transaction line at the same point
-                     graphRefr.op = 1;                                                                                                             //reset the opacity
+                     if(d.buyerID != myId && d.sellerID != myId){    //other transactions should be lighter
+                        graphRefr.op = .5;
+                     }
+                     else{
+                        graphRefr.op = 1; 
+                     }                                                                                                               //reset the opacity
                      graphRefr.currTransactionID = d.msgId;                                                                                        //update msgID
                   }
                   else{//currentSellTick[d.subjectID] == this.currentTransaction && this.currTransactionID == d.msgID                                  //No FPC, so continue to graph user's transaction
@@ -465,7 +503,14 @@ RedwoodHighFrequencyTrading.factory("Graphing", function () {
                else if (d.sellerID == myId) {
                   return d.price - d.FPC > 0 ? "my-positive-transactions" : "my-negative-transactions";
                }
-               else return "other-transactions";
+               else{
+                  if(d.buyerID != 0){  //some other user bought
+                     return d.FPC - d.price > 0 ? "other-positive-transactions" : "other-negative-transactions";
+                  }
+                  else if (d.sellerID != 0) {
+                     return d.price - d.FPC > 0 ? "other-positive-transactions" : "other-negative-transactions";
+                  }
+               }
             })            
       }
       graph.drawTransactions = function (graphRefr, historyDataSet, myId) {
@@ -512,17 +557,15 @@ RedwoodHighFrequencyTrading.factory("Graphing", function () {
             })
       };
       graph.drawFundamentalValue = function (graphRefr, dataHistory) {  //append a flashing yellow line every jump
-         this.marketSVG.append("line")
+         graphRefr.FPCop -= .05;
+         this.marketSVG.append("rect")
             .attr("id","REMOVE")
-            .attr("opacity", graphRefr.FPCop)
-            .attr("x1", this.elementWidth / 2 - 30)
-            .attr("x2", this.elementWidth / 2 + 30)
-            .attr("y1", this.elementHeight / 2)
-            .attr("y2", this.elementHeight / 2)
-            .attr("class", function (d) {
-               graphRefr.FPCop -= .05;
-               return "my-fpc-flash";
-            })
+            .attr("stroke-opacity", graphRefr.FPCop)
+            .attr("x", this.elementWidth / 2 - 30)
+            .attr("y", this.elementHeight / 2 - 5)
+            .attr("height", 10)
+            .attr("width", 60)
+            .attr("class", "my-fpc-flash");   
       };
 
       graph.NewLine = function (x1, x2, yOffset, lineID, destination) { //generates new line and stores to corresponding grup
@@ -610,17 +653,14 @@ RedwoodHighFrequencyTrading.factory("Graphing", function () {
       };
 
       graph.DrawBox = function (graphRefr, y1, shift, y2, elementID) {
-         let height = Math.abs(y1 - y2);
-         let yPos = (y1 + y2) / 2;
-         //let yPos = y1 > y2 ? y1 : y2;
-         // console.log(y1, y2, yPos, shift, graphRefr.elementHeight);
+         let height = Math.abs(y2 - y1);
+         let yPos = (graphRefr.elementHeight / 2 ) - (height / 2) + (shift * 2);
          this.marketSVG.append("rect")
             .attr("id", elementID)
             .attr("opacity", .2)
             .attr("x", graphRefr.elementWidth / 2 - 20)
             .attr("width", 40)
-            // .attr("y", (yPos - shift) / 2)
-            .attr("y", (graphRefr.elementHeight / 2 ) - (height / 2) + (shift * 2))
+            .attr("y", yPos)
             .attr("height", height)
             .style("fill", "Aqua")
       };

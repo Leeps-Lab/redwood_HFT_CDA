@@ -105,8 +105,10 @@ svg {
 }
 
 .my-fpc-flash {
-    stroke: rgb(255,255,0);
+    stroke: gold;
     stroke-width: 5;
+    fill-opacity: 0;
+    fill: pink;
 }
 
 .my-profit-snipe {
@@ -147,4 +149,16 @@ svg {
 .other-transactions {
     stroke: gray;
     stroke-width: 3;
+}
+
+.other-positive-transactions {
+    stroke: #3D7A5C;
+    stroke-width: 5;
+    /*opacity: .5;*/
+}
+
+.other-negative-trasactions {
+    stroke: #94476B;
+    stroke-width: 5;
+    /*opacity: .5;*/
 }

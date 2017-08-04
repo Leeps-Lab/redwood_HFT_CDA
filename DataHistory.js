@@ -189,12 +189,16 @@ RedwoodHighFrequencyTrading.factory("DataHistory", function () {
       dataHistory.storeTransaction = function (msg) {
          if (msg.buyerID == this.myId) {                                            // if I'm the buyer
             this.profit += msg.FPC - msg.price;                                     //fundPrice - myPrice
+            console.log("BUY");
             //console.log(msg.buyerID, msg.FPC - msg.price, msg.sellerID);
          }
          else if (msg.sellerID == this.myId) {                                      //if I'm the seller
             this.profit += msg.price - msg.FPC;
+            console.log("SELL");
             //console.log(msg.sellerID, msg.price - msg.FPC, msg.buyerID);
          }
+         
+
          if (msg.buyerID != 0) {
             if (this.playerData[msg.buyerID].curBuyOffer !== null) this.storeBuyOffer(msg.timeStamp, msg.buyerID);
 
@@ -213,6 +217,7 @@ RedwoodHighFrequencyTrading.factory("DataHistory", function () {
          if(msg.subjectID > 0){                                               //ADDED 7/21/17 to fix transaction horizontal lines
             this.transactions[0] = msg;                                       //added 7/24/17 -> we only need to graph the most recent transaction
          }
+         
       };
 
       dataHistory.storeSpeedChange = function (msg) { //("USER", "USPEED", [rs.user_id, $scope.using_speed, $scope.tradingGraph.getCurOffsetTime()])

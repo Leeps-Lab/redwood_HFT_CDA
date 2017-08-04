@@ -697,12 +697,13 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
                   $scope.mousePressed = false;                                   //reset the flag
                   if (event.offsetY <= $scope.tradingGraph.elementHeight / 2) {      //you left the svg right of the center tick
                      $scope.spread = (5 - Math.abs(10 * event.offsetY / $scope.tradingGraph.elementHeight)).toPrecision(2); //.1 increments
-                     if($scope.spread > 5){
-                        $scope.spread = 5;                                       //cap max spread to 5
-                     }
+                     if($scope.spread > 5) $scope.spread = 5;                                       //cap max spread to 5
+                     if($scope.spread <= .1) $scope.spread = .1;
                   } 
-                  else {                                                            //you clicked left of the center tick
-                     $scope.spread = 0.1;                                             // min spread subject to future changes
+                  else {                                                            //you clicked below of the center tick
+                     $scope.spread = (((10 * event.offsetY - $scope.tradingGraph.elementHeight / 5) / $scope.tradingGraph.elementHeight) - 5).toPrecision(2); //.1 increments
+                     if($scope.spread > 5) $scope.spread = 5;                                       //cap max spread to 5
+                     if($scope.spread <= .1) $scope.spread = .1;
                   }
                   var msg = new Message("USER", "UUSPR", [rs.user_id, $scope.spread, $scope.tradingGraph.getCurOffsetTime()]);
                   $scope.sendToGroupManager(msg);
@@ -717,12 +718,13 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
                $scope.mousePressed = false;                                      //reset the flag
                if (event.offsetY <= $scope.tradingGraph.elementHeight / 2) {      //you clicked right of the center tick
                   $scope.spread = (5 - Math.abs(10 * event.offsetY / $scope.tradingGraph.elementHeight)).toPrecision(2); //.1 increments
-                  if($scope.spread > 5){
-                     $scope.spread = 5;                                          //cap max spread to 5
-                  }
+                  if($scope.spread > 5) $scope.spread = 5;                                       //cap max spread to 5
+                  if($scope.spread <= .1) $scope.spread = .1;
                } 
                else {                                                            //you clicked left of the center tick
-                  $scope.spread = 0.1;                                             // min spread subject to future changes
+                  $scope.spread = (((10 * event.offsetY - $scope.tradingGraph.elementHeight / 5) / $scope.tradingGraph.elementHeight) - 5).toPrecision(2); //.1 increments
+                  if($scope.spread > 5) $scope.spread = 5;                                       //cap max spread to 5
+                  if($scope.spread <= .1) $scope.spread = .1;   
                }
                var msg = new Message("USER", "UUSPR", [rs.user_id, $scope.spread, $scope.tradingGraph.getCurOffsetTime()]);
                $scope.sendToGroupManager(msg);

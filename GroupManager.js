@@ -184,7 +184,7 @@ Redwood.factory("GroupManager", function () {
 
       groupManager.sendToRemoteMarket = function(leepsMsg){
          var msg = leepsMsgToOuch(leepsMsg);
-         // console.log(leepsMsg);
+         console.log(leepsMsg);
          this.socket.send(msg);
       }
 
@@ -201,7 +201,7 @@ Redwood.factory("GroupManager", function () {
          //    console.log(msg);
          // }
          if(msg.msgType === "C_TRA"){
-            //console.log(msg);
+            if(msg.sellerID != 0) console.log(msg);
             this.sendToMarketAlgorithms(msg);
          }
          else {
@@ -279,8 +279,9 @@ Redwood.factory("GroupManager", function () {
          
          // create the outside investor leeps message
          var msgType = this.investorArrivals[this.investorIndex][1] === 1 ? "EBUY" : "ESELL";
+         console.log(this.investorArrivals[this.investorIndex][1]);
          if(msgType === "EBUY"){
-            var msg2 = new OuchMessage("EBUY", 0, 214748.3647, true);      //changed 7/20/17
+            var msg2 = new OuchMessage("EBUY", 0, 214748.3647, true);      //changed 7/20/17 214748
          }
          else if(msgType === "ESELL"){
             var msg2 = new OuchMessage("ESELL", 0, 0, true);      //changed 7/20/17

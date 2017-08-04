@@ -359,7 +359,7 @@ function ouchToLeepsMsg(ouchMsg){
       var msg = new ItchMessage("C_TRA", subjId, price, timeStamp, 0, subjId);
     }
     else{
-      console.error("Unable to recognize type of tranaction: " + transactionType);
+      console.error("Unable to recognize type of transaction: " + transactionType);
     }
     msg.msgId = msgId;
 

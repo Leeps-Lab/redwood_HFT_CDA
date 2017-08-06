@@ -180,6 +180,7 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
                }
             });
 
+
          $scope.FPCpoll = function () {
             if($scope.tradingGraph.oldFundPrice != $scope.dHistory.curFundPrice[1]){
                $scope.event = $scope.e.JUMP;

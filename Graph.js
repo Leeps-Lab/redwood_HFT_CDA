@@ -435,7 +435,7 @@ RedwoodHighFrequencyTrading.factory("Graphing", function () {
 
                   if(graphRefr.currentBuyTick[d.subjectID] != graphRefr.currentTransaction && graphRefr.currTransactionID == d.msgId){                //The user's tick shifted from a FPC, but hasnt transacted
                      graphRefr.op -= .05; 
-                     return graphRefr.elementHeight / 2 - (graphRefr.currentTransaction * graphRefr.elementHeight / graphRefr.priceRange);           //Let old transaction line fade out at same spot
+                     return graphRefr.elementHeight / 2 + (graphRefr.currentTransaction * graphRefr.elementHeight / graphRefr.priceRange);           //Let old transaction line fade out at same spot
                   }  
                   else if(graphRefr.currentBuyTick[d.subjectID] != graphRefr.currentTransaction && graphRefr.currTransactionID != d.msgId){           //The user's tick shifted from a FPC and immediately transacted
                      graphRefr.currTransactionID = d.msgId;                                                                                        //update variable saving msgID of current transaction
@@ -445,8 +445,9 @@ RedwoodHighFrequencyTrading.factory("Graphing", function () {
                      }
                      else{
                         graphRefr.op = 1; 
+                        dataHistory.SnipeTransaction = false;
                      }                                                                                                               //reset the opacity
-                     return graphRefr.elementHeight / 2 - (graphRefr.currentBuyTick[d.subjectID] * graphRefr.elementHeight / graphRefr.priceRange);     //Let old transaction line fade out at same spot
+                     return graphRefr.elementHeight / 2 + (graphRefr.currentBuyTick[d.subjectID] * graphRefr.elementHeight / graphRefr.priceRange);     //Let old transaction line fade out at same spot
                   }
                   else if(graphRefr.currentBuyTick[d.subjectID] == graphRefr.currentTransaction && graphRefr.currTransactionID != d.msgId){           //Redraw the transaction line at the same point
                      if(d.buyerID != myId && d.sellerID != myId){    //other transactions should be lighter
@@ -454,12 +455,13 @@ RedwoodHighFrequencyTrading.factory("Graphing", function () {
                      }
                      else{
                         graphRefr.op = 1; 
+                        dataHistory.SnipeTransaction = false;
                      }                                                                                                               //reset the opacity
                      graphRefr.currTransactionID = d.msgId;                                                                                        //update msgID
                   }
                   else{//currentBuyTick[d.subjectID] == this.currentTransaction && this.currTransactionID == d.msgID                                  //No FPC, so continue to graph user's transaction
                      graphRefr.op -= .05;                                                                                                          //Decrement opacity to let line fade
-                     return graphRefr.elementHeight / 2 - (graphRefr.currentBuyTick[d.subjectID] * graphRefr.elementHeight / graphRefr.priceRange);
+                     return graphRefr.elementHeight / 2 + (graphRefr.currentBuyTick[d.subjectID] * graphRefr.elementHeight / graphRefr.priceRange);
                   }
                }
                else{                   //we know to draw line to the current sell offer
@@ -478,6 +480,7 @@ RedwoodHighFrequencyTrading.factory("Graphing", function () {
                      }
                      else{
                         graphRefr.op = 1; 
+                        dataHistory.SnipeTransaction = false;
                      }                                                                                                              //reset the opacity
                      return graphRefr.elementHeight / 2 - (graphRefr.currentSellTick[d.subjectID] * graphRefr.elementHeight / graphRefr.priceRange);     //Let old transaction line fade out at same spot
                   }
@@ -487,6 +490,7 @@ RedwoodHighFrequencyTrading.factory("Graphing", function () {
                      }
                      else{
                         graphRefr.op = 1; 
+                        dataHistory.SnipeTransaction = false;
                      }                                                                                                               //reset the opacity
                      graphRefr.currTransactionID = d.msgId;                                                                                        //update msgID
                   }
@@ -512,7 +516,24 @@ RedwoodHighFrequencyTrading.factory("Graphing", function () {
                   }
                }
             })            
-      }
+      };
+
+      graph.DrawSnipe = function(graphRefr, dataHistory){
+         if(dataHistory.snipeOP <= 0) dataHistory.SnipeTransaction = false;
+         if(dataHistory.SnipeTransaction){
+            dataHistory.snipeOP -= .01;
+            console.log(dataHistory.snipeOP);
+            this.marketSVG.append("rect")
+            .attr("id", "REMOVE")
+            .style("fill-opacity", dataHistory.snipeOP)
+            .attr("x", 0)
+            .attr("width", graphRefr.elementWidth)
+            .attr("y", 0)
+            .attr("height", graphRefr.elementHeight)
+            .attr("class", dataHistory.SnipeStyle)
+         }
+      };
+
       graph.drawTransactions = function (graphRefr, historyDataSet, myId) {
          graphRefr.marketSVG.selectAll("line.my-positive-transactions line.my-negative-transactions line.other-transactions")
             .data(historyDataSet)
@@ -652,9 +673,15 @@ RedwoodHighFrequencyTrading.factory("Graphing", function () {
          }         
       };
 
+
+
       graph.DrawBox = function (graphRefr, y1, shift, y2, elementID) {
+         let color = "Aqua";                    //default color
          let height = Math.abs(y2 - y1);
          let yPos = (graphRefr.elementHeight / 2 ) - (height / 2) + (shift * 2);
+         if(dataHistory.playerData[dataHistory.myId].spread == dataHistory.lowestSpread){  //I have the best spread
+            color = "LimeGreen";        //best spread color
+         }
          this.marketSVG.append("rect")
             .attr("id", elementID)
             .attr("opacity", .2)
@@ -662,7 +689,7 @@ RedwoodHighFrequencyTrading.factory("Graphing", function () {
             .attr("width", 40)
             .attr("y", yPos)
             .attr("height", height)
-            .style("fill", "Aqua")
+            .style("fill", color)
       };
 
       graph.DrawLaser = function (graphRefr, yPos, xOffset, duration, runtime, elementID, static, distance) {
@@ -911,6 +938,7 @@ RedwoodHighFrequencyTrading.factory("Graphing", function () {
          if(graph.laser){
             this.drawLaserOffers(graphRefr, dataHistory);
             this.drawLaserTransactions(graphRefr, dataHistory.transactions, dataHistory.myId);
+            this.DrawSnipe(graphRefr, dataHistory);
          }
          else{
             this.drawOffers(graphRefr, dataHistory);

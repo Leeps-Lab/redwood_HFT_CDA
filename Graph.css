@@ -162,3 +162,11 @@ svg {
     stroke-width: 5;
     /*opacity: .5;*/
 }
+
+.snipe-profit {
+    fill: green;
+}
+
+.snipe-loss {
+    fill: red;
+}

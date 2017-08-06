@@ -184,7 +184,7 @@ Redwood.factory("GroupManager", function () {
 
       groupManager.sendToRemoteMarket = function(leepsMsg){
          var msg = leepsMsgToOuch(leepsMsg);
-         console.log(leepsMsg);
+         // console.log(leepsMsg);
          this.socket.send(msg);
       }
 
@@ -279,7 +279,6 @@ Redwood.factory("GroupManager", function () {
          
          // create the outside investor leeps message
          var msgType = this.investorArrivals[this.investorIndex][1] === 1 ? "EBUY" : "ESELL";
-         console.log(this.investorArrivals[this.investorIndex][1]);
          if(msgType === "EBUY"){
             var msg2 = new OuchMessage("EBUY", 0, 214748.3647, true);      //changed 7/20/17 214748
          }

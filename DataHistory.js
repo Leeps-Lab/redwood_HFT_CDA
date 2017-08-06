@@ -33,6 +33,10 @@ RedwoodHighFrequencyTrading.factory("DataHistory", function () {
       dataHistory.fastSnipers = 0;
       dataHistory.totalTraders = 0;
 
+      dataHistory.SnipeTransaction = false;
+      dataHistory.SnipeStyle = "";
+      dataHistory.snipeOP = 1;
+
       dataHistory.recvMessage = function (msg) {
          switch (msg.msgType) {
             case "FPC"      :
@@ -198,6 +202,20 @@ RedwoodHighFrequencyTrading.factory("DataHistory", function () {
             //console.log(msg.sellerID, msg.price - msg.FPC, msg.buyerID);
          }
          
+         if(this.playerData[this.myId].state === "Snipe"){     //snipe transaction
+            if(msg.buyerID == this.myId){
+               console.log("snipe buy");
+               this.SnipeTransaction = true;
+               this.SnipeStyle = msg.price -  msg.FPC > 0 ? "snipe-loss" : "snipe-profit";
+               this.snipeOP = .5;
+            }
+            if(msg.sellerID == myId){
+               console.log("snipe sell");
+               this.SnipeTransaction = true;
+               this.SnipeStyle = msg.FPC - msg.price > 0 ? "snipe-loss" : "snipe-profit";
+               this.snipeOP = .5;
+            }
+         }
 
          if (msg.buyerID != 0) {
             if (this.playerData[msg.buyerID].curBuyOffer !== null) this.storeBuyOffer(msg.timeStamp, msg.buyerID);

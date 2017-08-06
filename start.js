@@ -26,6 +26,7 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
          $scope.offsetX = 0;
          $scope.jumpOffsetY = 0;
          $scope.continueTime = 0;
+         $scope.LaserSound  = "/static/experiments/redwood-high-frequency-trading-remote/Sounds/laser1.wav";
 
          $scope.s = {
             NO_LINES: 0,
@@ -713,6 +714,8 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
                   $scope.oldOffsetY = $scope.curOffsetY;                                //update our last y position for receding lines
                   $scope.curOffsetY = event.offsetY;                             //set event to be handled in FSM
                   $scope.event = $scope.e.CLICK;
+                  var a = new Audio($scope.LaserSound);
+                  a.play();
                }
             })
             .mouseup( function(event) {
@@ -733,6 +736,8 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
                $scope.oldOffsetY = $scope.curOffsetY;                                   //update our last y position for receding lines
                $scope.curOffsetY = event.offsetY;                                //set event to be handled in FSM
                $scope.event = $scope.e.CLICK;
+               var a = new Audio("/static/experiments/redwood-high-frequency-trading-remote/Sounds/laser1.wav");
+               a.play();   
             });
 
 

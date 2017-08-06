@@ -521,8 +521,7 @@ RedwoodHighFrequencyTrading.factory("Graphing", function () {
       graph.DrawSnipe = function(graphRefr, dataHistory){
          if(dataHistory.snipeOP <= 0) dataHistory.SnipeTransaction = false;
          if(dataHistory.SnipeTransaction){
-            dataHistory.snipeOP -= .01;
-            console.log(dataHistory.snipeOP);
+            dataHistory.snipeOP -= .03;
             this.marketSVG.append("rect")
             .attr("id", "REMOVE")
             .style("fill-opacity", dataHistory.snipeOP)

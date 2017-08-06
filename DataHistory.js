@@ -37,6 +37,11 @@ RedwoodHighFrequencyTrading.factory("DataHistory", function () {
       dataHistory.SnipeStyle = "";
       dataHistory.snipeOP = 1;
 
+      dataHistory.positive_sound;
+      dataHistory.negative_sound;
+      // dataHistory.positive_sound = "/static/experiments/redwood-high-frequency-trading-remote/Sounds/coin.ogg";
+      // dataHistory.negative_sound = "/static/experiments/redwood-high-frequency-trading-remote/Sounds/crying.mp3";
+
       dataHistory.recvMessage = function (msg) {
          switch (msg.msgType) {
             case "FPC"      :
@@ -86,6 +91,8 @@ RedwoodHighFrequencyTrading.factory("DataHistory", function () {
       
       //initializes player data storage
       dataHistory.init = function () {
+         dataHistory.positive_sound = new Audio("/static/experiments/redwood-high-frequency-trading-remote/Sounds/coin.ogg");
+         dataHistory.negative_sound = new Audio("/static/experiments/redwood-high-frequency-trading-remote/Sounds/crying.mp3");
          for (var uid of this.group) {
             this.playerData[uid] = {
                speed: false,
@@ -193,11 +200,35 @@ RedwoodHighFrequencyTrading.factory("DataHistory", function () {
       dataHistory.storeTransaction = function (msg) {
          if (msg.buyerID == this.myId) {                                            // if I'm the buyer
             this.profit += msg.FPC - msg.price;                                     //fundPrice - myPrice
+            if(msg.FPC - msg.price){
+               // var p = new Audio(this.positive_sound);
+               // p.volume = .3;
+               // p.play();
+               dataHistory.positive_sound.play();
+            }
+            else{
+               // var n = new Audio(this.negative_sound);
+               // n.volume = .3;
+               // n.play();
+               dataHistory.negative_sound.play();
+            }
             console.log("BUY");
             //console.log(msg.buyerID, msg.FPC - msg.price, msg.sellerID);
          }
          else if (msg.sellerID == this.myId) {                                      //if I'm the seller
             this.profit += msg.price - msg.FPC;
+         if(msg.price - msg.FPC){
+               // var p = new Audio(this.positive_sound);
+               // p.volume = .3;
+               // p.play();
+               dataHistory.positive_sound.play();
+            }
+            else{
+               // var n = new Audio(this.negative_sound);
+               // n.volume = .3; 
+               // n.play();
+               dataHistory.negative_sound.play();
+            }
             console.log("SELL");
             //console.log(msg.sellerID, msg.price - msg.FPC, msg.buyerID);
          }

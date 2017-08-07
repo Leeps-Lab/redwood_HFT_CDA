@@ -37,8 +37,12 @@ RedwoodHighFrequencyTrading.factory("DataHistory", function () {
       dataHistory.SnipeStyle = "";
       dataHistory.snipeOP = 1;
 
-      dataHistory.positive_sound;
-      dataHistory.negative_sound;
+      dataHistory.positive_sound = new Audio("/static/experiments/redwood-high-frequency-trading-remote/Sounds/coin.ogg");
+      dataHistory.positive_sound.volume = .1;
+      dataHistory.negative_sound = new Audio("/static/experiments/redwood-high-frequency-trading-remote/Sounds/crying.mp3");
+      dataHistory.negative_sound.volume = .1;
+      // dataHistory.positive_sound;
+      // dataHistory.negative_sound;
       // dataHistory.positive_sound = "/static/experiments/redwood-high-frequency-trading-remote/Sounds/coin.ogg";
       // dataHistory.negative_sound = "/static/experiments/redwood-high-frequency-trading-remote/Sounds/crying.mp3";
 
@@ -91,8 +95,10 @@ RedwoodHighFrequencyTrading.factory("DataHistory", function () {
       
       //initializes player data storage
       dataHistory.init = function () {
-         dataHistory.positive_sound = new Audio("/static/experiments/redwood-high-frequency-trading-remote/Sounds/coin.ogg");
-         dataHistory.negative_sound = new Audio("/static/experiments/redwood-high-frequency-trading-remote/Sounds/crying.mp3");
+         // dataHistory.positive_sound = new Audio("/static/experiments/redwood-high-frequency-trading-remote/Sounds/coin.ogg");
+         // dataHistory.positive_sound.volume = .1;
+         // dataHistory.negative_sound = new Audio("/static/experiments/redwood-high-frequency-trading-remote/Sounds/crying.mp3");
+         // dataHistory.negative_sound.volume = .1;
          for (var uid of this.group) {
             this.playerData[uid] = {
                speed: false,
@@ -204,6 +210,7 @@ RedwoodHighFrequencyTrading.factory("DataHistory", function () {
                // var p = new Audio(this.positive_sound);
                // p.volume = .3;
                // p.play();
+               console.log(dataHistory.positive_sound.volume);
                dataHistory.positive_sound.play();
             }
             else{
@@ -221,6 +228,7 @@ RedwoodHighFrequencyTrading.factory("DataHistory", function () {
                // var p = new Audio(this.positive_sound);
                // p.volume = .3;
                // p.play();
+               console.log(dataHistory.positive_sound.volume);
                dataHistory.positive_sound.play();
             }
             else{

@@ -26,7 +26,7 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
          $scope.offsetX = 0;
          $scope.jumpOffsetY = 0;
          $scope.continueTime = 0;
-         $scope.LaserSound  = "/static/experiments/redwood-high-frequency-trading-remote/Sounds/laser1.wav";
+         $scope.LaserSound;
 
          $scope.s = {
             NO_LINES: 0,
@@ -118,6 +118,7 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
             $scope.tradingGraph = graphing.makeTradingGraph("graph1", "graph2", data.startTime, data.playerTimeOffsets[rs.user_id]);
             $scope.tradingGraph.init(data.startFP, data.maxSpread, data.startingWealth);
 
+            $scope.AudioInit();
             // set last time and start looping the update function
             $scope.lastTime = getTime();
             // $interval($scope.update, CLOCK_FREQUENCY);
@@ -253,6 +254,7 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
                         $scope.tradingGraph.DrawBox($scope.tradingGraph, $scope.oldOffsetY, $scope.jumpOffsetY, $scope.CalculateYPOS($scope.oldOffsetY), "box"); //shift the spread region by the jump distance
                         $scope.lastEvent = $scope.event;                                        //keep track of the last event
                         $scope.event = $scope.e.NO_EVENT;                                       //clear event, transition to default
+                        $scope.LaserSound.play();
                         break;
 
                      default:                                                                   //no event, so continue drawing the lines
@@ -317,6 +319,7 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
                         $scope.lastEvent = $scope.event;                                        //keep track of the last event
                         $scope.event = $scope.e.NO_EVENT;                                       //clear event
                         $scope.tickState = $scope.s.DRAW_FIRST;                                 //transition to DRAW_FIRST
+                        $scope.LaserSound.play();
                         break;
 
                      default:                                                                   //continue to draw static current spread until the next event
@@ -685,6 +688,12 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
             }
          };
 
+         $scope.AudioInit = function (){
+            $scope.LaserSound = new Audio("/static/experiments/redwood-high-frequency-trading-remote/Sounds/laser1.wav");
+            $scope.LaserSound.volume = .1;
+            $scope.LaserSound.play();
+         };
+
          $("#graph1")
             .mousedown( function(event) {
                $scope.mousePressed = true;                                       //set the flag so in case we leave the svg element we know it was a press
@@ -714,8 +723,10 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
                   $scope.oldOffsetY = $scope.curOffsetY;                                //update our last y position for receding lines
                   $scope.curOffsetY = event.offsetY;                             //set event to be handled in FSM
                   $scope.event = $scope.e.CLICK;
-                  var a = new Audio($scope.LaserSound);
-                  a.play();
+
+                  //var a = new Audio($scope.LaserSound);
+                  //a.play();
+                  $scope.LaserSound.play();
                }
             })
             .mouseup( function(event) {
@@ -736,8 +747,10 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
                $scope.oldOffsetY = $scope.curOffsetY;                                   //update our last y position for receding lines
                $scope.curOffsetY = event.offsetY;                                //set event to be handled in FSM
                $scope.event = $scope.e.CLICK;
-               var a = new Audio("/static/experiments/redwood-high-frequency-trading-remote/Sounds/laser1.wav");
-               a.play();   
+
+               // var a = new Audio("/static/experiments/redwood-high-frequency-trading-remote/Sounds/laser1.wav");
+               // a.play();  
+               $scope.LaserSound.play(); 
             });
 
 

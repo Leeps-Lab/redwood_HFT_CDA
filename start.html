@@ -13,14 +13,14 @@
                     <th class="status-display">Number of Makers: {{dHistory.totalMakers}} ({{dHistory.fastMakers}} fast)</th>
                     <th class="status-display">Spread: {{spread}}</th>
                     <th class="status-display">Current Buy Offer: {{dHistory.playerData[dHistory.myId].curBuyOffer[1] | number : 2}}</th>
-                    <th class="status-display">Fund - CurBuy: {{(dHistory.curFundPrice[1] - dHistory.playerData[dHistory.myId].curBuyOffer[1]) | number : 2}}</th>
+                    <!-- <th class="status-display">Fund - CurBuy: {{(dHistory.curFundPrice[1] - dHistory.playerData[dHistory.myId].curBuyOffer[1]) | number : 2}}</th> -->
                 </tr>
                 <tr>
                     <th></th>
                     <th class="status-display">Number of Snipers: {{dHistory.totalSnipers}} ({{dHistory.fastSnipers}} fast)</th>
                     <th class="status-display">Your Profit: ${{dHistory.profit | number : 2}}</th>
                      <th class="status-display">Current Sell Offer: {{dHistory.playerData[dHistory.myId].curSellOffer[1] | number : 2}}</th>
-                     <th class="status-display">curSell - Fund: {{(dHistory.playerData[dHistory.myId].curSellOffer[1] - dHistory.curFundPrice[1]) | number : 2}}</th>
+                    <!--  <th class="status-display">curSell - Fund: {{(dHistory.playerData[dHistory.myId].curSellOffer[1] - dHistory.curFundPrice[1]) | number : 2}}</th> -->
                 </tr>    
                 <tr>
                     <th></th>

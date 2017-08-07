@@ -170,3 +170,13 @@ svg {
 .snipe-loss {
     fill: red;
 }
+
+.positive-profit {
+    stroke: green;
+    stroke-width: 1;
+}
+
+.negative-profit {
+    stroke: red;
+    stroke-width: 1;
+}

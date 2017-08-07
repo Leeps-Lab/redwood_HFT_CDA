@@ -197,11 +197,7 @@ Redwood.factory("GroupManager", function () {
       // handles a message from the market
       groupManager.recvFromMarket = function (msg) {
          //console.log("Inbound Message", msg);                //debug incoming ITCH messages
-         // if(msg.msgType === "C_USELL"){   //msg.msgType === "C_UBUY" || 
-         //    console.log(msg);
-         // }
          if(msg.msgType === "C_TRA"){
-            if(msg.sellerID != 0) console.log(msg);
             this.sendToMarketAlgorithms(msg);
          }
          else {

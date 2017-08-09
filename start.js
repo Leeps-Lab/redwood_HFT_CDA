@@ -545,20 +545,35 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
                   var msg = new Message("USER", "UOUT", [rs.user_id, $scope.tradingGraph.getCurOffsetTime()]);
                   $scope.sendToGroupManager(msg);
                   $scope.setState("state_out");
+                  
+                  $scope.setSpeed(false);
+                  $("#speed-switch").prop("checked", false);
                   $scope.tickState = $scope.s.OUT;
+                  $scope.event = $scope.e.FIRST_TIME;
                   break;
 
                case "SNIPE":
                   var msg = new Message("USER", "USNIPE", [rs.user_id, $scope.tradingGraph.getCurOffsetTime()]);
                   $scope.sendToGroupManager(msg);
                   $scope.setState("state_snipe");
+
+                  $scope.setSpeed(false);
+                  $("#speed-switch").prop("checked", false);
                   $scope.tickState = $scope.s.OUT;
+                  $scope.event = $scope.e.FIRST_TIME;
                   break;
 
                case "MAKER":
                   var msg = new Message("USER", "UMAKER", [rs.user_id, $scope.tradingGraph.getCurOffsetTime()]);
                   $scope.sendToGroupManager(msg);
                   $scope.setState("state_maker");
+
+                  $scope.setSpeed(false);
+                  $("#speed-switch").prop("checked", false);
+                  $scope.tickState = $scope.s.NO_LINES;        //fake a click event
+                  $scope.event = $scope.e.CLICK;
+                  $scope.curOffsetY = $scope.tradingGraph.elementHeight / 4;
+                  $scope.spread = 2.5;
                   break;
 
                case "FAST":

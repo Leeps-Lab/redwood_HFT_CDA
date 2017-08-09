@@ -174,7 +174,7 @@ body {
 }
 
 .top-banner {
-    margin-bottom: 5px;
+    /*margin-bottom: 5px;*/
     border: rgb(200, 200, 200) 2px solid;
     background-color: rgb(230, 230, 230);
     width: 100%;
@@ -183,7 +183,7 @@ body {
 .profit-graph-container {
     height: 500px;
     margin: 40px;
-    width: 60%;
+    width: 70%;
     border: rgb(200, 200, 200) 1px solid;
     background-color: rgb(230, 230, 230);
 }
@@ -191,9 +191,14 @@ body {
 .user-graph-container {
     height: 500px;
     margin: 20px;
-    width: 30%;
+    width: 20%;
     border: rgb(200, 200, 200) 1px solid;
     background-color: rgb(230, 230, 230);
+}
+
+.table{
+    table-layout : auto;
+    padding-bottom: 0px;
 }
 
 .control-container {

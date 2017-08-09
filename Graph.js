@@ -607,21 +607,6 @@ RedwoodHighFrequencyTrading.factory("Graphing", function () {
             .attr("class", "my-buy-offer");
       };
 
-      graph.DrawSegment = function (graphRefr, yPos, xOffset, duration, runtime, elementID) {
-         let progress = Math.min(runtime / duration, 1);           //percentage of duration ms
-         let x1 = graphRefr.elementWidth / 2 + xOffset - (graphRefr.elementWidth * progress).toFixed(2);        //XPOS OF 0 GRAPHS FROM RHS, WIDTH/2 FROM MIDPOINT
-         let x2 = xOffset - (graphRefr.elementWidth * progress).toFixed(2);
-         if(x2 < 0) x2 = 0;
-         this.marketSVG.append("line")
-            .attr("id", elementID)
-            .attr("opacity", .5)
-            .attr("x1", x1)
-            .attr("x2", x2)
-            .attr("y1", yPos)
-            .attr("y2", yPos)
-            .attr("class", "my-buy-offer");
-      };
-
 
       graph.drawAllProfit = function (graphRefr, dataHistory) {
          for (var user of dataHistory.group) {

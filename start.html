@@ -1,39 +1,37 @@
 <div ng-controller="HFTStartController">
         <!--Top Data Banner-->
         <div class="top-banner">
-            <table style="width:75%">
+            <table class="table" style="width:100%">
                 <tr>
-                    <th class="status-display">Group # {{groupNum}}</th>
-                    <th class="status-display">Number of Traders: {{dHistory.totalTraders}}</th>
-                    <th class="status-display">Role: {{state}}</th>
-                    <th class="status-display">Fundamental Value: {{dHistory.curFundPrice[1] | number : 2}}</th>
+                    <td class="status-display">Group # {{groupNum}}</td>
+                    <td class="status-display">Number of Traders: {{dHistory.totalTraders}}</td>
+                    <td class="status-display">Role: {{state}}</td>
+                    <td class="status-display">Fundamental Value: {{dHistory.curFundPrice[1] | number : 2}}</td>
                 </tr>
                 <tr>
-                    <th class="status-display">Period # </th>
-                    <th class="status-display">Number of Makers: {{dHistory.totalMakers}} ({{dHistory.fastMakers}} fast)</th>
-                    <th class="status-display">Spread: {{spread}}</th>
-                    <th class="status-display">Current Buy Offer: {{dHistory.playerData[dHistory.myId].curBuyOffer[1] | number : 2}}</th>
-                    <!-- <th class="status-display">Fund - CurBuy: {{(dHistory.curFundPrice[1] - dHistory.playerData[dHistory.myId].curBuyOffer[1]) | number : 2}}</th> -->
+                    <td class="status-display">Period # </td>
+                    <td class="status-display">Number of Makers: {{dHistory.totalMakers}} ({{dHistory.fastMakers}} fast)</td>
+                    <td class="status-display">Spread: {{spread}}</td>
+                    <td class="status-display">Current Buy Offer: {{dHistory.playerData[dHistory.myId].curBuyOffer[1] | number : 2}}</td>
                 </tr>
                 <tr>
-                    <th></th>
-                    <th class="status-display">Number of Snipers: {{dHistory.totalSnipers}} ({{dHistory.fastSnipers}} fast)</th>
-                    <th class="status-display">Your Profit: ${{dHistory.profit | number : 2}}</th>
-                     <th class="status-display">Current Sell Offer: {{dHistory.playerData[dHistory.myId].curSellOffer[1] | number : 2}}</th>
-                    <!--  <th class="status-display">curSell - Fund: {{(dHistory.playerData[dHistory.myId].curSellOffer[1] - dHistory.curFundPrice[1]) | number : 2}}</th> -->
+                    <td class="status-display">Speed Cost: ${{dHistory.speedCost | number : 2}} / Second</td>
+                    <td class="status-display">Number of Snipers: {{dHistory.totalSnipers}} ({{dHistory.fastSnipers}} fast)</td>
+                    <td class="status-display">Your Profit: ${{dHistory.profit | number : 2}}</td>
+                     <td class="status-display">Current Sell Offer: {{dHistory.playerData[dHistory.myId].curSellOffer[1] | number : 2}}</td>
                 </tr>    
-                <tr>
-                    <th></th>
-                    <th class="status-display">Speed Cost: ${{dHistory.speedCost | number : 2}} / Second</th>
-                    <th></th>
-                </tr>   
+                <!-- <tr>
+                    <td></td>
+                    <td class="status-display">Speed Cost: ${{dHistory.speedCost | number : 2}} / Second</td>
+                    <td></td>
+                </tr>   --> 
             </table>
         </div>
 
     <!-- bottom of the ui -->
     <div class="row">
         <!-- graph the profit -->
-        <div class="col-xs-8 profit-graph-container">
+        <div class="col-xs-8 profit-graph-container" style="padding: 5px">
             <svg width="100%" height="100%" id="graph2">
                 <span class="zoom-in" id="profit-zoom-in" ng-class="{'zoom-disabled': tradingGraph.expandedGraph}">+</span>
                 <span class="zoom-out" id="profit-zoom-out" ng-class="{'zoom-disabled': tradingGraph.expandedGraph}">-</span>
@@ -41,20 +39,20 @@
         </div>
 
         <!-- graph the experiment -->
-        <div class="col-xs-6 user-graph-container">
+        <div class="col-xs-6 user-graph-container" style="padding: 5px">
             <svg width="100%" height="100%" id="graph1"></svg>
         </div>
 
         <!-- user buttons -->
-        <div class="col-xs-3 control-container">
+        <div class="col-xs-3 control-container" style="padding: 5px">
             <!-- roles -->
             <div class="button-container-state">
-                <div class="row">
+                <div class="row" style="padding-bottom:3em">
                     <button id="state_out" ng-disabled="state=='state_out'" class="btn" type="button" style="width:75px">
                         Out   
                     </button>
                 </div>
-                <div class="row">
+                <div class="row" style="padding-bottom:3em">
                     <button id="state_snipe" ng-disabled="state=='state_snipe'" class="btn" type="button" style="width:75px">
                         Snipe
                     </button> 
@@ -75,9 +73,4 @@
             </div> 
         </div>
     </div>
-    <!-- <audio>
-        <src id="laser_sound" src="/static/experiments/redwood-high-frequency-trading-remote/Sounds/laser1.wav" type="audio/wav">
-        Your browser does not support the audio element poop.
-    </audio> -->
-    
 </div>

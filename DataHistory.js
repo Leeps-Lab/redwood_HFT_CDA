@@ -63,12 +63,10 @@ RedwoodHighFrequencyTrading.factory("DataHistory", function () {
                this.recordSellOffer(msg);
                break;
             case "C_RBUY"   :
-               //this.storeBuyOffer(msg.msgData[1], msg.msgData[0]);
                this.storeBuyOffer(msg.timeStamp, msg.subjectID);
                break;
             case "C_RSELL"  :
                this.storeBuyOffer(msg.timeStamp, msg.subjectID);
-               //this.storeSellOffer(msg.msgData[1], msg.msgData[0]);
                break;
             case "UMAKER" :
                this.recordStateChange("Maker", msg.msgData[0], msg.msgData[1]);

@@ -378,31 +378,33 @@ RedwoodHighFrequencyTrading.factory("Graphing", function () {
       graph.drawLaserOffers = function (graphRefr, dataHistory){
          var p,q;
          for (var user of dataHistory.group) {
-            if (user !== dataHistory.myId && dataHistory.playerData[user].curBuyOffer !== null) {
-               q = (dataHistory.curFundPrice[1] - dataHistory.playerData[user].curBuyOffer[1]) * graphRefr.widthScale;
-               graphRefr.currentBuyTick[user] = q;
-            }
-            else if(user !== dataHistory.myId && dataHistory.playerData[user].curBuyOffer == null){
-               q = null;
-            }
-            if (user !== dataHistory.myId && dataHistory.playerData[user].curSellOffer !== null) {
-               p = (dataHistory.playerData[user].curSellOffer[1] - dataHistory.curFundPrice[1]) * graphRefr.widthScale;  //added width scale 7/27/17
-               graphRefr.currentSellTick[user] = p;
-            }
-            else if(user !== dataHistory.myId && dataHistory.playerData[user].curSellOffer == null){
-               p = null;
-            }
+            if(dataHistory.playerData[user].state === "Maker"){
+               if (user !== dataHistory.myId && dataHistory.playerData[user].curBuyOffer !== null) {
+                  q = (dataHistory.curFundPrice[1] - dataHistory.playerData[user].curBuyOffer[1]) * graphRefr.widthScale;
+                  graphRefr.currentBuyTick[user] = q;
+               }
+               else if(user !== dataHistory.myId && dataHistory.playerData[user].curBuyOffer == null){
+                  q = null;
+               }
+               if (user !== dataHistory.myId && dataHistory.playerData[user].curSellOffer !== null) {
+                  p = (dataHistory.playerData[user].curSellOffer[1] - dataHistory.curFundPrice[1]) * graphRefr.widthScale;  //added width scale 7/27/17
+                  graphRefr.currentSellTick[user] = p;
+               }
+               else if(user !== dataHistory.myId && dataHistory.playerData[user].curSellOffer == null){
+                  p = null;
+               }
 
-            this.drawLaserMarket(graphRefr, p, q, "others-buy-offer");
+               this.drawLaserMarket(graphRefr, p, q, "others-buy-offer");
+            }
          }
-         if (dataHistory.playerData[dataHistory.myId].curBuyOffer !== null) {
+         if (dataHistory.playerData[dataHistory.myId].curBuyOffer !== null && dataHistory.playerData[dataHistory.myId].state === "Maker") {
             q = (dataHistory.curFundPrice[1] - dataHistory.playerData[dataHistory.myId].curBuyOffer[1]) * graphRefr.widthScale;
             graphRefr.currentBuyTick[dataHistory.myId] = q;
          }
          else{
             q = null;
          }
-         if (dataHistory.playerData[dataHistory.myId].curSellOffer !== null) {
+         if (dataHistory.playerData[dataHistory.myId].curSellOffer !== null && dataHistory.playerData[dataHistory.myId].state === "Maker") {
             p = (dataHistory.playerData[dataHistory.myId].curSellOffer[1] - dataHistory.curFundPrice[1]) * graphRefr.widthScale;  //added width scale 7/27/17
             graphRefr.currentSellTick[dataHistory.myId] = p;
          }

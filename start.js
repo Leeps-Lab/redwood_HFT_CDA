@@ -442,7 +442,7 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
             .click(function (event) {
                $scope.setSpeed(false);
                $("#speed-switch").prop("checked", false);
-               
+
                var msg = new Message("USER", "USNIPE", [rs.user_id, $scope.tradingGraph.getCurOffsetTime()]);
                $scope.sendToGroupManager(msg);
                $scope.setState("state_snipe");
@@ -461,6 +461,11 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
                var msg = new Message("USER", "UMAKER", [rs.user_id, $scope.tradingGraph.getCurOffsetTime()]);
                $scope.sendToGroupManager(msg);
                $scope.setState("state_maker");
+               $scope.tickState = $scope.s.NO_LINES;        //fake a click event
+               $scope.event = $scope.e.CLICK;
+               $scope.curOffsetY = $scope.tradingGraph.elementHeight / 4;
+               $scope.spread = 2.5;
+
             });
 
          // button for setting state to "out of market"

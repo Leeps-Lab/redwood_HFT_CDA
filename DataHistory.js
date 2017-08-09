@@ -69,7 +69,7 @@ RedwoodHighFrequencyTrading.factory("DataHistory", function () {
                this.storeBuyOffer(msg.timeStamp, msg.subjectID);
                break;
             case "UMAKER" :
-               this.recordStateChange("Maker", msg.msgData[0], msg.msgData[1]);
+               this.recordStateChange("Maker", msg.msgData[0], msg.msgData[1]); //rs.user_id, $scope.tradingGraph.getCurOffsetTime()]
                break;
             case "USNIPE" :
                this.recordStateChange("Snipe", msg.msgData[0], msg.msgData[1]);
@@ -108,6 +108,24 @@ RedwoodHighFrequencyTrading.factory("DataHistory", function () {
          }
       };
 
+      dataHistory.getCurrBuy = function () {    //function for updating start.html fields
+         if(this.playerData[this.myId].state == "Maker"){
+            return this.playerData[this.myId].curBuyOffer == null ? "N/A" : this.playerData[this.myId].curBuyOffer[1];
+         }
+         else{
+            return "N/A";
+         }
+      };
+
+      dataHistory.getCurrSell = function () {
+         if(this.playerData[this.myId].state == "Maker"){
+            return this.playerData[this.myId].curSellOffer == null ? "N/A" : this.playerData[this.myId].curSellOffer[1];
+         }
+         else{
+            return "N/A";
+         }
+      };
+
       dataHistory.calcLowestSpread = function () {
          this.lowestSpread = "N/A";
          for (var player in this.playerData) {
@@ -121,8 +139,13 @@ RedwoodHighFrequencyTrading.factory("DataHistory", function () {
          this.playerData[uid].state = newState;
          this.calcLowestSpread();
 
-         var curProfit = this.playerData[uid].curProfitSegment[1] - ((timestamp - this.playerData[uid].curProfitSegment[0]) * this.playerData[uid].curProfitSegment[2] / 1000);
-         this.recordProfitSegment(curProfit, timestamp, this.playerData[uid].curProfitSegment[2], uid, newState, true, curProfit);
+         var curProfit = this.playerData[uid].curProfitSegment[1] - ((timestamp - this.playerData[uid].curProfitSegment[0]) * this.playerData[uid].curProfitSegment[2] / 1000000000);
+         this.recordProfitSegment(curProfit, timestamp, this.playerData[uid].curProfitSegment[2], uid, newState, true);
+
+         if(newState != "Maker"){                           //added 8/9/17 to remove any orders that dont get shifted
+            this.playerData[uid].curBuyOffer = null;
+            this.playerData[uid].curSellOffer = null;
+         }
       };
 
       // Adds fundamental price change to history

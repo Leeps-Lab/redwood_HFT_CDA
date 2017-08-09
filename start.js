@@ -16,10 +16,8 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
          $scope.maxSpread = 1;
          $scope.lastTime = 0;          // the last time that the update loop ran. used for calculating profit decreases.
          $scope.mousePressed = false;
-         $scope.animationID = null;
          $scope.oldOffsetY = null;
          $scope.oldUsingSpeed = 0;
-         $scope.overWriteID = [];
          $scope.curOffsetY = null;
          $scope.startTime = 0;
          $scope.removeStartTime = 0;
@@ -27,6 +25,7 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
          $scope.jumpOffsetY = 0;
          $scope.continueTime = 0;
          $scope.LaserSound;
+         $scope.statename = "Out";
 
          $scope.s = {
             NO_LINES: 0,
@@ -63,6 +62,8 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
                $scope.dHistory.profit -= (getTime() - $scope.lastTime) * $scope.dHistory.speedCost / 1000000000;
             }
             $scope.lastTime = getTime();
+
+            $scope.dHistory.CalculatePlayerInfo();
             requestAnimationFrame($scope.update);
          };
 
@@ -71,7 +72,6 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
             if ($scope.isDebug) {
                $scope.logger.logSend(msg, "Group Manager");
             }
-            $scope.dHistory.CalculatePlayerInfo();
             rs.send("To_Group_Manager", msg);
          };
 
@@ -143,7 +143,22 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
             handleMsgFromGM(msg);
          });
 
-          $scope.AudioInit = function (){
+         $scope.GetProfit = function () {
+            return $scope.dHistory.profit;
+         };
+
+         $scope.GetStateName = function (){
+            if ($scope.state == "state_maker") return "Maker";
+            if ($scope.state == "state_out") return "Out";
+            if ($scope.state == "state_snipe") return "Sniper";
+         };
+
+         $scope.GetSpread = function (){
+            if($scope.state == "state_maker") return $scope.spread;
+            else return "N/A";
+         };
+
+         $scope.AudioInit = function (){
             $scope.LaserSound = new Audio("/static/experiments/redwood-high-frequency-trading-remote/Sounds/laser1.wav");
             $scope.LaserSound.volume = .1;
             $scope.LaserSound.play();
@@ -333,8 +348,16 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
                case $scope.s.OUT:
                   switch(event){
                      case $scope.e.FIRST_TIME:
-                        $scope.tradingGraph.marketSVG.selectAll("#current").remove();           //clear any graph elements
-                        $scope.tradingGraph.marketSVG.selectAll("#box").remove();               //clear any graph elements
+                        if(!$scope.using_speed){
+                           window.setTimeout(function(){
+                              $scope.tradingGraph.marketSVG.selectAll("#current").remove();           //clear any graph elements
+                              $scope.tradingGraph.marketSVG.selectAll("#box").remove();               //clear any graph elements
+                           }, 500);
+                        }
+                        else{
+                           $scope.tradingGraph.marketSVG.selectAll("#current").remove();           //clear any graph elements
+                           $scope.tradingGraph.marketSVG.selectAll("#box").remove();               //clear any graph elements
+                        }
                         $scope.jumpOffsetY = 0;                                                 //reset variable
                         $scope.oldOffsetY = $scope.curOffsetY;                                  //reset variable
                         $scope.lastEvent = $scope.e.NO_EVENT;                                   //reset variable
@@ -440,9 +463,6 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
             .addClass("state-not-selected")
             .button()
             .click(function (event) {
-               $scope.setSpeed(false);
-               $("#speed-switch").prop("checked", false);
-
                var msg = new Message("USER", "USNIPE", [rs.user_id, $scope.tradingGraph.getCurOffsetTime()]);
                $scope.sendToGroupManager(msg);
                $scope.setState("state_snipe");
@@ -455,16 +475,14 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
             .addClass("state-not-selected")
             .button()
             .click(function (event) {
-               $scope.setSpeed(false);
-               $("#speed-switch").prop("checked", false);
-
                var msg = new Message("USER", "UMAKER", [rs.user_id, $scope.tradingGraph.getCurOffsetTime()]);
                $scope.sendToGroupManager(msg);
                $scope.setState("state_maker");
                $scope.tickState = $scope.s.NO_LINES;        //fake a click event
                $scope.event = $scope.e.CLICK;
-               $scope.curOffsetY = $scope.tradingGraph.elementHeight / 4;
-               $scope.spread = 2.5;
+               // $scope.curOffsetY = $scope.tradingGraph.elementHeight / 4;
+               // $scope.spread = 2.5;
+               // $scope.oldOffsetY = null;
 
             });
 
@@ -545,7 +563,6 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
                   var msg = new Message("USER", "UOUT", [rs.user_id, $scope.tradingGraph.getCurOffsetTime()]);
                   $scope.sendToGroupManager(msg);
                   $scope.setState("state_out");
-                  
                   $scope.setSpeed(false);
                   $("#speed-switch").prop("checked", false);
                   $scope.tickState = $scope.s.OUT;
@@ -557,8 +574,6 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
                   $scope.sendToGroupManager(msg);
                   $scope.setState("state_snipe");
 
-                  $scope.setSpeed(false);
-                  $("#speed-switch").prop("checked", false);
                   $scope.tickState = $scope.s.OUT;
                   $scope.event = $scope.e.FIRST_TIME;
                   break;
@@ -568,12 +583,11 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
                   $scope.sendToGroupManager(msg);
                   $scope.setState("state_maker");
 
-                  $scope.setSpeed(false);
-                  $("#speed-switch").prop("checked", false);
                   $scope.tickState = $scope.s.NO_LINES;        //fake a click event
                   $scope.event = $scope.e.CLICK;
                   $scope.curOffsetY = $scope.tradingGraph.elementHeight / 4;
                   $scope.spread = 2.5;
+                  $scope.oldOffsetY = null;
                   break;
 
                case "FAST":

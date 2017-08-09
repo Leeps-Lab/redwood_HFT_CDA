@@ -217,9 +217,15 @@ Redwood.factory("GroupManager", function () {
          // if this is a user message, handle it and don't send it to market
          if (msg.protocol === "USER") {
             var subjectID = msg.msgData[0];
-            this.marketAlgorithms[subjectID].recvFromGroupManager(msg);
 
-            this.sendToAllDataHistories(msg);            //updates the UI, doesn't work when directly sent from start.js
+            if(this.marketAlgorithms[subjectID].using_speed){                 //if fast send straight to graph
+               this.sendToAllDataHistories(msg);
+            }
+            else{
+               window.setTimeout(this.sendToAllDataHistories.bind(this), this.delay, msg);   //wait delay time to send to update graph
+            }
+
+            this.marketAlgorithms[subjectID].recvFromGroupManager(msg);       //send to market algorithms -> server
 
             this.dataStore.storeMsg(msg);
             if (msg.msgType == "UMAKER") this.dataStore.storeSpreadChange(msg.msgData[1], this.marketAlgorithms[subjectID].spread, msg.msgData[0]);

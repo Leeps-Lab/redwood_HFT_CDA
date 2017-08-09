@@ -440,6 +440,9 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
             .addClass("state-not-selected")
             .button()
             .click(function (event) {
+               $scope.setSpeed(false);
+               $("#speed-switch").prop("checked", false);
+               
                var msg = new Message("USER", "USNIPE", [rs.user_id, $scope.tradingGraph.getCurOffsetTime()]);
                $scope.sendToGroupManager(msg);
                $scope.setState("state_snipe");
@@ -452,6 +455,9 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
             .addClass("state-not-selected")
             .button()
             .click(function (event) {
+               $scope.setSpeed(false);
+               $("#speed-switch").prop("checked", false);
+
                var msg = new Message("USER", "UMAKER", [rs.user_id, $scope.tradingGraph.getCurOffsetTime()]);
                $scope.sendToGroupManager(msg);
                $scope.setState("state_maker");

@@ -124,7 +124,7 @@ RedwoodHighFrequencyTrading.factory("DataHistory", function () {
          this.calcLowestSpread();
 
          var curProfit = this.playerData[uid].curProfitSegment[1] - ((timestamp - this.playerData[uid].curProfitSegment[0]) * this.playerData[uid].curProfitSegment[2] / 1000);
-         this.recordProfitSegment(curProfit, timestamp, this.playerData[uid].curProfitSegment[2], uid, newState, true);
+         this.recordProfitSegment(curProfit, timestamp, this.playerData[uid].curProfitSegment[2], uid, newState, true, curProfit);
       };
 
       // Adds fundamental price change to history
@@ -255,7 +255,7 @@ RedwoodHighFrequencyTrading.factory("DataHistory", function () {
             //p = this.playerData[uid].state === "Snipe" ? msg.price - msg.FPC : msg.FPC - msg.price;     //snipe message profit calculated opposite of makers
             p = msg.FPC - msg.price;
             var curProfit = this.playerData[uid].curProfitSegment[1] - ((msg.timeStamp - this.playerData[uid].curProfitSegment[0]) * this.playerData[uid].curProfitSegment[2] / 1000000000); //changed from 1000
-            console.log(this.playerData[uid].state, "buy for profit:", p);
+            // console.log(this.playerData[uid].state, "buy for profit:", p);
             this.recordProfitSegment(curProfit + p, msg.timeStamp, this.playerData[uid].curProfitSegment[2], uid, this.playerData[uid].state, false, curProfit);
          }
          if (msg.sellerID != 0) {
@@ -264,7 +264,7 @@ RedwoodHighFrequencyTrading.factory("DataHistory", function () {
             // p = this.playerData[uid].state === "Snipe" ? msg.FPC - msg.price : msg.price - msg.FPC;     //snipe message profit calculated opposite of makers
             p = msg.price - msg.FPC;
             var curProfit = this.playerData[uid].curProfitSegment[1] - ((msg.timeStamp - this.playerData[uid].curProfitSegment[0]) * this.playerData[uid].curProfitSegment[2] / 1000000000); //changed from 1000
-            console.log(this.playerData[uid].state, "sell for profit:", p);
+            // console.log(this.playerData[uid].state, "sell for profit:", p);
             this.recordProfitSegment(curProfit + p, msg.timeStamp, this.playerData[uid].curProfitSegment[2], uid, this.playerData[uid].state, false, curProfit);
          }
 

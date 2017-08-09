@@ -266,7 +266,7 @@ RedwoodHighFrequencyTrading.factory("Graphing", function () {
       //draws profit line
       graph.drawProfit = function (graphRefr, historyDataSet, currentData, dataHistory, outStyleClass, makerStyleClass, snipeStyleClass, uid) {
          this.profitSVG.selectAll("line." + outStyleClass + " line." + makerStyleClass + " line." + snipeStyleClass)
-            .data(historyDataSet, function (d) {
+            .data(historyDataSet, function (d) {   //d = [startTime, endTime, curProfit, endPrice, state] current = [startTime, price, slope, state]
                return d;
             })
             .enter()
@@ -303,7 +303,7 @@ RedwoodHighFrequencyTrading.factory("Graphing", function () {
          }
             
          this.profitSVG.selectAll("line.positive-profit line.negative-profit")
-            .data(dataHistory.playerData[uid].profitJumps) //d = [startTime, endTime, curProfit, endPrice, state] current = [startTime, price, slope, state]
+            .data(dataHistory.playerData[dataHistory.myId].profitJumps)          //REPLACE dataHistory.myId with myID to graph vertical lines for other users profit
             .enter()
             .append("line")
             .filter(function (d) {
@@ -322,12 +322,12 @@ RedwoodHighFrequencyTrading.factory("Graphing", function () {
                return graphRefr.mapProfitPriceToYAxis(d.newPrice);     //current profit
             })
             .attr("class", function (d) {
-               if(uid == dataHistory.myId){
+               // if(uid == dataHistory.myId){
                   return d.oldPrice < d.newPrice ? "my-positive-profit" : "my-negative-profit";
-               }
-               else{
-                  return d.oldPrice < d.newPrice ? "other-positive-profit" : "other-negative-profit";
-               }
+               // }
+               // else{
+                  // return d.oldPrice < d.newPrice ? "other-positive-profit" : "other-negative-profit";
+               // }
             });   
       };
 

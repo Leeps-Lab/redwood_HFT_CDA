@@ -171,12 +171,22 @@ svg {
     fill: red;
 }
 
-.positive-profit {
+.my-positive-profit {
     stroke: green;
+    stroke-width: 2;
+}
+
+.my-negative-profit {
+    stroke: red;
+    stroke-width: 2;
+}
+
+.other-positive-profit {
+    stroke: #3D7A5C;
     stroke-width: 1;
 }
 
-.negative-profit {
-    stroke: red;
+.other-negative-profit {
+    stroke: #94476B;
     stroke-width: 1;
 }

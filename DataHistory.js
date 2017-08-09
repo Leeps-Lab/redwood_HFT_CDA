@@ -146,7 +146,7 @@ RedwoodHighFrequencyTrading.factory("DataHistory", function () {
       dataHistory.recordBuyOffer = function (buyMsg) {
          if(buyMsg.subjectID > 0){
             if(this.playerData[buyMsg.subjectID].state == 'Snipe'){                                   //TEST -> don't want to graph snipe offer
-               console.log("Tried to record buy offer, state: "  + this.playerData[buyMsg.subjectID].state);
+               // console.log("Tried to record buy offer, state: "  + this.playerData[buyMsg.subjectID].state);
                return;
             }
             //Check if current buy offer needs to be stored
@@ -165,7 +165,7 @@ RedwoodHighFrequencyTrading.factory("DataHistory", function () {
       dataHistory.recordSellOffer = function (sellMsg) {
          if(sellMsg.subjectID > 0){                            //TEST 7/20/17 
             if(this.playerData[sellMsg.subjectID].state == 'Snipe'){                                 //TEST -> don't want to graph snipe offer
-               console.log("Tried to record sell offer, state: "  + this.playerData[sellMsg.subjectID].state);
+               // console.log("Tried to record sell offer, state: "  + this.playerData[sellMsg.subjectID].state);
                return;
             }
             //Check if current sell offer needs to be stored
@@ -202,10 +202,19 @@ RedwoodHighFrequencyTrading.factory("DataHistory", function () {
       dataHistory.storeTransaction = function (msg) {
          var p;
          if (msg.buyerID == this.myId) {                                            // if I'm the buyer
-            p = this.playerData[this.myId].state === "Snipe" ? msg.price - msg.FPC : msg.FPC - msg.price;     //snipe message profit calculated opposite of makers
-            console.log(this.playerData[this.myId].state, p);
-            this.profit += p;                                     //fundPrice - myPrice
-            
+            if(this.playerData[this.myId].state === "Snipe"){                       //set variables for flash
+               // p = msg.price - msg.FPC;                                             //profit calculated opposite for snipers
+               p = msg.FPC - msg.price;
+               this.SnipeTransaction = true;
+               this.SnipeStyle = p < 0 ? "snipe-loss" : "snipe-profit";
+               this.snipeOP = .5;
+            }
+            else{
+               p = msg.FPC - msg.price;
+            }
+
+            this.profit += p;
+
             if(p > 0){
                dataHistory.negative_sound.pause();
                dataHistory.positive_sound.play();
@@ -214,13 +223,20 @@ RedwoodHighFrequencyTrading.factory("DataHistory", function () {
                dataHistory.positive_sound.pause();
                dataHistory.negative_sound.play();
             }
-            console.log("BUY");
          }
          else if (msg.sellerID == this.myId) {                                      //if I'm the seller
-            p = this.playerData[this.myId].state === "Snipe" ? msg.FPC - msg.price : msg.price - msg.FPC;     //snipe message profit calculated opposite of makers
-            console.log(this.playerData[this.myId].state, p);
+            if(this.playerData[this.myId].state === "Snipe"){                       //set variables for flash
+               // p = msg.FPC - msg.price;                                             //profit calculated opposite for snipers
+               p = msg.price - msg.FPC;  
+               this.SnipeTransaction = true;
+               this.SnipeStyle = p < 0 ? "snipe-loss" : "snipe-profit";
+               this.snipeOP = .5;
+            }
+            else{
+               p = msg.price - msg.FPC;                                             //Im a maker
+            }
             this.profit += p;
-            
+
             if(p > 0){
                dataHistory.negative_sound.pause();
                dataHistory.positive_sound.play();
@@ -228,40 +244,28 @@ RedwoodHighFrequencyTrading.factory("DataHistory", function () {
             else{
                dataHistory.positive_sound.pause();
                dataHistory.negative_sound.play();
-            }
-            console.log("SELL");
-         }
-         
-         if(this.playerData[this.myId].state === "Snipe"){     //snipe transaction, set variables for flashing graphics
-            if(msg.buyerID == this.myId){
-               console.log("snipe buy");
-               // p = msg.price - msg.FPC;
-               this.SnipeTransaction = true;
-               this.SnipeStyle = p > 0 ? "snipe-loss" : "snipe-profit";
-               this.snipeOP = .5;
-            }
-            if(msg.sellerID == this.myId){
-               console.log("snipe sell");
-               // p = msg.FPC - msg.price;
-               this.SnipeTransaction = true;
-               this.SnipeStyle = p > 0 ? "snipe-loss" : "snipe-profit";
-               this.snipeOP = .5;
             }
          }
 
+         
+
          if (msg.buyerID != 0) {
-            if (this.playerData[msg.buyerID].curBuyOffer !== null) this.storeBuyOffer(msg.timeStamp, msg.buyerID);
-            // p = this.playerData[myId].state === "Snipe" ? msg.price - msg.FPC : msg.FPC - msg.price;     //snipe message profit calculated opposite of makers
             var uid = msg.buyerID;
+            if (this.playerData[uid].curBuyOffer !== null) this.storeBuyOffer(msg.timeStamp, uid);
+            //p = this.playerData[uid].state === "Snipe" ? msg.price - msg.FPC : msg.FPC - msg.price;     //snipe message profit calculated opposite of makers
+            p = msg.FPC - msg.price;
             var curProfit = this.playerData[uid].curProfitSegment[1] - ((msg.timeStamp - this.playerData[uid].curProfitSegment[0]) * this.playerData[uid].curProfitSegment[2] / 1000000000); //changed from 1000
-            this.recordProfitSegment(curProfit + p, msg.timeStamp, this.playerData[uid].curProfitSegment[2], uid, this.playerData[uid].state);
+            console.log(this.playerData[uid].state, "buy for profit:", p);
+            this.recordProfitSegment(curProfit + p, msg.timeStamp, this.playerData[uid].curProfitSegment[2], uid, this.playerData[uid].state, false, curProfit);
          }
          if (msg.sellerID != 0) {
-            if (this.playerData[msg.sellerID].curSellOffer !== null) this.storeSellOffer(msg.timeStamp, msg.sellerID);
-            // p = this.playerData[myId].state === "Snipe" ? msg.FPC - msg.price : msg.price - msg.FPC;     //snipe message profit calculated opposite of makers
             var uid = msg.sellerID;
+            if (this.playerData[uid].curSellOffer !== null) this.storeSellOffer(msg.timeStamp, uid);
+            // p = this.playerData[uid].state === "Snipe" ? msg.FPC - msg.price : msg.price - msg.FPC;     //snipe message profit calculated opposite of makers
+            p = msg.price - msg.FPC;
             var curProfit = this.playerData[uid].curProfitSegment[1] - ((msg.timeStamp - this.playerData[uid].curProfitSegment[0]) * this.playerData[uid].curProfitSegment[2] / 1000000000); //changed from 1000
-            this.recordProfitSegment(curProfit + p, msg.timeStamp, this.playerData[uid].curProfitSegment[2], uid, this.playerData[uid].state);
+            console.log(this.playerData[uid].state, "sell for profit:", p);
+            this.recordProfitSegment(curProfit + p, msg.timeStamp, this.playerData[uid].curProfitSegment[2], uid, this.playerData[uid].state, false, curProfit);
          }
 
          if(msg.subjectID > 0){                                               //ADDED 7/21/17 to fix transaction horizontal lines
@@ -277,19 +281,17 @@ RedwoodHighFrequencyTrading.factory("DataHistory", function () {
          this.recordProfitSegment(curProfit, msg.msgData[2], msg.msgData[1] ? this.speedCost : 0, uid, this.playerData[uid].state, true);
       };
 
-      dataHistory.recordProfitSegment = function (price, startTime, slope, uid, state, speedChange) {
+      dataHistory.recordProfitSegment = function (price, startTime, slope, uid, state, speedChange, old) {
          if (price > this.highestProfitPrice) this.highestProfitPrice = price;
          if (price < this.lowestProfitPrice) this.lowestProfitPrice = price;
 
          if (this.playerData[uid].curProfitSegment != null) {
-            var speedDiff = this.playerData[uid].speed ? (startTime - this.lastTime) * dataHistory.speedCost / 1000000000: 0;    //calculate profit lost from speed cost
             if(speedChange){  //dont draw a profit line when changing speed or state
-               this.playerData[uid].profitJumps.push({timestamp: startTime, newPrice: 0, oldPrice: 0, speedloss: 0, lastTime: this.lastTime});
+               this.playerData[uid].profitJumps.push({timestamp: startTime, newPrice: 0, oldPrice: 0});
             } 
             else {
-               this.playerData[uid].profitJumps.push({timestamp: startTime, newPrice: price, oldPrice: this.playerData[uid].curProfitSegment[1], speedloss: speedDiff, lastTime: this.lastTime});
+               this.playerData[uid].profitJumps.push({timestamp: startTime, newPrice: price, oldPrice: old});
             }
-            console.log(this.playerData[uid].curProfitSegment[1] - speedDiff, price, price - this.playerData[uid].curProfitSegment[1] - speedDiff);
             this.lastTime = startTime;
             this.storeProfitSegment(startTime, uid);
          }
@@ -304,6 +306,7 @@ RedwoodHighFrequencyTrading.factory("DataHistory", function () {
          //find end price by subtracting how far graph has descended from start price
          var endPrice = this.playerData[uid].curProfitSegment[1] - ((endTime - this.playerData[uid].curProfitSegment[0]) * this.playerData[uid].curProfitSegment[2] / 1000000000); //changed from 1000
          this.playerData[uid].pastProfitSegments.push([this.playerData[uid].curProfitSegment[0], endTime, this.playerData[uid].curProfitSegment[1], endPrice, this.playerData[uid].curProfitSegment[3]]);
+         // console.log(this.playerData[uid].curProfitSegment[1], endPrice);
          this.playerData[uid].curProfitSegment = null;
       };
 

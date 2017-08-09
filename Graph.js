@@ -264,7 +264,7 @@ RedwoodHighFrequencyTrading.factory("Graphing", function () {
       };
 
       //draws profit line
-      graph.drawProfit = function (graphRefr, historyDataSet, currentData, dataHistory, outStyleClass, makerStyleClass, snipeStyleClass) {
+      graph.drawProfit = function (graphRefr, historyDataSet, currentData, dataHistory, outStyleClass, makerStyleClass, snipeStyleClass, uid) {
          this.profitSVG.selectAll("line." + outStyleClass + " line." + makerStyleClass + " line." + snipeStyleClass)
             .data(historyDataSet, function (d) {
                return d;
@@ -292,8 +292,18 @@ RedwoodHighFrequencyTrading.factory("Graphing", function () {
                return d[4] == "Out" ? outStyleClass : (d[4] == "Maker" ? makerStyleClass : snipeStyleClass);
             });
 
+         if (currentData != null) {
+            var pricefinal = currentData[1] - ((graphRefr.currentTime - currentData[0]) * currentData[2] / 1000000000); //determines how far down the line has moved (from speed)
+            this.profitSVG.append("line")
+               .attr("x1", this.mapTimeToXAxis(currentData[0]))
+               .attr("x2", this.curTimeX)
+               .attr("y1", this.mapProfitPriceToYAxis(currentData[1]))
+               .attr("y2", this.mapProfitPriceToYAxis(pricefinal))
+               .attr("class", currentData[3] == "Out" ? outStyleClass : (currentData[3] == "Maker" ? makerStyleClass : snipeStyleClass));
+         }
+            
          this.profitSVG.selectAll("line.positive-profit line.negative-profit")
-            .data(dataHistory.playerData[dataHistory.myId].profitJumps) //d = [startTime, endTime, curProfit, endPrice, state] current = [startTime, price, slope, state]
+            .data(dataHistory.playerData[uid].profitJumps) //d = [startTime, endTime, curProfit, endPrice, state] current = [startTime, price, slope, state]
             .enter()
             .append("line")
             .filter(function (d) {
@@ -306,28 +316,19 @@ RedwoodHighFrequencyTrading.factory("Graphing", function () {
                return graphRefr.mapTimeToXAxis(d.timestamp);
             })
             .attr("y1", function (d) {
-               // return d.newPrice < d.oldPrice - d.speedloss ? graphRefr.mapProfitPriceToYAxis(d.oldPrice) : graphRefr.mapProfitPriceToYAxis(d.oldPrice - d.speedloss);
-               // console.log(d.oldPrice - d.speedloss, d.newPrice, d.newPrice - d.oldPrice - d.speedloss);
-               return graphRefr.mapProfitPriceToYAxis(d.oldPrice - d.speedloss);     //old profit
+               return graphRefr.mapProfitPriceToYAxis(d.oldPrice);     //old profit
             })
             .attr("y2", function (d) {
                return graphRefr.mapProfitPriceToYAxis(d.newPrice);     //current profit
             })
             .attr("class", function (d) {
-               return d.oldPrice - d.speedloss < d.newPrice ? "positive-profit" : "negative-profit";
+               if(uid == dataHistory.myId){
+                  return d.oldPrice < d.newPrice ? "my-positive-profit" : "my-negative-profit";
+               }
+               else{
+                  return d.oldPrice < d.newPrice ? "other-positive-profit" : "other-negative-profit";
+               }
             });   
-
-         if (currentData != null) {
-            var pricefinal = currentData[1] - ((graphRefr.currentTime - currentData[0]) * currentData[2] / 1000000000); //determines how far down the line has moved (from speed)
-            this.profitSVG.append("line")
-               .attr("x1", this.mapTimeToXAxis(currentData[0]))
-               .attr("x2", this.curTimeX)
-               .attr("y1", this.mapProfitPriceToYAxis(currentData[1]))
-               .attr("y2", this.mapProfitPriceToYAxis(pricefinal))
-               .attr("class", currentData[3] == "Out" ? outStyleClass : (currentData[3] == "Maker" ? makerStyleClass : snipeStyleClass));
-         }
-
-
       };
 
       graph.drawLaserMarket = function (graphRefr, currentSell, currentBuy, styleClassName) {
@@ -623,10 +624,10 @@ RedwoodHighFrequencyTrading.factory("Graphing", function () {
       graph.drawAllProfit = function (graphRefr, dataHistory) {
          for (var user of dataHistory.group) {
             if (user !== dataHistory.myId) {
-               this.drawProfit(graphRefr, dataHistory.playerData[user].pastProfitSegments, dataHistory.playerData[user].curProfitSegment, dataHistory, "others-profit-out", "others-profit-maker", "others-profit-snipe");
+               this.drawProfit(graphRefr, dataHistory.playerData[user].pastProfitSegments, dataHistory.playerData[user].curProfitSegment, dataHistory, "others-profit-out", "others-profit-maker", "others-profit-snipe", user);
             }
          }
-         this.drawProfit(graphRefr, dataHistory.playerData[dataHistory.myId].pastProfitSegments, dataHistory.playerData[dataHistory.myId].curProfitSegment, dataHistory, "my-profit-out", "my-profit-maker", "my-profit-snipe");
+         this.drawProfit(graphRefr, dataHistory.playerData[dataHistory.myId].pastProfitSegments, dataHistory.playerData[dataHistory.myId].curProfitSegment, dataHistory, "my-profit-out", "my-profit-maker", "my-profit-snipe", user);
       };
 
       graph.drawPriceAxis = function (graphRefr, priceLines, svgToUpdate, priceMapFunction) {

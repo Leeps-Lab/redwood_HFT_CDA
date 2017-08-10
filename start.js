@@ -16,13 +16,9 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
          $scope.lastTime = 0;          // the last time that the update loop ran. used for calculating profit decreases.
          $scope.mousePressed = false;
          $scope.oldOffsetY = null;
-         $scope.oldUsingSpeed = 0;
          $scope.curOffsetY = null;
          $scope.startTime = 0;
-         $scope.removeStartTime = 0;
-         $scope.offsetX = 0;
          $scope.jumpOffsetY = 0;
-         $scope.continueTime = 0;
          $scope.LaserSound;
          $scope.statename = "Out";
 
@@ -349,7 +345,7 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
                   switch(event){
                      case $scope.e.FIRST_TIME:
                         if(!$scope.using_speed){
-                           window.setTimeout(function(){
+                           window.setTimeout(function(){                                              //wait your delay before removing
                               $scope.tradingGraph.marketSVG.selectAll("#current").remove();           //clear any graph elements
                               $scope.tradingGraph.marketSVG.selectAll("#box").remove();               //clear any graph elements
                            }, 500);
@@ -480,9 +476,11 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
                $scope.setState("state_maker");
                $scope.tickState = $scope.s.NO_LINES;        //fake a click event
                $scope.event = $scope.e.CLICK;
-               // $scope.curOffsetY = $scope.tradingGraph.elementHeight / 4;
-               // $scope.spread = 2.5;
-               // $scope.oldOffsetY = null;
+               $scope.curOffsetY = $scope.tradingGraph.elementHeight / 4;
+               $scope.spread = 2.5;
+               $scope.oldOffsetY = null;
+               var nMsg = new Message("USER", "UUSPR", [rs.user_id, $scope.spread, $scope.tradingGraph.getCurOffsetTime()]);
+               $scope.sendToGroupManager(nMsg);
 
             });
 
@@ -588,6 +586,8 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
                   $scope.curOffsetY = $scope.tradingGraph.elementHeight / 4;
                   $scope.spread = 2.5;
                   $scope.oldOffsetY = null;
+                  var nMsg = new Message("USER", "UUSPR", [rs.user_id, $scope.spread, $scope.tradingGraph.getCurOffsetTime()]);
+                  $scope.sendToGroupManager(nMsg);
                   break;
 
                case "FAST":

@@ -1,11 +1,10 @@
 RedwoodHighFrequencyTrading.controller("HFTStartController",
    ["$scope",
-      '$interval',
       "RedwoodSubject",
       "DataHistory",
       "Graphing",
       "$http",
-      function ($scope, $interval, rs, dataHistory, graphing, $http) {
+      function ($scope, rs, dataHistory, graphing, $http) {
 
          var CLOCK_FREQUENCY = 50;   // Frequency of loop, measured in ms delay between ticks
 
@@ -65,7 +64,8 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
 
             $scope.dHistory.CalculatePlayerInfo();
             requestAnimationFrame($scope.update);
-         };
+            $scope.$digest();                      //for updating profit
+         }; 
 
          // Sends a message to the Group Manager
          $scope.sendToGroupManager = function (msg, delay) {

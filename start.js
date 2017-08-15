@@ -46,9 +46,7 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
          //Loops at speed CLOCK_FREQUENCY in Hz, updates the graph
          $scope.update = function (timestamp) {
 
-            if($scope.tradingGraph.laser){
-               $scope.FSM($scope.tickState, $scope.event, timestamp);
-            }
+            $scope.FSM($scope.tickState, $scope.event, timestamp);
             $scope.FPCpoll();
 
             $scope.tradingGraph.draw($scope.dHistory);
@@ -139,9 +137,6 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
             handleMsgFromGM(msg);
          });
 
-         $scope.GetProfit = function () {
-            return $scope.dHistory.profit;
-         };
 
          $scope.GetStateName = function (){
             if ($scope.state == "state_maker") return "Maker";
@@ -226,8 +221,8 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
                   switch(event){ 
                      case $scope.e.CLICK:                                                       //user's first click on the graph
                         $scope.startTime = window.performance.now();                            //set start time for the lasers
-                        $scope.tradingGraph.callDrawSpreadTick($scope.curOffsetY, $scope.using_speed, timestamp - $scope.startTime, false, "current", false, 0);                        //generate the top line
-                        $scope.tradingGraph.callDrawSpreadTick($scope.CalculateYPOS($scope.curOffsetY), $scope.using_speed, timestamp - $scope.startTime, false, "current", false, 0);  //generate the bottom line
+                        $scope.tradingGraph.callDrawSpreadTick($scope.curOffsetY, $scope.using_speed, timestamp - $scope.startTime, false, "current", 0);                        //generate the top line
+                        $scope.tradingGraph.callDrawSpreadTick($scope.CalculateYPOS($scope.curOffsetY), $scope.using_speed, timestamp - $scope.startTime, false, "current", 0);  //generate the bottom line
                         $scope.lastEvent = $scope.e.FIRST_TIME;                                 //special case
                         $scope.event = $scope.e.NO_EVENT;                                       //clear event
                         $scope.tickState = $scope.s.DRAW_FIRST;                                 //transition to DRAW_FIRST
@@ -248,8 +243,8 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
                         $scope.startTime = window.performance.now();                            //reset start time for the new lines
                         $scope.tradingGraph.marketSVG.selectAll("#current").remove();           //replace moving lines with your new spread
                         $scope.tradingGraph.marketSVG.selectAll("#box").remove();               //clear old spread region if it's been drawn
-                        $scope.tradingGraph.callDrawSpreadTick($scope.curOffsetY, $scope.using_speed, timestamp - $scope.startTime, false, "current", false, 0);                       //new top line at new spread
-                        $scope.tradingGraph.callDrawSpreadTick($scope.CalculateYPOS($scope.curOffsetY), $scope.using_speed, timestamp - $scope.startTime, false, "current", false, 0); //new bot line at new spread
+                        $scope.tradingGraph.callDrawSpreadTick($scope.curOffsetY, $scope.using_speed, timestamp - $scope.startTime, false, "current", 0);                       //new top line at new spread
+                        $scope.tradingGraph.callDrawSpreadTick($scope.CalculateYPOS($scope.curOffsetY), $scope.using_speed, timestamp - $scope.startTime, false, "current", 0); //new bot line at new spread
                         $scope.tradingGraph.DrawBox($scope.tradingGraph, $scope.oldOffsetY, $scope.jumpOffsetY, $scope.CalculateYPOS($scope.oldOffsetY), "box");                                 //display your spread region at your old spread
                         $scope.lastEvent = $scope.event;                                        //keep track of the last event
                         $scope.event = $scope.e.NO_EVENT;                                       //clear event
@@ -259,8 +254,8 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
                         $scope.startTime = window.performance.now();                            //reset start time for the new lines
                         $scope.tradingGraph.marketSVG.selectAll("#current").remove();           //moving spread lines will be replaced
                         $scope.tradingGraph.marketSVG.selectAll("#box").remove();               //clear old spread region for shifted one
-                        $scope.tradingGraph.callDrawSpreadTick($scope.curOffsetY, $scope.using_speed, timestamp - $scope.startTime, false, "current", false, 0);                        //send new top line at new spread
-                        $scope.tradingGraph.callDrawSpreadTick($scope.CalculateYPOS($scope.curOffsetY), $scope.using_speed, timestamp - $scope.startTime, false, "current", false, 0);  //send new bot line at new spread
+                        $scope.tradingGraph.callDrawSpreadTick($scope.curOffsetY, $scope.using_speed, timestamp - $scope.startTime, false, "current", 0);                        //send new top line at new spread
+                        $scope.tradingGraph.callDrawSpreadTick($scope.CalculateYPOS($scope.curOffsetY), $scope.using_speed, timestamp - $scope.startTime, false, "current", 0);  //send new bot line at new spread
                         $scope.oldOffsetY = $scope.curOffsetY;                                  //must set this so upon leaving this case so it will be correct in default
                         $scope.tradingGraph.DrawBox($scope.tradingGraph, $scope.oldOffsetY, $scope.jumpOffsetY, $scope.CalculateYPOS($scope.oldOffsetY), "box"); //shift the spread region by the jump distance
                         $scope.lastEvent = $scope.event;                                        //keep track of the last event
@@ -272,8 +267,8 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
                         if($scope.using_speed){
                            if(timestamp - $scope.startTime < $scope.tradingGraph.fastDelay){    //current spread lines havent reached the end
                               $scope.tradingGraph.marketSVG.selectAll("#current").remove();     //delete line history so they appear moving
-                              $scope.tradingGraph.callDrawSpreadTick($scope.curOffsetY, $scope.using_speed, timestamp - $scope.startTime, false, "current", false, 0);                        //current top line
-                              $scope.tradingGraph.callDrawSpreadTick($scope.CalculateYPOS($scope.curOffsetY), $scope.using_speed, timestamp - $scope.startTime, false, "current", false, 0);  //current bot line
+                              $scope.tradingGraph.callDrawSpreadTick($scope.curOffsetY, $scope.using_speed, timestamp - $scope.startTime, false, "current", 0);                        //current top line
+                              $scope.tradingGraph.callDrawSpreadTick($scope.CalculateYPOS($scope.curOffsetY), $scope.using_speed, timestamp - $scope.startTime, false, "current", 0);  //current bot line
                               if($scope.lastEvent != $scope.e.FIRST_TIME){                      //don't want to display spread region until the first lines reach the center
                                  $scope.tradingGraph.marketSVG.selectAll("#box").remove();      //clear redundant spread regions for performance
                                  $scope.tradingGraph.DrawBox($scope.tradingGraph, $scope.oldOffsetY, $scope.jumpOffsetY, $scope.CalculateYPOS($scope.oldOffsetY), "box");          //display your current spread region with offset if any
@@ -288,8 +283,8 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
                         else {                                                                  //no event, so continue drawing the lines
                            if(timestamp - $scope.startTime < $scope.tradingGraph.slowDelay){    //current spread lines havent reached the end
                               $scope.tradingGraph.marketSVG.selectAll("#current").remove();     //delete line history so they appear moving
-                              $scope.tradingGraph.callDrawSpreadTick($scope.curOffsetY, $scope.using_speed, timestamp - $scope.startTime, false, "current", false, 0);                        //current top line
-                              $scope.tradingGraph.callDrawSpreadTick($scope.CalculateYPOS($scope.curOffsetY), $scope.using_speed, timestamp - $scope.startTime, false, "current", false, 0);  //current bot line
+                              $scope.tradingGraph.callDrawSpreadTick($scope.curOffsetY, $scope.using_speed, timestamp - $scope.startTime, false, "current", 0);                        //current top line
+                              $scope.tradingGraph.callDrawSpreadTick($scope.CalculateYPOS($scope.curOffsetY), $scope.using_speed, timestamp - $scope.startTime, false, "current", 0);  //current bot line
                               if($scope.lastEvent != $scope.e.FIRST_TIME){                      //don't want to display spread region until the first lines reach the center
                                  $scope.tradingGraph.marketSVG.selectAll("#box").remove();      //clear redundant spread regions for performance
                                  $scope.tradingGraph.DrawBox($scope.tradingGraph, $scope.oldOffsetY, $scope.jumpOffsetY, $scope.CalculateYPOS($scope.oldOffsetY), "box");          //display your current spread region
@@ -311,8 +306,8 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
                         $scope.startTime = window.performance.now();                            //reset start time for the new spread lines
                         $scope.tradingGraph.marketSVG.selectAll("#current").remove();           //remove static lines current spread
                         $scope.tradingGraph.marketSVG.selectAll("#box").remove();               //remove current spread region for performance and safety
-                        $scope.tradingGraph.callDrawSpreadTick($scope.curOffsetY, $scope.using_speed, timestamp - $scope.startTime, false, "current", false, 0);                        //new top line at spread
-                        $scope.tradingGraph.callDrawSpreadTick($scope.CalculateYPOS($scope.curOffsetY), $scope.using_speed, timestamp - $scope.startTime, false, "current", false, 0);  //new bot line at spread
+                        $scope.tradingGraph.callDrawSpreadTick($scope.curOffsetY, $scope.using_speed, timestamp - $scope.startTime, false, "current", 0);                        //new top line at spread
+                        $scope.tradingGraph.callDrawSpreadTick($scope.CalculateYPOS($scope.curOffsetY), $scope.using_speed, timestamp - $scope.startTime, false, "current", 0);  //new bot line at spread
                         $scope.tradingGraph.DrawBox($scope.tradingGraph, $scope.oldOffsetY, $scope.jumpOffsetY, $scope.CalculateYPOS($scope.oldOffsetY), "box");                                  //display your current spread region            
                         $scope.lastEvent = $scope.event;                                        //keep track of the last event
                         $scope.event = $scope.e.NO_EVENT;                                       //clear event
@@ -323,8 +318,8 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
                         $scope.startTime = window.performance.now();                            //reset start time for the new lines
                         $scope.tradingGraph.marketSVG.selectAll("#current").remove();           //remove your current static lines
                         $scope.tradingGraph.marketSVG.selectAll("#box").remove();               //remove your spread region
-                        $scope.tradingGraph.callDrawSpreadTick($scope.curOffsetY, $scope.using_speed, timestamp - $scope.startTime, false, "current", false, 0);                                 //new top line at current spread
-                        $scope.tradingGraph.callDrawSpreadTick($scope.CalculateYPOS($scope.curOffsetY), $scope.using_speed, timestamp - $scope.startTime, false, "current", false, 0);           //new bot line at current spread
+                        $scope.tradingGraph.callDrawSpreadTick($scope.curOffsetY, $scope.using_speed, timestamp - $scope.startTime, false, "current", 0);                                 //new top line at current spread
+                        $scope.tradingGraph.callDrawSpreadTick($scope.CalculateYPOS($scope.curOffsetY), $scope.using_speed, timestamp - $scope.startTime, false, "current", 0);           //new bot line at current spread
                         $scope.oldOffsetY = $scope.curOffsetY;                                  //must set this so upon leaving this case, it will work in default
                         $scope.tradingGraph.DrawBox($scope.tradingGraph, $scope.oldOffsetY, $scope.jumpOffsetY, $scope.CalculateYPOS($scope.oldOffsetY), "box"); //display new shifted spread region
                         $scope.lastEvent = $scope.event;                                        //keep track of the last event

@@ -218,12 +218,12 @@ Redwood.factory("GroupManager", function () {
          if (msg.protocol === "USER") {
             var subjectID = msg.msgData[0];
 
-            if(this.marketAlgorithms[subjectID].using_speed){                 //if fast send straight to graph
+            // if(this.marketAlgorithms[subjectID].using_speed){                 //if fast send straight to graph
                this.sendToAllDataHistories(msg);
-            }
-            else{
-               window.setTimeout(this.sendToAllDataHistories.bind(this), this.delay, msg);   //wait delay time to send to update graph
-            }
+            // }
+            // else{
+            //    window.setTimeout(this.sendToAllDataHistories.bind(this), this.delay, msg);   //wait delay time to send to update graph
+            // }
 
             this.marketAlgorithms[subjectID].recvFromGroupManager(msg);       //send to market algorithms -> server
 

@@ -60,7 +60,6 @@ RedwoodHighFrequencyTrading.factory("Graphing", function () {
       graph.prevMaxPriceProfit = 0;
       graph.prevMinPriceProfit = 0;
 
-      graph.currentTick = [];          //added 7/21/17 for drawing transaction lines
       graph.op = 1;                    //added 7/24/17 for adding opacity to transaction lines
       graph.currentTransaction = null;    //added 7/24/17 for ensuring only the correct orders are drawn as transacted
       graph.currTransactionID = null;     //added 7/24/17 for ensuring only the correct orders are drawn as transacted
@@ -412,7 +411,7 @@ RedwoodHighFrequencyTrading.factory("Graphing", function () {
             p = null;
          }
          this.drawLaserMarket(graphRefr, p, q, "my-buy-offer");
-      }
+      };
 
       graph.drawLaserTransactions = function (graphRefr, historyDataSet, myId){
          graphRefr.marketSVG.selectAll("line.my-positive-transactions line.my-negative-transactions line.other-negative-transactions line.other-positive-transactions")
@@ -421,8 +420,22 @@ RedwoodHighFrequencyTrading.factory("Graphing", function () {
             .append("line")
             .attr("id","REMOVE")
             .attr("opacity", graphRefr.op)
-            .attr("x1", graphRefr.elementWidth / 2)
-            .attr("x2", graphRefr.elementWidth / 2)
+            .attr("x1", function (d){
+               if(d.buyerID == myId || d.sellerID == myId){
+                  return graphRefr.elementWidth / 2 + 5;
+               }
+               else{
+                  return graphRefr.elementWidth / 2 - 5;
+               }
+            })
+            .attr("x2", function (d){
+               if(d.buyerID == myId || d.sellerID == myId){
+                  return graphRefr.elementWidth / 2 + 5;
+               }
+               else{
+                  return graphRefr.elementWidth / 2 - 5;
+               }
+            })
             .attr("y1", graphRefr.elementHeight / 2)
             .attr("y2", function (d) {
                if(d.buyerID != 0){     //we know to draw line to the current buy offer
@@ -543,22 +556,12 @@ RedwoodHighFrequencyTrading.factory("Graphing", function () {
       };
 
 
-      graph.callDrawSpreadTick = function (yPos, speed, runtime, static, elementID, remove, xPos, segment){
+      graph.callDrawSpreadTick = function (yPos, speed, runtime, static, elementID, xPos){
          if(speed){
-            if(remove){
-               graph.DrawLaser(this, yPos, xPos, this.fastDelay, runtime, elementID, static, 50 + this.elementWidth);  //draw line off of the screen
-            }
-            else{
-               graph.DrawLaser(this, yPos, xPos, this.fastDelay, runtime, elementID, static, this.elementWidth / 2);
-            }
+            graph.DrawLaser(this, yPos, xPos, this.fastDelay, runtime, elementID, static, this.elementWidth / 2);
          }
          else{
-            if(remove){
-               graph.DrawLaser(this, yPos, xPos, this.slowDelay, runtime, elementID, static, 50 + this.elementWidth);  //draw line off of the screen
-            }
-            else{
-               graph.DrawLaser(this, yPos, xPos, this.slowDelay, runtime, elementID, static, this.elementWidth / 2);
-            }
+            graph.DrawLaser(this, yPos, xPos, this.slowDelay, runtime, elementID, static, this.elementWidth / 2);
          }
       };
 
@@ -743,11 +746,9 @@ RedwoodHighFrequencyTrading.factory("Graphing", function () {
                id: "REMOVE"
             });
 
-         if(graph.laser){
-            this.drawLaserOffers(graphRefr, dataHistory);
-            this.drawLaserTransactions(graphRefr, dataHistory.transactions, dataHistory.myId);
-            this.DrawSnipe(graphRefr, dataHistory);
-         }
+         this.drawLaserOffers(graphRefr, dataHistory);
+         this.drawLaserTransactions(graphRefr, dataHistory.transactions, dataHistory.myId);
+         this.DrawSnipe(graphRefr, dataHistory);
          
          if(this.oldFundPrice == null){
             this.oldFundPrice = dataHistory.curFundPrice[1];   //initialize

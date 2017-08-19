@@ -302,7 +302,7 @@ RedwoodHighFrequencyTrading.factory("Graphing", function () {
          }
             
          this.profitSVG.selectAll("line.positive-profit line.negative-profit")
-            .data(dataHistory.playerData[dataHistory.myId].profitJumps)          //REPLACE dataHistory.myId with myID to graph vertical lines for other users profit
+            .data(dataHistory.playerData[dataHistory.myId].profitJumps)          //REPLACE dataHistory.myId with uid to graph vertical lines for other users profit
             .enter()
             .append("line")
             .filter(function (d) {

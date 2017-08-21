@@ -239,7 +239,8 @@ Redwood.controller("AdminCtrl",
                         groupNumber: groupNum,
                         memberIDs: group,
                         isDebug: debugMode,
-                        mFlag: marketFlag
+                        mFlag: marketFlag,
+                        groupNum: groupNum
                      };
                      $scope.groupManagers[groupNum] = groupManager.createGroupManager(groupArgs, ra.sendCustom);
                      $scope.groupManagers[groupNum].market = marketManager.createMarketManager(ra.sendCustom, groupNum, $scope.groupManagers[groupNum]);

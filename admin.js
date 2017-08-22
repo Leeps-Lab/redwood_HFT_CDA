@@ -411,8 +411,7 @@ Redwood.controller("AdminCtrl",
                data.unshift(["player", "final_profit"]);
 
                // get file name by formatting end time as readable string
-               var d = new Date();
-               var filename = d.getHours() + '_' + d.getMinutes() + '_' + d.getSeconds() + '_cda_final_profits.csv';
+               var filename = printTime(this.startTime) + '_cda_final_profits.csv';
 
                var csvRows = [];
                for (let index = 0; index < data.length; index++) {

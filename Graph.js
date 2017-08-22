@@ -34,7 +34,7 @@ RedwoodHighFrequencyTrading.factory("Graphing", function () {
       graph.graphAdjustSpeedProfit = .1;      //speed that profit price axis adjusts in pixels per frame
       graph.marketPriceGridIncrement = 1;     //amount between each line on market price axis
       graph.profitPriceGridIncrement = 1;     //amount between each line on profit price axis
-      graph.contractedTimeInterval = 30;      //amount of time displayed on time axis when graph is contracted
+      graph.contractedTimeInterval = 60;      //amount of time displayed on time axis when graph is contracted
       graph.timeInterval = graph.contractedTimeInterval; //current amount in seconds displayed at once on full time axis
       graph.timeIncrement = 5;         //Amount in seconds between lines on time axis
       graph.currentTime = 0;           //Time displayed on graph
@@ -76,17 +76,12 @@ RedwoodHighFrequencyTrading.factory("Graphing", function () {
       graph.removeAnimationID = 0;
       graph.removeStaticAnimationID = 0;
       graph.IDArray = [];
-      graph.slowDelay = 2000;                   
-      graph.fastDelay = 1000;
+      graph.slowDelay = 500;                   
+      graph.fastDelay = 100;
       graph.FPCswing = null;              //used for shifting spread ticks with FPC's
       graph.currentSellTick = [];
       graph.currentBuyTick = [];
       graph.PreviousProfit = 0;
-
-      if(graph.laser){
-         graph.fastDelay = 100;
-         graph.slowDelay = 500;
-      }
 
       graph.getCurOffsetTime = function () {
          return getTime() - this.timeOffset;
@@ -365,9 +360,33 @@ RedwoodHighFrequencyTrading.factory("Graphing", function () {
                .attr("y2", function(d) {
                      return graphRefr.elementHeight / 2 - (currentSell * graphRefr.elementHeight / graphRefr.priceRange);
                })
-               
                .attr("class", styleClassName)  
+         }
 
+         if((currentBuy || currentSell) && (styleClassName == "my-buy-offer")){            //only need one side to draw MY box
+            let color = "Aqua";                    //default color
+            let y, height;
+            height = 2 * (dataHistory.receivedSpread[dataHistory.myId] * graphRefr.elementHeight / graphRefr.priceRange).toFixed(2);
+            // height = 2 * (dataHistory.playerData[dataHistory.myId].spread * graphRefr.newElementHeight / graphRefr.priceRange).toFixed(2);
+            
+            if(currentSell){
+               y = graphRefr.elementHeight / 2 - (currentSell * graphRefr.elementHeight / graphRefr.priceRange);
+            }
+            else {
+               y = graphRefr.elementHeight / 2 + (currentBuy * graphRefr.elementHeight / graphRefr.priceRange);
+               y -= height;
+            }
+            if(dataHistory.playerData[dataHistory.myId].spread == dataHistory.lowestSpread){  //I have the best spread
+               color = "LimeGreen";        //best spread color
+            }
+            this.marketSVG.append("rect")
+               .attr("id", "REMOVE")
+               .attr("opacity", .2)
+               .attr("x", graphRefr.elementWidth / 2 - 20)
+               .attr("width", 40)
+               .attr("y", y)
+               .attr("height", height)
+               .style("fill", color)
          }
       };
 

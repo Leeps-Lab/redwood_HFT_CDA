@@ -37,6 +37,8 @@ RedwoodHighFrequencyTrading.factory("DataHistory", function () {
       dataHistory.SnipeStyle = "";
       dataHistory.snipeOP = 1;
       dataHistory.lastTime = null;
+
+      dataHistory.receivedSpread = [];
       
       dataHistory.positive_sound;
       dataHistory.negative_sound;
@@ -177,6 +179,8 @@ RedwoodHighFrequencyTrading.factory("DataHistory", function () {
             //Push on new buy offer
             this.playerData[buyMsg.subjectID].curBuyOffer = [buyMsg.timeStamp, buyMsg.price];   // [timestamp, price]
 
+            this.receivedSpread[buyMsg.subjectID] = this.playerData[buyMsg.subjectID].spread;         //added 8/22 because normal spread is processed too quickly
+
             // check to see if new buy price is lowest price so far
             if (buyMsg.price < this.lowestMarketPrice) this.lowestMarketPrice = buyMsg.price;
          }
@@ -195,6 +199,8 @@ RedwoodHighFrequencyTrading.factory("DataHistory", function () {
             }
             //Push on new sell offer
             this.playerData[sellMsg.subjectID].curSellOffer = [sellMsg.timeStamp, sellMsg.price];   // [timestamp, price]
+
+            this.receivedSpread[sellMsg.subjectID] = this.playerData[sellMsg.subjectID].spread;                 //added 8/22 because normal spread is processed too quickly
 
             // check to see if new sell price is highest price so far
             if (sellMsg.price > this.highestMarketPrice) this.highestMarketPrice = sellMsg.price;

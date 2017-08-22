@@ -81,16 +81,28 @@ Redwood.factory("MarketAlgorithm", function () {
                   if (this.buyEntered) {
                      nMsg3.msgData[2].push(this.updateSellOfferMsg());
                   }
+                  else{
+                      nMsg3.msgData[2].push(this.enterSellOfferMsg());     //enter a new order in the event yours transacted during a jump
+                  }
                   if (this.sellEntered) {
                      nMsg3.msgData[2].push(this.updateBuyOfferMsg());
+                  }
+                  else{
+                      nMsg3.msgData[2].push(this.enterBuyOfferMsg());      //enter a new order in the event yours transacted during a jump
                   }
                }
                else{                                     //the price moved down -> update buy order before sell order
                   if (this.buyEntered) {
                      nMsg3.msgData[2].push(this.updateBuyOfferMsg());
                   }
+                  else{
+                      nMsg3.msgData[2].push(this.enterBuyOfferMsg());      //enter a new order in the event yours transacted during a jump
+                  }
                   if (this.sellEntered) {
                      nMsg3.msgData[2].push(this.updateSellOfferMsg());
+                  }
+                  else{
+                      nMsg3.msgData[2].push(this.enterSellOfferMsg());     //enter a new order in the event yours transacted during a jump
                   }
                }
                
@@ -98,6 +110,13 @@ Redwood.factory("MarketAlgorithm", function () {
             else if (this.state == "state_snipe") {
                nMsg3 = new Message("SYNC_FP", "SNIPE", [this.myId, this.using_speed, []]);
                nMsg3.timeStamp = msg.msgData[0]; // for debugging test output only
+
+               if(this.buyEntered) {    //remove stale snipe messages (no more IOC)    added 8/22/17
+                  this.sendToGroupManager(this.removeBuyOfferMsg());
+               }
+               else if(this.sellEntered){
+                  this.sendToGroupManager(this.removeSellOfferMsg());
+               }
 
                if(positiveChange){     //the new price is greater than the old price -> generate snipe buy message
                   //snipeBuyMsg = new Message("OUCH", "EBUY", [this.myId, this.fundamentalPrice, true, getTime()]);  

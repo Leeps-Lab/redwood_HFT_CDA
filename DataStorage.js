@@ -407,7 +407,7 @@ Redwood.factory("DataStorage", function () {
          data[0].push("num_transactions", "eq_price", "buy_orders_before", "buy_orders_after", "sell_orders_before", "sell_orders_after", "porder", "dvalue", "cumvalue", "investor_buy_sell");
 
          // get file name by formatting start time as readable string
-         var filename = printTime(this.startTime) + '_fba_group_' + this.groupNum + '.csv';
+         var filename = printTime(this.startTime) + '_cda_group_' + this.groupNum + '.csv';
 
          // download data 2d array as csv
          // stolen from stackoverflow

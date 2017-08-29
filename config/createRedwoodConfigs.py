@@ -6,7 +6,6 @@ nPlayersPerGroup = int(sys.argv[2])
 periods = int(sys.argv[3])
 exchangeType = "cda"
 subject = "default"
-nPlayersPerGroup = 4
 startingWealth = 140
 speedCost = 0.1
 maxSpread = 5
@@ -21,6 +20,6 @@ for period in range(1,periods+1):
     fName = exchangeType+"_config_"+str(nGroups)+"groups_p"+str(period)+".csv"
     fOut = open(fName,"w")
     fOut.write("period,subject,groups,startingWealth,speedCost,maxSpread,marketEventsURL,priceChangesURL\n")
-    fOut.write(str(period)+","+subject+",'"+str(groupList)+"',"+str(startingWealth)+","+str(speedCost)+","+str(maxSpread)+","+marketEventsURL+","+priceChangesURL)
+    fOut.write(str(period)+","+subject+",\""+str(groupList)+"\","+str(startingWealth)+","+str(speedCost)+","+str(maxSpread)+","+marketEventsURL+","+priceChangesURL)
     fOut.close()
     

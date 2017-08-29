@@ -164,6 +164,8 @@ Redwood.controller("AdminCtrl",
             $scope.speedCost = $scope.config.speedCost;
             $scope.startingWealth = $scope.config.startingWealth;
             $scope.maxSpread = $scope.config.maxSpread;
+            $scope.experimentLength = $scope.config.experimentLength;
+            $scope.exchangeRate = $scope.config.exchangeRate;
 
             $scope.priceChanges = [];
             var priceURL = $scope.config.priceChangesURL;
@@ -343,7 +345,16 @@ Redwood.controller("AdminCtrl",
                   console.log("Initial Delay: " + investorDelayTime);
                   window.setTimeout($scope.groupManagers[groupNum].sendNextInvestorArrival, investorDelayTime / 1000000);
                }
-               
+               if($scope.experimentLength == null){
+                  $scope.experimentLength = 10000;      //default exp length of 5 mins
+               }
+               if($scope.exchangeRate == null){
+                  $scope.exchangeRate = 10;              //default exchange rate of 10
+               }
+               window.setTimeout(function (){
+                  console.log("Experiment ending after", $scope.experimentLength / 1000, "seconds");
+                  ra.sendCustom("end_game");
+               }, $scope.experimentLength);      //end the experiment after configurable experimentLength
             }
          });
 
@@ -401,7 +412,8 @@ Redwood.controller("AdminCtrl",
                console.log($scope.groupManagers);
                for (var group in $scope.groupManagers) {
                   for (var player in $scope.groupManagers[group].dataStore.playerFinalProfits) {
-                     data.push([player, $scope.groupManagers[group].dataStore.playerFinalProfits[player]]);
+                     data.push([player, $scope.groupManagers[group].dataStore.playerFinalProfits[player],
+                        $scope.groupManagers[group].dataStore.playerFinalProfits[player] / $scope.exchangeRate]);
                   }
                }
 
@@ -409,7 +421,7 @@ Redwood.controller("AdminCtrl",
                   return a[0] - b[0];
                });
 
-               data.unshift(["player", "final_profit"]);
+               data.unshift(["player", "final_profit", "after_exchange_rate"]);
 
                // get file name by formatting end time as readable string
                var filename = printTime($scope.startTime) + '_cda_final_profits.csv';

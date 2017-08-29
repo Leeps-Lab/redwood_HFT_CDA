@@ -346,7 +346,7 @@ Redwood.controller("AdminCtrl",
                   window.setTimeout($scope.groupManagers[groupNum].sendNextInvestorArrival, investorDelayTime / 1000000);
                }
                if($scope.experimentLength == null){
-                  $scope.experimentLength = 10000;      //default exp length of 5 mins
+                  $scope.experimentLength = 300000;      //default exp length of 5 mins
                }
                if($scope.exchangeRate == null){
                   $scope.exchangeRate = 10;              //default exchange rate of 10
@@ -409,7 +409,6 @@ Redwood.controller("AdminCtrl",
             .click(function () {
                // export final profit values to csv
                var data = [];
-               console.log($scope.groupManagers);
                for (var group in $scope.groupManagers) {
                   for (var player in $scope.groupManagers[group].dataStore.playerFinalProfits) {
                      data.push([player, $scope.groupManagers[group].dataStore.playerFinalProfits[player],

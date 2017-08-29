@@ -366,7 +366,7 @@ Redwood.controller("AdminCtrl",
                var msg = new OuchMessage("EBUY", 0, 214748.3647, true);
                msg.delay = false;
                for (var group in $scope.groupManagers) {
-                  $scope.groupManagers[group].dataStore.investorArrivals.push([getTime() - this.startTime, "BUY"]);
+                  $scope.groupManagers[group].dataStore.investorArrivals.push([getTime() - $scope.startTime, "BUY"]);
                   $scope.groupManagers[group].sendToMarket(msg);
                }
             });
@@ -377,7 +377,7 @@ Redwood.controller("AdminCtrl",
                var msg = new OuchMessage("ESELL", 0, 0, true);
                msg.delay = false;
                for (var group in $scope.groupManagers) {
-                  $scope.groupManagers[group].dataStore.investorArrivals.push([getTime() - this.startTime, "SELL"]);
+                  $scope.groupManagers[group].dataStore.investorArrivals.push([getTime() - $scope.startTime, "SELL"]);
                   $scope.groupManagers[group].sendToMarket(msg);
                }
             });
@@ -398,6 +398,7 @@ Redwood.controller("AdminCtrl",
             .click(function () {
                // export final profit values to csv
                var data = [];
+               console.log($scope.groupManagers);
                for (var group in $scope.groupManagers) {
                   for (var player in $scope.groupManagers[group].dataStore.playerFinalProfits) {
                      data.push([player, $scope.groupManagers[group].dataStore.playerFinalProfits[player]]);
@@ -411,7 +412,7 @@ Redwood.controller("AdminCtrl",
                data.unshift(["player", "final_profit"]);
 
                // get file name by formatting end time as readable string
-               var filename = printTime(this.startTime) + '_cda_final_profits.csv';
+               var filename = printTime($scope.startTime) + '_cda_final_profits.csv';
 
                var csvRows = [];
                for (let index = 0; index < data.length; index++) {

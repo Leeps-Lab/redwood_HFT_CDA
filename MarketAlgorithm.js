@@ -48,8 +48,12 @@ Redwood.factory("MarketAlgorithm", function () {
 
       // sends out remove buy and sell messages for exiting market
       marketAlgorithm.exitMarket = function () {
-         this.sendToGroupManager(this.removeBuyOfferMsg());
-         this.sendToGroupManager(this.removeSellOfferMsg());
+         if(this.buyEntered) {    
+            this.sendToGroupManager(this.removeBuyOfferMsg());
+         }
+         if(this.sellEntered){
+            this.sendToGroupManager(this.removeSellOfferMsg());
+         }
       };
 
       // Handle message sent to the market algorithm
@@ -78,13 +82,13 @@ Redwood.factory("MarketAlgorithm", function () {
 
                //prevent maker from sniping themself
                if(positiveChange){                       //the price moved up -> update sell order before buy order
-                  if (this.buyEntered) {
+                  if (this.sellEntered) {
                      nMsg3.msgData[2].push(this.updateSellOfferMsg());
                   }
                   else{
                       nMsg3.msgData[2].push(this.enterSellOfferMsg());     //enter a new order in the event yours transacted during a jump
                   }
-                  if (this.sellEntered) {
+                  if (this.buyEntered) {
                      nMsg3.msgData[2].push(this.updateBuyOfferMsg());
                   }
                   else{
@@ -114,7 +118,7 @@ Redwood.factory("MarketAlgorithm", function () {
                if(this.buyEntered) {    //remove stale snipe messages (no more IOC)    added 8/22/17
                   this.sendToGroupManager(this.removeBuyOfferMsg());
                }
-               else if(this.sellEntered){
+               if(this.sellEntered){
                   this.sendToGroupManager(this.removeSellOfferMsg());
                }
 
@@ -156,9 +160,6 @@ Redwood.factory("MarketAlgorithm", function () {
          if (msg.msgType === "UMAKER") {
             this.enterMarket();                 // enter market
             this.state = "state_maker";         // set state
-
-            //var nMsg = new Message("DATA", "C_UMAKER", msg.msgData);     //removed 6/27/17 for refactor
-            //this.sendToAllDataHistories(nMsg);                           //removed 6/27/17 for refactor
          }
 
          // user sent signal to change state to sniper
@@ -167,9 +168,6 @@ Redwood.factory("MarketAlgorithm", function () {
                this.exitMarket();
             }
             this.state = "state_snipe";         // update state
-
-            //var nMsg = new Message("DATA", "C_USNIPE", msg.msgData);     //removed 6/27/17 for refactor
-            //this.sendToAllDataHistories(nMsg);                           //removed 6/27/17 for refactor
          }
 
          // user sent signal to change state to "out of market"
@@ -178,15 +176,10 @@ Redwood.factory("MarketAlgorithm", function () {
                this.exitMarket();
             }
             this.state = "state_out";           // update state
-
-            //var nMsg = new Message("DATA", "C_UOUT", msg.msgData);
-            //this.sendToAllDataHistories(nMsg);
          }
 
          if (msg.msgType === "USPEED") {
             this.using_speed = msg.msgData[1];
-            //var nMsg = new Message("DATA", "C_USPEED", msg.msgData);     //removed 6/27/17 for refactor
-            //this.sendToAllDataHistories(nMsg);                           //removed 6/27/17 for refactor
          }
 
          //User updated their spread
@@ -199,9 +192,6 @@ Redwood.factory("MarketAlgorithm", function () {
             if (this.sellEntered) {
                this.sendToGroupManager(this.updateSellOfferMsg());
             }
-
-            //var nMsg = new Message("DATA", "C_UUSPR", msg.msgData);      //removed 6/27/17 for refactor
-            //this.sendToAllDataHistories(nMsg);                           //removed 6/27/17 for refactor
          }
 
          // Confirmation that a buy offer has been placed in market
@@ -242,6 +232,7 @@ Redwood.factory("MarketAlgorithm", function () {
          // Confirmation that a buy offer has been updated
          if (msg.msgType == "C_UBUY") {
             if (msg.subjectID == this.myId) {
+               this.buyEntered = true;
                this.sendToAllDataHistories(msg);           
             }
          }
@@ -249,31 +240,51 @@ Redwood.factory("MarketAlgorithm", function () {
          // Confirmation that a sell offer has been updated
          if (msg.msgType == "C_USELL") {
             if (msg.subjectID == this.myId) {
+               this.sellEntered = true;
                this.sendToAllDataHistories(msg);           
             }
          }
 
          // Confirmation that a transaction has taken place
          if (msg.msgType == "C_TRA") {
-            msg.FPC = this.fundamentalPrice;
-            //console.log(msg);
-            //this.sendToAllDataHistories(msg);
-            this.sendToDataHistory(msg,msg.subjectID);   //test 7/18/17 (only need to send to dhistory of user that transacted);
-            if (this.state == "state_maker") {     //replenish filled orders
-               if (msg.buyerID === this.myId)
-               {
-                  this.currentBuyId = 0;
-                  this.buyEntered = false;         //added 7/18/17 for fixing OUT user input
-                  this.sendToGroupManager(this.enterBuyOfferMsg());
-               }
-               if (msg.sellerID === this.myId) 
-               {
-                  this.currentSellId = 0;
-                  this.sellEntered = false;        //added 7/18/17 for fixing OUT user input
+            msg.FPC = this.fundamentalPrice;    //add FPC to message for graphing
+            if (msg.buyerID === this.myId) {    
+               this.currentBuyId = 0;
+               this.buyEntered = false;         //added 7/18/17 for fixing OUT user input
+            }
+            if (msg.sellerID === this.myId) {
+               this.currentSellId = 0;
+               this.sellEntered = false;        //added 7/18/17 for fixing OUT user input
+            }
+            if (this.state == "state_maker") {     //replenish filled orders if maker
+               if(this.sellEntered == false){
                   this.sendToGroupManager(this.enterSellOfferMsg());
                }
+               if(this.buyEntered == false){
+                  this.sendToGroupManager(this.enterBuyOfferMsg());
+               }
             }
+            this.sendToDataHistory(msg,msg.subjectID);
+            this.groupManager.dataStore.storeMsg(msg);   
          }
+         // if (msg.msgType == "C_TRA") {
+         //    msg.FPC = this.fundamentalPrice;
+         //    this.sendToDataHistory(msg,msg.subjectID);   //test 7/18/17 (only need to send to dhistory of user that transacted);
+         //    if (this.state == "state_maker") {     //replenish filled orders
+         //       if (msg.buyerID === this.myId)
+         //       {
+         //          this.currentBuyId = 0;
+         //          this.buyEntered = false;         //added 7/18/17 for fixing OUT user input
+         //          this.sendToGroupManager(this.enterBuyOfferMsg());
+         //       }
+         //       if (msg.sellerID === this.myId) 
+         //       {
+         //          this.currentSellId = 0;
+         //          this.sellEntered = false;        //added 7/18/17 for fixing OUT user input
+         //          this.sendToGroupManager(this.enterSellOfferMsg());
+         //       }
+         //    }
+         // }
       };
 
       marketAlgorithm.enterBuyOfferMsg = function () {

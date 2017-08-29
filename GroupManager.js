@@ -178,9 +178,6 @@ Redwood.factory("GroupManager", function () {
                this.syncFPArray = new SynchronizeArray(this.memberIDs);
             }
          }
-
-
-
          // general message that needs to be passed on to marketManager
          if (msg.protocol === "OUCH") {
             groupManager.sendToMarket(msg);

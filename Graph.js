@@ -630,6 +630,39 @@ RedwoodHighFrequencyTrading.factory("Graphing", function () {
             .attr("class", "my-buy-offer");
       };
 
+      graph.drawStaticLines = function(graphRefr){
+         // draw vertical center line
+         graphRefr.marketSVG.append("line").attr({
+               x1: graphRefr.elementWidth / 2,
+               x2: graphRefr.elementWidth / 2,
+               y1: 0, 
+               y2: graphRefr.elementHeight, //this.elementHeight / 2,
+               class: "price-line",
+               id: "KEEP"
+            });
+
+         // // draw static current price tick
+         graphRefr.marketSVG.append("line").attr({
+               x1: graphRefr.elementWidth / 2 - 30,
+               x2: graphRefr.elementWidth / 2 + 30,
+               y1: graphRefr.elementHeight / 2,// * graphRefr.heightScale - 30,//this.elementHeight / 2 - 30,//- 10,    //changed 7/26/17
+               y2: graphRefr.elementHeight / 2,//* graphRefr.heightScale + 30,//this.elementHeight / 2 + 30,//+ 10,
+               class: "my-profit-out",
+               id: "KEEP"
+            });
+
+         for(var height = 0; height <= graphRefr.elementHeight; height += graphRefr.elementHeight / 10){
+            graphRefr.marketSVG.append("line").attr({
+               x1: graphRefr.elementWidth / 2 - 5,
+               x2: graphRefr.elementWidth / 2 + 5,
+               y1: height,
+               y2: height,
+               class: "my-profit-out",
+               id: "KEEP"
+            });
+         }
+
+      };
 
       graph.drawAllProfit = function (graphRefr, dataHistory) {
          for (var user of dataHistory.group) {
@@ -746,26 +779,6 @@ RedwoodHighFrequencyTrading.factory("Graphing", function () {
          //this.drawPriceGridLines(graphRefr, this.marketPriceLines, this.marketSVG, this.mapMarketPriceToYAxis);
          this.drawPriceGridLines(graphRefr, this.profitPriceLines, this.profitSVG, this.mapProfitPriceToYAxis);
 
-         // draw vertical center line
-         this.marketSVG.append("line").attr({
-               x1: this.elementWidth / 2,
-               x2: this.elementWidth / 2,
-               y1: 0, 
-               y2: this.elementHeight, //this.elementHeight / 2,
-               class: "price-line",
-               id: "REMOVE"
-            });
-
-         // // draw static current price tick
-         this.marketSVG.append("line").attr({
-               x1: this.elementWidth / 2 - 30,
-               x2: this.elementWidth / 2 + 30,
-               y1: this.elementHeight / 2,// * graphRefr.heightScale - 30,//this.elementHeight / 2 - 30,//- 10,    //changed 7/26/17
-               y2: this.elementHeight / 2,//* graphRefr.heightScale + 30,//this.elementHeight / 2 + 30,//+ 10,
-               class: "my-profit-out",
-               id: "REMOVE"
-            });
-
          this.drawLaserOffers(graphRefr, dataHistory);
          this.drawLaserTransactions(graphRefr, dataHistory.transactions, dataHistory.myId);
          this.DrawSnipe(graphRefr, dataHistory);
@@ -812,6 +825,7 @@ RedwoodHighFrequencyTrading.factory("Graphing", function () {
          this.marketPriceLines = this.calcPriceGridLines(this.maxPriceMarket, this.minPriceMarket, this.marketPriceGridIncrement);
          this.profitPriceLines = this.calcPriceGridLines(this.maxPriceProfit, this.minPriceProfit, this.profitPriceGridIncrement);
          this.timeLines = this.calcTimeGridLines(this.adminStartTime, this.adminStartTime + this.timeInterval * 1000000000 + this.advanceTimeShown, this.timeIncrement * 1000000000);
+         this.drawStaticLines(this);
       };
 
       return graph;

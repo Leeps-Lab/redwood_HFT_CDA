@@ -21,7 +21,7 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
          $scope.jumpOffsetY = 0;
          $scope.LaserSound;
          $scope.statename = "Out";
-
+         
          $scope.s = {
             NO_LINES: 0,
             DRAW_FIRST: 1,
@@ -84,6 +84,7 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
             $scope.maxSpread = data.maxSpread;
             $scope.sliderVal = $scope.maxSpread / 2;
             $scope.spread = $scope.maxSpread / 2;
+            $scope.exchangeRate = data.exchangeRate;
             $("#slider")
                .slider({
                   value: $scope.sliderVal,

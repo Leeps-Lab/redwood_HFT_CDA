@@ -168,6 +168,13 @@ Redwood.controller("AdminCtrl",
             $scope.exchangeRate = $scope.config.exchangeRate;
             $scope.exchangeURI = $scope.config.exchangeURI;
 
+            if($scope.experimentLength == null){
+               $scope.experimentLength = 300000;      //default exp length of 5 mins
+            }
+            if($scope.exchangeRate == null){
+               $scope.exchangeRate = 10;              //default exchange rate of 10
+            }
+
             $scope.priceChanges = [];
             var priceURL = $scope.config.priceChangesURL;
             $http.get(priceURL).then(function (response) {
@@ -321,7 +328,8 @@ Redwood.controller("AdminCtrl",
                   speedCost: $scope.speedCost,
                   startingWealth: $scope.startingWealth,
                   maxSpread: $scope.maxSpread,
-                  playerTimeOffsets: $scope.playerTimeOffsets
+                  playerTimeOffsets: $scope.playerTimeOffsets,
+                  exchangeRate: $scope.exchangeRate
                };
 
                if($scope.config.hasOwnProperty("input_addresses")) {
@@ -347,12 +355,7 @@ Redwood.controller("AdminCtrl",
                   console.log("Initial Delay: " + investorDelayTime);
                   window.setTimeout($scope.groupManagers[groupNum].sendNextInvestorArrival, investorDelayTime / 1000000);
                }
-               if($scope.experimentLength == null){
-                  $scope.experimentLength = 300000;      //default exp length of 5 mins
-               }
-               if($scope.exchangeRate == null){
-                  $scope.exchangeRate = 10;              //default exchange rate of 10
-               }
+               
                window.setTimeout(function (){
                   console.log("Experiment ending after", $scope.experimentLength / 1000, "seconds");
                   ra.sendCustom("end_game");

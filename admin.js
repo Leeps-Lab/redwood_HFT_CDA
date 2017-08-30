@@ -376,6 +376,12 @@ Redwood.controller("AdminCtrl",
             ra.resume();
          });
 
+         $("#show-instructions")
+            .button()
+            .click(function () {
+               ra.sendCustom("end_game");
+            });
+
          $("#buy-investor")
             .button()
             .click(function () {

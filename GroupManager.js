@@ -34,8 +34,10 @@ Redwood.factory("GroupManager", function () {
       // only open websockets connection if running in REMOTE mode
       if(groupManager.marketFlag === "REMOTE"/*ZACH, D/N MODIFY!*/){
          // remove later
-         if(groupArgs.URI == null) groupArgs.URI = "54.149.235.92";    //for testing purposes, default is oregon
-
+         if(groupArgs.URI == null){
+            console.log("remember to add the correct URI to your config file...");
+            groupArgs.URI = "54.149.235.92";    //for testing purposes, default is oregon
+         }
          // open websocket with market
          groupManager.marketURI = "ws://" + groupArgs.URI + ":800" + groupArgs.groupNum + "/";
          groupManager.socket = new WebSocket(groupManager.marketURI, ['binary', 'base64']);

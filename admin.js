@@ -172,7 +172,10 @@ Redwood.controller("AdminCtrl",
                $scope.experimentLength = 300000;      //default exp length of 5 mins
             }
             if($scope.exchangeRate == null){
-               $scope.exchangeRate = 10;              //default exchange rate of 10
+               $scope.exchangeRate = 1;              //default exchange rate of 1
+            }
+            if($scope.startingWealth == null){
+               $scope.startingWealth = 20;
             }
 
             $scope.priceChanges = [];

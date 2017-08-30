@@ -652,14 +652,14 @@ RedwoodHighFrequencyTrading.factory("Graphing", function () {
             });
 
          for(var height = 0; height <= graphRefr.elementHeight; height += graphRefr.elementHeight / 10){
-            graphRefr.marketSVG.append("line").attr({
-               x1: graphRefr.elementWidth / 2 - 5,
-               x2: graphRefr.elementWidth / 2 + 5,
-               y1: height,
-               y2: height,
-               class: "my-profit-out",
-               id: "KEEP"
-            });
+            graphRefr.marketSVG.append("line")
+               .attr('x1', 0)
+               .attr('x2', graphRefr.elementWidth)
+               .attr('y1', height)
+               .attr('y2', height)
+               .attr('class', "price-line")
+               .attr('id', "KEEP")
+               .style('opacity',.1)
          }
 
       };

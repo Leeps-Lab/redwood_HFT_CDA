@@ -36,7 +36,7 @@ Redwood.factory("GroupManager", function () {
 
          // open websocket with market
          groupManager.marketURI = "ws://54.149.235.92:800" + groupArgs.groupNum + "/";
-          // groupManager.marketURI = "ws://18.196.3.136:800" + groupArgs.groupNum + "/";
+          // groupManager.marketURI = "ws://54.93.112.219:800" + groupArgs.groupNum + "/";
 
          groupManager.socket = new WebSocket(groupManager.marketURI, ['binary', 'base64']);
          groupManager.socket.onopen = function(event) {
@@ -46,7 +46,7 @@ Redwood.factory("GroupManager", function () {
 
          groupManager.socket.onerror = function(event) {
             console.log("Failed to connect to Oregon Exchange, trying Frankfurt");
-            groupManager.marketURI = "ws://18.196.3.136:800" + groupArgs.groupNum + "/";
+            groupManager.marketURI = "ws://54.93.112.219:800" + groupArgs.groupNum + "/";
             console.log("Connecting to Frankfurt Exchange");
             groupManager.socket = new WebSocket(groupManager.marketURI, ['binary', 'base64']);
             groupManager.socketRcv(groupManager.socket);

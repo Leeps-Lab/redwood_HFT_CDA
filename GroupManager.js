@@ -36,8 +36,6 @@ Redwood.factory("GroupManager", function () {
 
          // open websocket with market
          groupManager.marketURI = "ws://54.149.235.92:800" + groupArgs.groupNum + "/";
-          // groupManager.marketURI = "ws://52.59.251.204:800" + groupArgs.groupNum + "/";
-
          groupManager.socket = new WebSocket(groupManager.marketURI, ['binary', 'base64']);
          groupManager.socket.onopen = function(event) {
             console.log("Group", groupArgs.groupNum, " Opened Websocket Connection");

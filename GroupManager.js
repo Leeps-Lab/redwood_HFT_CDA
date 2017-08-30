@@ -35,7 +35,8 @@ Redwood.factory("GroupManager", function () {
       if(groupManager.marketFlag === "REMOTE"/*ZACH, D/N MODIFY!*/){
 
          // open websocket with market
-         groupManager.marketURI = "ws://54.149.235.92:800" + groupArgs.groupNum + "/";
+         // groupManager.marketURI = "ws://54.149.235.92:800" + groupArgs.groupNum + "/";
+         groupManager.marketURI = "ws://" + groupArgs.URI + ":800" + groupArgs.groupNum + "/";
          groupManager.socket = new WebSocket(groupManager.marketURI, ['binary', 'base64']);
          groupManager.socket.onopen = function(event) {
             console.log("Group", groupArgs.groupNum, " Opened Websocket Connection");

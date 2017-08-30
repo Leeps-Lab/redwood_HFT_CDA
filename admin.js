@@ -166,6 +166,7 @@ Redwood.controller("AdminCtrl",
             $scope.maxSpread = $scope.config.maxSpread;
             $scope.experimentLength = $scope.config.experimentLength;
             $scope.exchangeRate = $scope.config.exchangeRate;
+            $scope.exchangeURI = $scope.config.exchangeURI;
 
             $scope.priceChanges = [];
             var priceURL = $scope.config.priceChangesURL;
@@ -242,7 +243,8 @@ Redwood.controller("AdminCtrl",
                         memberIDs: group,
                         isDebug: debugMode,
                         mFlag: marketFlag,
-                        groupNum: groupNum
+                        groupNum: groupNum,
+                        URI: $scope.exchangeURI
                      };
                      $scope.groupManagers[groupNum] = groupManager.createGroupManager(groupArgs, ra.sendCustom);
                      $scope.groupManagers[groupNum].market = marketManager.createMarketManager(ra.sendCustom, groupNum, $scope.groupManagers[groupNum]);

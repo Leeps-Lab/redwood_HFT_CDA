@@ -376,6 +376,7 @@ Redwood.controller("AdminCtrl",
             .click(function () {
                var msg = new OuchMessage("EBUY", 0, 214748.3647, true);
                msg.delay = false;
+               msg.msgId = Math.floor(Math.random() * 1000 + 1000);  //lol
                for (var group in $scope.groupManagers) {
                   $scope.groupManagers[group].dataStore.investorArrivals.push([getTime() - $scope.startTime, "BUY"]);
                   $scope.groupManagers[group].sendToMarket(msg);
@@ -387,6 +388,7 @@ Redwood.controller("AdminCtrl",
             .click(function () {
                var msg = new OuchMessage("ESELL", 0, 0, true);
                msg.delay = false;
+               msg.msgId = Math.floor(Math.random() * 1000 + 1000);  //lol
                for (var group in $scope.groupManagers) {
                   $scope.groupManagers[group].dataStore.investorArrivals.push([getTime() - $scope.startTime, "SELL"]);
                   $scope.groupManagers[group].sendToMarket(msg);

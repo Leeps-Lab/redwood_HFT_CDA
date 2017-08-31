@@ -48,12 +48,14 @@ Redwood.factory("MarketAlgorithm", function () {
 
       // sends out remove buy and sell messages for exiting market
       marketAlgorithm.exitMarket = function () {
-         if(this.buyEntered) {    
-            this.sendToGroupManager(this.removeBuyOfferMsg());
-         }
-         if(this.sellEntered){
-            this.sendToGroupManager(this.removeSellOfferMsg());
-         }
+         // if(this.buyEntered) {    
+         //    this.sendToGroupManager(this.removeBuyOfferMsg());
+         // }
+         // if(this.sellEntered){
+         //    this.sendToGroupManager(this.removeSellOfferMsg());
+         // }
+         this.sendToGroupManager(this.removeBuyOfferMsg());
+         this.sendToGroupManager(this.removeSellOfferMsg());         //test 8/31 to make sure all of your orders are cancelled
       };
 
       // Handle message sent to the market algorithm
@@ -244,6 +246,18 @@ Redwood.factory("MarketAlgorithm", function () {
 
          // Confirmation that a transaction has taken place
          if (msg.msgType == "C_TRA") {
+
+            //Test!! (out people are getting transactions) 8/31/17
+            if(msg.buyerID === this.myId && this.buyEntered === false) {
+               //I transacted even though I was supposed to be out
+               return;
+            }
+            if(msg.sellerID === this.myId && this.sellEntered === false) {
+               //I transacted even though I was supposed to be out
+               return;
+            }
+            //Test!! (out people are getting transactions) 8/31/17
+
             msg.FPC = this.fundamentalPrice;    //add FPC to message for graphing
             if (msg.buyerID === this.myId) {    
                this.buyEntered = false;         //added 7/18/17 for fixing OUT user input

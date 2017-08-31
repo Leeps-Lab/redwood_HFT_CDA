@@ -361,7 +361,10 @@ Redwood.controller("AdminCtrl",
                
                window.setTimeout(function (){
                   console.log("Experiment ending after", $scope.experimentLength / 1000, "seconds");
-                  ra.sendCustom("end_game");
+                  // ra.sendCustom("end_game");
+
+                  ra.sendCustom("_next_period");      //send signal to start to prepare for next period
+                  //reset my
                }, $scope.experimentLength);      //end the experiment after configurable experimentLength
             }
          });

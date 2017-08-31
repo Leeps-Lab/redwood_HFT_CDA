@@ -565,6 +565,11 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
             rs.finish();
          });
 
+         rs.recv("_next_period", function (uid, msg) {
+            console.log("Starting Next Period");
+            rs.next_period(1);
+         });
+
          $scope.processInputAction = function (inputIndex) {
             // console.log($scope.inputData[inputIndex]);
             switch ($scope.inputData[inputIndex][1]) {

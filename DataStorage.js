@@ -3,7 +3,7 @@
 Redwood.factory("DataStorage", function () {
    var api = {};
 
-   api.createDataStorage = function (group, groupNum, speedCost, startingWealth) {
+   api.createDataStorage = function (group, groupNum, speedCost, startingWealth, period) {
       var dataStorage = {};
 
       dataStorage.startTime = 0;          // experiment start time
@@ -13,6 +13,7 @@ Redwood.factory("DataStorage", function () {
       dataStorage.speedCost = speedCost;
       dataStorage.startingWealth = startingWealth;
       dataStorage.playerSpreadValues = {};// associative array of each player's current spread value
+      dataStorage.period = period;
 
       dataStorage.speedChanges = [];      // array of speed change events: [timestamp, speed, uid]
       dataStorage.stateChanges = [];      // array of state change events: [timestamp, state, uid]
@@ -44,7 +45,7 @@ Redwood.factory("DataStorage", function () {
             this.playerSpreadValues[user] = maxSpread / 2;
          }
 
-         $("#ui").append("<button class='btn' id='export-btn-" + groupNum + "' type='button'>Export Group " + this.groupNum + " CSV</button>");
+         $("#ui").append("<button class='btn' id='export-btn-" + groupNum + "' type='button'>Export Group " + this.groupNum + " Period " + this.period + " CSV</button>");
          $("#export-btn-" + groupNum)
             .button()
             .click(function () {
@@ -407,7 +408,7 @@ Redwood.factory("DataStorage", function () {
          data[0].push("num_transactions", "eq_price", "buy_orders_before", "buy_orders_after", "sell_orders_before", "sell_orders_after", "porder", "dvalue", "cumvalue", "investor_buy_sell");
 
          // get file name by formatting start time as readable string
-         var filename = printTime(this.startTime) + '_cda_group_' + this.groupNum + '.csv';
+         var filename = printTime(this.startTime) + '_cda_group_' + this.groupNum + '_P' + this.period + '.csv';
 
          // download data 2d array as csv
          // stolen from stackoverflow

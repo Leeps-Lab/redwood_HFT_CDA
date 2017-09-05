@@ -70,15 +70,18 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
          };
 
          
-
          //First function to run when page is loaded
-         rs.on_load(function () {
+          rs.on_load(function () {
+            // rs._enable_messaging();
+            console.log("Loaded");
             rs.send("set_player_time_offset", getTime());
             rs.send("Subject_Ready");
          });
 
+
          //Initializes experiment
          rs.recv("Experiment_Begin", function (uid, data) {
+            console.log("Received Experiment_Begin");
             $scope.groupNum = data.groupNumber;
             $scope.group = data.group;
             $scope.maxSpread = data.maxSpread;
@@ -105,6 +108,8 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
             }
 
             //Create data history and graph objects
+            $scope.dHistory = {};
+            $scope.tradingGraph = {};
             $scope.dHistory = dataHistory.createDataHistory(data.startTime, data.startFP, rs.user_id, $scope.group, $scope.isDebug, data.speedCost, data.startingWealth, data.maxSpread);
             $scope.dHistory.init();
             $scope.tradingGraph = graphing.makeTradingGraph("graph1", "graph2", data.startTime, data.playerTimeOffsets[rs.user_id]);
@@ -492,7 +497,7 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
                $scope.oldOffsetY = null;
                var nMsg = new Message("USER", "UUSPR", [rs.user_id, $scope.spread, $scope.tradingGraph.getCurOffsetTime()]);
                $scope.sendToGroupManager(nMsg);
-
+               console.log($scope.dHistory);
             });
 
          // button for setting state to "out of market"
@@ -562,13 +567,24 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
          });
 
          rs.recv("end_game", function (uid, msg) {
+            console.log("ending game");
             rs.finish();
          });
 
          rs.recv("_next_period", function (uid, msg) {
             console.log("Starting Next Period");
-            rs.next_period(1);
+            rs.trigger("_next_period");                  //sets up subjects for next period and increments period number
+            for(var member in $scope.dHistory){
+               delete $scope.dHistory[member];
+            }
+            for(var member in $scope.tradingGraph){
+               delete $scope.tradingGraph[member];
+            }
+            $scope.dHistory = {};
+            $scope.tradingGraph = {};
          });
+
+
 
          $scope.processInputAction = function (inputIndex) {
             // console.log($scope.inputData[inputIndex]);

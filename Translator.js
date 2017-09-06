@@ -29,7 +29,13 @@ function splitMessages(messageStr){
   return msgArray;
 }
 
-
+function generateSystemEventMsg() {
+  var sysMsg = new Uint8Array(10);
+  sysMsg[0] = charToByte('S');
+  spliceInArray(intToByteArray(getTime()), sysMsg, 8, 1);
+  sysMsg[9] = charToByte('S');
+  return sysMsg;
+}
 
 // converts from the in-house leeps message format to an OUCH 4.2 formatted message
 function leepsMsgToOuch(leepsMsg){
@@ -365,11 +371,6 @@ function ouchToLeepsMsg(ouchMsg){
 
     return msg;
   }
-
-
-  // else{
-  //     console.log("Not a supported msg format");
-  // }
 
 }
 

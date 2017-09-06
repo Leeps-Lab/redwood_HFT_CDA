@@ -43,6 +43,9 @@ Redwood.factory("GroupManager", function () {
          groupManager.socket = new WebSocket(groupManager.marketURI, ['binary', 'base64']);
          groupManager.socket.onopen = function(event) {
             console.log("Group", groupArgs.groupNum, " Opened Websocket Connection to", groupArgs.URI);
+            var sysMsg = generateSystemEventMsg();
+            console.log("Sending System Message to Reset Order Book:", sysMsg);
+            this.send(sysMsg);
          };
 
          // recieves messages from remote market

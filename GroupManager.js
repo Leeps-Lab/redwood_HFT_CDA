@@ -42,11 +42,11 @@ Redwood.factory("GroupManager", function () {
          // open websocket with market
          groupManager.marketURI = "ws://" + groupArgs.URI + ":800" + groupArgs.groupNum + "/";
          groupManager.socket = new WebSocket(groupManager.marketURI, ['binary', 'base64']);
+
          groupManager.socket.onopen = function(event) {
             console.log("Group", groupArgs.groupNum, " Opened Websocket Connection to", groupArgs.URI);
-            var sysMsg = generateSystemEventMsg();
-            console.log("Sending System Message to Reset Order Book:", sysMsg);
-            this.send(sysMsg);
+            console.log("Resetting Order Book");
+            this.send(generateSystemEventMsg());
          };
 
          // recieves messages from remote market
@@ -100,7 +100,6 @@ Redwood.factory("GroupManager", function () {
 
       groupManager.sendToAllDataHistories = function (msg) {
          this.dataStore.storeMsg(msg);
-         console.log('sent to all data histories');
          this.rssend("To_All_Data_Histories", msg, this.period);
       };
 
@@ -200,7 +199,7 @@ Redwood.factory("GroupManager", function () {
 
       // handles a message from the market
       groupManager.recvFromMarket = function (msg) {
-         console.log("Inbound Message", msg);                //debug incoming ITCH messages
+         // console.log("Inbound Message", msg);                //debug incoming ITCH messages
          if(msg.msgType === "C_TRA"){
             this.sendToMarketAlgorithms(msg);
          }

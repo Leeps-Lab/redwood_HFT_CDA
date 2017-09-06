@@ -158,7 +158,7 @@ Redwood.controller("AdminCtrl",
                return;
             }
 
-            console.log("Reinitalizing Groups");
+            console.log("Initalizing Groups, period:", period);
             resetGroups(); //Assign groups to users
 
             //INITIALIZE ADMIN FOR EXPERIMENT   **************************************
@@ -170,7 +170,6 @@ Redwood.controller("AdminCtrl",
 
 
             $scope.config = ra.get_config(period, 0);
-            console.log($scope.config);
 
             $scope.speedCost = $scope.config.speedCost;
             $scope.startingWealth = $scope.config.startingWealth;
@@ -179,7 +178,6 @@ Redwood.controller("AdminCtrl",
             $scope.exchangeRate = $scope.config.exchangeRate;
             $scope.exchangeURI = $scope.config.exchangeURI;
 
-            console.log("Experiment length:", $scope.experimentLength);
             if($scope.experimentLength == null){
                $scope.experimentLength = 300000;      //default exp length of 5 mins
             }
@@ -353,8 +351,6 @@ Redwood.controller("AdminCtrl",
                   beginData.input_addresses = $scope.config.input_addresses.split(',');
                }
 
-               console.log("Sending Experiment_Begin");
-               console.log(beginData);
                ra.sendCustom("Experiment_Begin", beginData, "admin", $scope.period, groupNum);
                $scope.groupManagers[groupNum].startTime = $scope.startTime;
                $scope.groupManagers[groupNum].dataStore.init(startFP, $scope.startTime, $scope.config.maxSpread);
@@ -366,8 +362,8 @@ Redwood.controller("AdminCtrl",
                if ($scope.priceChanges.length > 2) {
                   window.setTimeout($scope.groupManagers[groupNum].sendNextPriceChange, $scope.startTime + $scope.priceChanges[$scope.groupManagers[groupNum].priceIndex][0] - getTime());
                }
-               console.log("number 1: " + $scope.investorArrivals[$scope.groupManagers[groupNum].investorIndex][0]);
-               console.log("number 2: " + getTime());
+               // console.log("number 1: " + $scope.investorArrivals[$scope.groupManagers[groupNum].investorIndex][0]);
+               // console.log("number 2: " + getTime());
                if ($scope.investorArrivals.length > 1) {
                   var investorDelayTime = ($scope.startTime + $scope.investorArrivals[$scope.groupManagers[groupNum].investorIndex][0]) - getTime();
                   console.log("Initial Delay: " + investorDelayTime);

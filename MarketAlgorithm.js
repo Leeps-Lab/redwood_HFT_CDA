@@ -48,19 +48,12 @@ Redwood.factory("MarketAlgorithm", function () {
 
       // sends out remove buy and sell messages for exiting market
       marketAlgorithm.exitMarket = function () {
-         // if(this.buyEntered) {    
-         //    this.sendToGroupManager(this.removeBuyOfferMsg());
-         // }
-         // if(this.sellEntered){
-         //    this.sendToGroupManager(this.removeSellOfferMsg());
-         // }
          this.sendToGroupManager(this.removeBuyOfferMsg());
          this.sendToGroupManager(this.removeSellOfferMsg());         //test 8/31 to make sure all of your orders are cancelled
       };
 
       // Handle message sent to the market algorithm
       marketAlgorithm.recvFromGroupManager = function (msg) {
-         console.log(msg);
 
          // Fundamental Price Change
          if (msg.msgType === "FPC") {
@@ -70,8 +63,6 @@ Redwood.factory("MarketAlgorithm", function () {
             
             //Calculate if the new fundamental price is greater than the old price
             var positiveChange = (this.fundamentalPrice - this.oldFundamentalPrice) > 0 ? true : false;
-            //console.log(printTime(getTime()) + " Old Fundamental Price: " + this.oldFundamentalPrice + " Current Fundamental Price: " + this.fundamentalPrice + " positiveChange: " + positiveChange +  " UserID: " + this.myId + "\n");
-
 
             //send player state to group manager
             var nMsg3;
@@ -189,6 +180,7 @@ Redwood.factory("MarketAlgorithm", function () {
 
          //User updated their spread
          if (msg.msgType === "UUSPR") {
+            this.state = "state_maker";
             this.spread = msg.msgData[1];
             //See if there are existing orders that need to be updated
             if (this.buyEntered) {

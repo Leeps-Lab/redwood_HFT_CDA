@@ -44,7 +44,6 @@ RedwoodHighFrequencyTrading.factory("DataHistory", function () {
       dataHistory.negative_sound;
 
       dataHistory.recvMessage = function (msg) {
-         console.log(msg);
          switch (msg.msgType) {
             case "FPC"      :
                this.recordFPCchange(msg);

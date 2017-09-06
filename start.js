@@ -72,8 +72,6 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
          
          //First function to run when page is loaded
           rs.on_load(function () {
-            // rs._enable_messaging();
-            console.log("Loaded");
             rs.send("set_player_time_offset", getTime());
             rs.send("Subject_Ready");
          });
@@ -81,7 +79,6 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
 
          //Initializes experiment
          rs.recv("Experiment_Begin", function (uid, data) {
-            console.log("Received Experiment_Begin");
             $scope.groupNum = data.groupNumber;
             $scope.group = data.group;
             $scope.maxSpread = data.maxSpread;
@@ -131,7 +128,6 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
                   window.setTimeout($scope.processInputAction, delay, 0);
                });
             }
-            console.log("made it here\n");
          });
 
          rs.recv("end_game", function (uid, msg) {

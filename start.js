@@ -21,7 +21,7 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
          $scope.jumpOffsetY = 0;
          $scope.LaserSound;
          $scope.statename = "Out";
-         
+
          $scope.s = {
             NO_LINES: 0,
             DRAW_FIRST: 1,
@@ -88,11 +88,7 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
             $scope.sliderVal = $scope.maxSpread / 2;
             $scope.spread = $scope.maxSpread / 2;
             $scope.exchangeRate = data.exchangeRate;
-            $("#slider")
-               .slider({
-                  value: $scope.sliderVal,
-                  max: $scope.maxSpread
-               });
+            $scope.period = data.period;
 
             // create associative array to go from uid to local group id for display purposes
             $scope.displayId = {};
@@ -108,10 +104,9 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
             }
 
             //Create data history and graph objects
-            $scope.dHistory = {};
-            $scope.tradingGraph = {};
             $scope.dHistory = dataHistory.createDataHistory(data.startTime, data.startFP, rs.user_id, $scope.group, $scope.isDebug, data.speedCost, data.startingWealth, data.maxSpread);
             $scope.dHistory.init();
+            
             $scope.tradingGraph = graphing.makeTradingGraph("graph1", "graph2", data.startTime, data.playerTimeOffsets[rs.user_id]);
             $scope.tradingGraph.init(data.startFP, data.maxSpread, data.startingWealth);
 
@@ -119,7 +114,6 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
             $scope.AudioInit();
             // set last time and start looping the update function
             $scope.lastTime = getTime();
-            // $interval($scope.update, CLOCK_FREQUENCY);
             requestAnimationFrame($scope.update);                 //added 7/31/17 for smoother graphing
             // if input data was provided, setup automatic input system
             if (data.hasOwnProperty("input_addresses")) {
@@ -137,6 +131,18 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
                   window.setTimeout($scope.processInputAction, delay, 0);
                });
             }
+            console.log("made it here\n");
+         });
+
+         rs.recv("end_game", function (uid, msg) {
+            console.log("ending game");
+            rs.finish();
+         });
+
+         rs.recv("_next_period", function (uid, msg) {
+            //insert window timeout for however long they want to wait in between periods
+            console.log("Starting Next Period");
+            rs.trigger("_next_period");                  //sets up subjects for next period and increments period number
          });
 
          rs.recv("From_Group_Manager", function (uid, msg) {
@@ -439,31 +445,6 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
                $scope.LaserSound.play(); 
             });
 
-
-         $("#slider")
-            .slider({
-               orientation: "horizontal",
-               step: .01,
-               range: "min",
-               slide: function (event, ui) {
-                  $scope.sliderVal = ui.value;
-               },
-               stop: function () {
-                  if ($scope.sliderVal != $scope.spread) {
-                     $scope.spread = $scope.sliderVal;
-                     var msg = new Message("USER", "UUSPR", [rs.user_id, $scope.spread, $scope.tradingGraph.getCurOffsetTime()]);
-                     $scope.sendToGroupManager(msg);
-                  }
-               },
-               start: function (event, ui) {
-                  if ($scope.state != "state_maker") {
-                     var msg = new Message("USER", "UMAKER", [rs.user_id, $scope.tradingGraph.getCurOffsetTime()]);
-                     $scope.sendToGroupManager(msg);
-                     $scope.setState("state_maker");
-                  }
-               }
-            });
-
          // button for setting state to sniper
          $("#state_snipe")
             .addClass("state-not-selected")
@@ -558,24 +539,6 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
          // receives message sent to all dataHistories
          rs.recv("To_All_Data_Histories", function (uid, msg) {
             $scope.dHistory.recvMessage(msg);
-         });
-
-         rs.recv("end_game", function (uid, msg) {
-            console.log("ending game");
-            rs.finish();
-         });
-
-         rs.recv("_next_period", function (uid, msg) {
-            console.log("Starting Next Period");
-            rs.trigger("_next_period");                  //sets up subjects for next period and increments period number
-            for(var member in $scope.dHistory){
-               delete $scope.dHistory[member];
-            }
-            for(var member in $scope.tradingGraph){
-               delete $scope.tradingGraph[member];
-            }
-            $scope.dHistory = {};
-            $scope.tradingGraph = {};
          });
 
 

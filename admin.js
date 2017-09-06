@@ -266,7 +266,8 @@ Redwood.controller("AdminCtrl",
                         isDebug: debugMode,
                         mFlag: marketFlag,
                         groupNum: groupNum,
-                        URI: $scope.exchangeURI
+                        URI: $scope.exchangeURI,
+                        period: $scope.period
                      };
                      $scope.groupManagers[groupNum] = groupManager.createGroupManager(groupArgs, ra.sendCustom);
                      $scope.groupManagers[groupNum].market = marketManager.createMarketManager(ra.sendCustom, groupNum, $scope.groupManagers[groupNum]);
@@ -343,7 +344,8 @@ Redwood.controller("AdminCtrl",
                   startingWealth: $scope.startingWealth,
                   maxSpread: $scope.maxSpread,
                   playerTimeOffsets: $scope.playerTimeOffsets,
-                  exchangeRate: $scope.exchangeRate
+                  exchangeRate: $scope.exchangeRate,
+                  period: $scope.period
                };
 
                if($scope.config.hasOwnProperty("input_addresses")) {
@@ -401,11 +403,11 @@ Redwood.controller("AdminCtrl",
             ra.resume();
          });
 
-         $("#show-instructions")
-            .button()
-            .click(function () {
-               ra.sendCustom("end_game");
-            });
+         // $("#show-instructions")
+         //    .button()
+         //    .click(function () {
+         //       ra.sendCustom("end_game");
+         //    });
 
          $("#buy-investor")
             .button()

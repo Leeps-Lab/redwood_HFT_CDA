@@ -11,6 +11,7 @@ Redwood.factory("GroupManager", function () {
       groupManager.marketAlgorithms = {};   // reference to all market algorithms in this group, mapped by subject id ---> marketAlgorithms[subjectID]
       groupManager.market = {};             // reference to the market object for this group
       groupManager.dataStore = {};
+      groupManager.period = groupArgs.period;
 
       groupManager.priceChanges = groupArgs.priceChanges;         // array of all price changes that will occur
       groupManager.investorArrivals = groupArgs.investorArrivals; // array of all investor arrivals that will occur
@@ -89,17 +90,18 @@ Redwood.factory("GroupManager", function () {
 
 
       // wrapper for the redwood send function
-      groupManager.rssend = function (key, value) {
-         sendFunction(key, value, "admin", 1, this.groupNumber);
+      groupManager.rssend = function (key, value, period) {
+         sendFunction(key, value, "admin", period, this.groupNumber);      //***** was by default sending to period 1
       };
 
-      groupManager.sendToDataHistory = function (msg, uid) {
-         this.rssend("To_Data_History_" + uid, msg);
+      groupManager.sendToDataHistory = function (msg, uid, period) {
+         this.rssend("To_Data_History_" + uid, msg, period);
       };
 
       groupManager.sendToAllDataHistories = function (msg) {
          this.dataStore.storeMsg(msg);
-         this.rssend("To_All_Data_Histories", msg);
+         console.log('sent to all data histories');
+         this.rssend("To_All_Data_Histories", msg, this.period);
       };
 
       // sends a message to all of the market algorithms in this group

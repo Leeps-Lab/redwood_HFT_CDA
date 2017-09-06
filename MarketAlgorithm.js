@@ -60,6 +60,7 @@ Redwood.factory("MarketAlgorithm", function () {
 
       // Handle message sent to the market algorithm
       marketAlgorithm.recvFromGroupManager = function (msg) {
+         console.log(msg);
 
          // Fundamental Price Change
          if (msg.msgType === "FPC") {
@@ -252,18 +253,6 @@ Redwood.factory("MarketAlgorithm", function () {
 
          // Confirmation that a transaction has taken place
          if (msg.msgType == "C_TRA") {
-
-            //Test!! (out people are getting transactions) 8/31/17
-            if(msg.buyerID === this.myId && this.buyEntered === false) {
-               //I transacted even though I was supposed to be out
-               return;
-            }
-            if(msg.sellerID === this.myId && this.sellEntered === false) {
-               //I transacted even though I was supposed to be out
-               return;
-            }
-            //Test!! (out people are getting transactions) 8/31/17
-
             msg.FPC = this.fundamentalPrice;    //add FPC to message for graphing
             if (msg.buyerID === this.myId) {    
                this.buyEntered = false;         //added 7/18/17 for fixing OUT user input

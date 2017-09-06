@@ -317,8 +317,6 @@ Redwood.controller("AdminCtrl",
          });
 
          ra.recv("Subject_Ready", function (uid) {
-            console.log("received subject ready");
-
             // get group number
             var groupNum = $scope.idToGroup[uid];
 
@@ -360,13 +358,13 @@ Redwood.controller("AdminCtrl",
 
                // if there are any price changes to send, start price change sending recursive function
                if ($scope.priceChanges.length > 2) {
-                  window.setTimeout($scope.groupManagers[groupNum].sendNextPriceChange, $scope.startTime + $scope.priceChanges[$scope.groupManagers[groupNum].priceIndex][0] - getTime());
+                  var jumpDelay = $scope.startTime + $scope.priceChanges[$scope.groupManagers[groupNum].priceIndex][0] - getTime();
+                  window.setTimeout($scope.groupManagers[groupNum].sendNextPriceChange, jumpDelay / 1000000);
+                  console.log("First Jump in...", jumpDelay / 1000000);
                }
-               // console.log("number 1: " + $scope.investorArrivals[$scope.groupManagers[groupNum].investorIndex][0]);
-               // console.log("number 2: " + getTime());
                if ($scope.investorArrivals.length > 1) {
                   var investorDelayTime = ($scope.startTime + $scope.investorArrivals[$scope.groupManagers[groupNum].investorIndex][0]) - getTime();
-                  console.log("Initial Delay: " + investorDelayTime);
+                  console.log("First Investor in...", investorDelayTime / 1000000);
                   window.setTimeout($scope.groupManagers[groupNum].sendNextInvestorArrival, investorDelayTime / 1000000);
                }
                window.setTimeout(function (){

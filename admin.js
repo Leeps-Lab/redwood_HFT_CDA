@@ -110,7 +110,7 @@ Redwood.controller("AdminCtrl",
                ra.on_set_config(function (config) { //Display the config file
                   $("table.config").empty();
                   var a = $.csv.toArrays(config);
-                  $scope.numPeriods = a.length;
+                  $scope.numPeriods = a.length - 1;
                   for (var i = 0; i < a.length; i++) {
                      var row = a[i];
                      var tr = $("<tr>");
@@ -129,8 +129,8 @@ Redwood.controller("AdminCtrl",
 
          $scope.groupManagers = {};
 
-         var resetGroups = function (period) {
-            var config = ra.get_config(period, 0) || {};
+         var resetGroups = function (period) {              
+            var config = ra.get_config(1, 0) || {};
             for (var i = 0; i < ra.subjects.length; i++) { //set all subjects to group 1 (this is so that matching can be changed per period)
                if ($.isArray(config.groups)) {
                   for (var groupId = 0; groupId < config.groups.length; groupId++) {
@@ -150,16 +150,9 @@ Redwood.controller("AdminCtrl",
 
          Display.initialize();
 
-         var initExperiment = function (period) {
-            if(period == null) period = 1;
-            if(period >= $scope.numPeriods){
-               console.log("That was the final period");
-               finishGame();
-               return;
-            }
-
-            console.log("Initalizing Groups, period:", period);
-            resetGroups(); //Assign groups to users
+         var initExperiment = function () {
+            console.log("Initalizing Groups, period:", $scope.period);
+            resetGroups($scope.period); //Assign groups to users                  //MAYBE GET RID OF THIS IN FUTURE
 
             //INITIALIZE ADMIN FOR EXPERIMENT   **************************************
 
@@ -169,7 +162,7 @@ Redwood.controller("AdminCtrl",
                                        // DEBUG  = use debug market (i.e. this.debugMarket)
 
 
-            $scope.config = ra.get_config(period, 0);
+            $scope.config = ra.get_config($scope.period, 0);
 
             $scope.speedCost = $scope.config.speedCost;
             $scope.startingWealth = $scope.config.startingWealth;
@@ -267,23 +260,24 @@ Redwood.controller("AdminCtrl",
                         URI: $scope.exchangeURI,
                         period: $scope.period
                      };
+                     
                      $scope.groupManagers[groupNum] = groupManager.createGroupManager(groupArgs, ra.sendCustom);
-                     $scope.groupManagers[groupNum].market = marketManager.createMarketManager(ra.sendCustom, groupNum, $scope.groupManagers[groupNum]);
-                     $scope.groupManagers[groupNum].dataStore = dataStorage.createDataStorage(group, groupNum, $scope.speedCost, $scope.startingWealth, period);
+                     // $scope.groupManagers[groupNum].market = marketManager.createMarketManager(ra.sendCustom, groupNum, $scope.groupManagers[groupNum]);
+                     $scope.groupManagers[groupNum].dataStore = dataStorage.createDataStorage(group, groupNum, $scope.speedCost, $scope.startingWealth, $scope.period);
                      for (var subjectNum of group) {
 
                         // map subject number to group number
                         $scope.idToGroup[subjectNum] = groupNum;
 
                         // package market algorithm arguments into an object then create market algorithm
-                        var subjectArgs = {
+                        $scope.subjectArgs = {
                            myId: subjectNum,
                            groupId: groupNum,
                            isDebug: debugMode,
                            speedCost: $scope.speedCost,
                            maxSpread: $scope.maxSpread
                         };
-                        $scope.groupManagers[groupNum].marketAlgorithms[subjectNum] = marketAlgorithm.createMarketAlgorithm(subjectArgs, $scope.groupManagers[groupNum]);
+                        $scope.groupManagers[groupNum].marketAlgorithms[subjectNum] = marketAlgorithm.createMarketAlgorithm($scope.subjectArgs, $scope.groupManagers[groupNum]);
                      }
                   }
                });
@@ -291,7 +285,8 @@ Redwood.controller("AdminCtrl",
          };
 
          ra.on_load(function () {
-            initExperiment();      //moved everything to a function for calls between period
+            $scope.period = 1;
+            initExperiment($scope.period);      //moved everything to a function for calls between period
          }); 
 
          ra.recv("player_join_market", function (uid, msg) {
@@ -301,11 +296,12 @@ Redwood.controller("AdminCtrl",
 
 
          ra.on_register(function (user) { //Add a row to the table to each user
-            resetGroups();
+            resetGroups($scope.period);
          });
 
          ra.on("start_session", function () {
             ra.start_session();
+            window.setTimeout(sendPeriod, 5000 + $scope.experimentLength);    //generous 5secs to load everything
          });
 
          $scope.playerTimeOffsets = {};
@@ -349,10 +345,13 @@ Redwood.controller("AdminCtrl",
                   beginData.input_addresses = $scope.config.input_addresses.split(',');
                }
 
-               ra.sendCustom("Experiment_Begin", beginData, "admin", $scope.period, groupNum);
+               ra.sendCustom("Experiment_Begin", beginData, "admin", $scope.period, groupNum);  //****
                $scope.groupManagers[groupNum].startTime = $scope.startTime;
                $scope.groupManagers[groupNum].dataStore.init(startFP, $scope.startTime, $scope.config.maxSpread);
                for (var user of group) {
+                  // $scope.groupManagers[groupNum].marketAlgorithms[user].fundamentalPrice = startFP;
+                  $scope.subjectArgs.startFP = startFP;
+                  // $scope.groupManagers[groupNum].marketAlgorithms[user].init($scope.subjectArgs);
                   $scope.groupManagers[groupNum].marketAlgorithms[user].fundamentalPrice = startFP;
                }
 
@@ -360,28 +359,46 @@ Redwood.controller("AdminCtrl",
                if ($scope.priceChanges.length > 2) {
                   var jumpDelay = $scope.startTime + $scope.priceChanges[$scope.groupManagers[groupNum].priceIndex][0] - getTime();
                   window.setTimeout($scope.groupManagers[groupNum].sendNextPriceChange, jumpDelay / 1000000);
-                  console.log("First Jump in...", jumpDelay / 1000000);
+                  // console.log("First Jump in...", jumpDelay / 1000000);
                }
                if ($scope.investorArrivals.length > 1) {
                   var investorDelayTime = ($scope.startTime + $scope.investorArrivals[$scope.groupManagers[groupNum].investorIndex][0]) - getTime();
-                  console.log("First Investor in...", investorDelayTime / 1000000);
+                  // console.log("First Investor in...", investorDelayTime / 1000000);
                   window.setTimeout($scope.groupManagers[groupNum].sendNextInvestorArrival, investorDelayTime / 1000000);
                }
-               window.setTimeout(function (){
-                  $scope.period = ra.periods[1];
-                  console.log("Period", $scope.period, " ending after", $scope.experimentLength / 1000, "seconds");
-                  //download all the groups csvs
-                  //download all the profit csvs
-                  ra.sendCustom("_next_period");               //send signal to start to prepare for next period
-                  initExperiment(++$scope.period);             //initialize experiment using next row in config csv
-
-               }, $scope.experimentLength);      //end the experiment after configurable experimentLength
             }
          });
 
+         var sendPeriod = function() {
+               console.log("Period", $scope.period, "ending after", $scope.experimentLength / 1000, "seconds");
+               $scope.period++;
+
+               if($scope.period > $scope.numPeriods){          //end game
+                  finishGame();
+               }
+               else{
+                  for (var groupNum = 1; groupNum <= $scope.groups.length; groupNum++){
+                     // var group = $scope.getGroup(groupNum);
+                     // for (var user of group) {
+                     //    $scope.groupManagers[group].marketAlgorithms[user].exitMarket();           //ensure each user is reset for next period
+                     // }
+                     ra.sendCustom("_next_period");
+                  }
+                  initExperiment();             //initialize experiment using next row in config csv
+                  window.setTimeout(sendPeriod, $scope.experimentLength);
+               }
+         };
+
         var finishGame = function() {
+            console.log("ending game");
             ra.sendCustom("end_game");
-            //download data
+
+            //download data:
+            for(var groupNum = 1; groupNum <= $scope.groups.length; groupNum++){
+               $scope.groupManagers[groupNum].socket.send(generateSystemEventMsg('E'));   //signal to server to end the day
+               $("#export-btn-" + groupNum).click().removeAttr("id");     //removes download link after the click
+            }
+            $('#export-profits').click().removeAttr("id");
         };
 
          ra.recv("To_Group_Manager", function (uid, msg) {
@@ -443,10 +460,17 @@ Redwood.controller("AdminCtrl",
             .click(function () {
                // export final profit values to csv
                var data = [];
-               for (var group in $scope.groupManagers) {
-                  for (var player in $scope.groupManagers[group].dataStore.playerFinalProfits) {
-                     data.push([player, $scope.groupManagers[group].dataStore.playerFinalProfits[player],
-                        $scope.groupManagers[group].dataStore.playerFinalProfits[player] / $scope.exchangeRate]);
+               // for (var group in $scope.groupManagers) {
+               //    for (var player in $scope.groupManagers[group].dataStore.playerFinalProfits) {
+               //       data.push([player, $scope.groupManagers[group].dataStore.playerFinalProfits[player],
+               //          $scope.groupManagers[group].dataStore.playerFinalProfits[player] / $scope.exchangeRate]);
+               //    }
+               // }
+
+               for (var group in $scope.groupManagers) {                                                 
+                  for (var period in $scope.groupManagers[group].dataStore.playerFinalProfits) {         //each row in final
+                     var row = $scope.groupManagers[group].dataStore.playerFinalProfits;
+                     // data.push(row);
                   }
                }
 

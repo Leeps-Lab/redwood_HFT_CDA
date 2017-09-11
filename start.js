@@ -136,9 +136,8 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
          });
 
          rs.recv("_next_period", function (uid, msg) {
-            //insert window timeout for however long they want to wait in between periods
             console.log("Starting Next Period");
-            rs.trigger("_next_period");                  //sets up subjects for next period and increments period number
+            rs.trigger("_next_period");
          });
 
          rs.recv("From_Group_Manager", function (uid, msg) {
@@ -468,7 +467,6 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
                $scope.oldOffsetY = null;
                var nMsg = new Message("USER", "UUSPR", [rs.user_id, $scope.spread, $scope.tradingGraph.getCurOffsetTime()]);
                $scope.sendToGroupManager(nMsg);
-               console.log($scope.dHistory);
             });
 
          // button for setting state to "out of market"

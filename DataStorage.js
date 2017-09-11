@@ -71,7 +71,6 @@ Redwood.factory("DataStorage", function () {
                this.storeSpreadChange(message.msgData[2], message.msgData[1], message.msgData[0]);
                break;
             case "C_TRA" :
-               //this.storeTransaction(message.timeStamp, message.msgData[1], message.msgData[2], message.msgData[3], message.msgData[4]);
                this.storeTransaction(message.timeStamp, message.price, message.FPC, message.buyerID, message.sellerID);
                break;
             case "FPC" :
@@ -426,10 +425,15 @@ Redwood.factory("DataStorage", function () {
          a.click();
          a.remove();
 
+         var finalProfits = {};
          // fill player final profits array with cumulative profit value from last line of data
          for (let index = 0; index < this.group.length; index++) {
-            this.playerFinalProfits[this.group[index]] = data[data.length - 1][index * 5 + 5];
+            var player = this.group[index];
+            // this.playerFinalProfits[this.group[index]] = data[data.length - 1][index * 5 + 5];
+            finalProfits[player] = data[data.length - 1][index * 5 + 5];
          }
+         this.playerFinalProfits[this.period] = finalProfits;     //array of arrays
+         console.log(this.playerFinalProfits);
       };
 
       return dataStorage;

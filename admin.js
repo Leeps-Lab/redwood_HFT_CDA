@@ -349,10 +349,9 @@ Redwood.controller("AdminCtrl",
                $scope.groupManagers[groupNum].startTime = $scope.startTime;
                $scope.groupManagers[groupNum].dataStore.init(startFP, $scope.startTime, $scope.config.maxSpread);
                for (var user of group) {
-                  // $scope.groupManagers[groupNum].marketAlgorithms[user].fundamentalPrice = startFP;
-                  $scope.subjectArgs.startFP = startFP;
-                  // $scope.groupManagers[groupNum].marketAlgorithms[user].init($scope.subjectArgs);
                   $scope.groupManagers[groupNum].marketAlgorithms[user].fundamentalPrice = startFP;
+                  // $scope.subjectArgs.startFP = startFP;
+                  // $scope.groupManagers[groupNum].marketAlgorithms[user].init($scope.subjectArgs);
                }
 
                // if there are any price changes to send, start price change sending recursive function
@@ -378,10 +377,12 @@ Redwood.controller("AdminCtrl",
                }
                else{
                   for (var groupNum = 1; groupNum <= $scope.groups.length; groupNum++){
-                     // var group = $scope.getGroup(groupNum);
-                     // for (var user of group) {
-                     //    $scope.groupManagers[group].marketAlgorithms[user].exitMarket();           //ensure each user is reset for next period
-                     // }
+                     var group = $scope.getGroup(groupNum);
+                     for (var user of group) {
+                        if($scope.groupManagers[groupNum].marketAlgorithms[user] != null){
+                           $scope.groupManagers[groupNum].marketAlgorithms[user].exitMarket();           //ensure each user is reset for next period
+                        }
+                     }
                      ra.sendCustom("_next_period");
                   }
                   initExperiment();             //initialize experiment using next row in config csv
@@ -467,18 +468,28 @@ Redwood.controller("AdminCtrl",
                //    }
                // }
 
-               for (var group in $scope.groupManagers) {                                                 
-                  for (var period in $scope.groupManagers[group].dataStore.playerFinalProfits) {         //each row in final
-                     var row = $scope.groupManagers[group].dataStore.playerFinalProfits;
-                     // data.push(row);
+               for (var group in $scope.groupManagers){                                          //for each group
+                  for (var period = 1; period <= $scope.numPeriods; period++){                   //for each period
+                     var row = $scope.groupManagers[group].dataStore.playerFinalProfits[period]; //a finalProfit object
+                     for(var player in row){
+                        data.push([player, row[player], row[player] / $scope.exchangeRate]);     //push each 
+                     }
                   }
                }
+
+               console.log(data);
 
                data.sort(function (a, b) {
                   return a[0] - b[0];
                });
 
-               data.unshift(["player", "final_profit", "after_exchange_rate"]);
+               // for(var p = 1; p <= $scope.numPeriods; p++){
+               //    let fp = "final_profit_p" + p;
+               //    let ffp = "after_exchange_rate_" + p;
+               //    data.unshift(fp, ffp);
+               // }
+
+               data.unshift(["player", "final_profit", "after_exchange_rate_"]);    //adds to beginning of array
 
                // get file name by formatting end time as readable string
                var filename = printTime($scope.startTime) + '_cda_final_profits.csv';

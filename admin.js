@@ -286,6 +286,7 @@ Redwood.controller("AdminCtrl",
 
          ra.on_load(function () {
             $scope.period = 1;
+            $scope.profitData = [];
             initExperiment($scope.period);      //moved everything to a function for calls between period
          }); 
 
@@ -370,21 +371,27 @@ Redwood.controller("AdminCtrl",
 
          var sendPeriod = function() {
                console.log("Period", $scope.period, "ending after", $scope.experimentLength / 1000, "seconds");
+               
+               for (var groupNum = 1; groupNum <= $scope.groups.length; groupNum++){         //download data and leave market
+                  var group = $scope.getGroup(groupNum);
+                  for (var user of group) {
+                     if($scope.groupManagers[groupNum].marketAlgorithms[user] != null){
+                        $scope.groupManagers[groupNum].marketAlgorithms[user].exitMarket();           //ensure each user is reset for next period
+                     }
+                  }
+                  $("#export-btn-" + groupNum).click().removeAttr("id");     //removes download link after the click
+                  getFinalProfits();
+                  }
+
+
                $scope.period++;
 
                if($scope.period > $scope.numPeriods){          //end game
                   finishGame();
                }
                else{
-                  for (var groupNum = 1; groupNum <= $scope.groups.length; groupNum++){
-                     var group = $scope.getGroup(groupNum);
-                     for (var user of group) {
-                        if($scope.groupManagers[groupNum].marketAlgorithms[user] != null){
-                           $scope.groupManagers[groupNum].marketAlgorithms[user].exitMarket();           //ensure each user is reset for next period
-                        }
-                     }
-                     ra.sendCustom("_next_period");
-                  }
+                  
+                  ra.sendCustom("_next_period");
                   initExperiment();             //initialize experiment using next row in config csv
                   window.setTimeout(sendPeriod, $scope.experimentLength);
                }
@@ -397,9 +404,19 @@ Redwood.controller("AdminCtrl",
             //download data:
             for(var groupNum = 1; groupNum <= $scope.groups.length; groupNum++){
                $scope.groupManagers[groupNum].socket.send(generateSystemEventMsg('E'));   //signal to server to end the day
-               $("#export-btn-" + groupNum).click().removeAttr("id");     //removes download link after the click
+               // $("#export-btn-" + groupNum).click().removeAttr("id");     //removes download link after the click
             }
             $('#export-profits').click().removeAttr("id");
+        };
+
+        var getFinalProfits = function() {
+            for (var group in $scope.groupManagers) {
+               for (var player in $scope.groupManagers[group].dataStore.playerFinalProfits) {
+                  $scope.profitData.push([$scope.period, player, $scope.groupManagers[group].dataStore.playerFinalProfits[player],
+                     $scope.groupManagers[group].dataStore.playerFinalProfits[player] / $scope.exchangeRate]);
+               }
+            }
+
         };
 
          ra.recv("To_Group_Manager", function (uid, msg) {
@@ -460,7 +477,7 @@ Redwood.controller("AdminCtrl",
             .button()
             .click(function () {
                // export final profit values to csv
-               var data = [];
+               // var data = [];
                // for (var group in $scope.groupManagers) {
                //    for (var player in $scope.groupManagers[group].dataStore.playerFinalProfits) {
                //       data.push([player, $scope.groupManagers[group].dataStore.playerFinalProfits[player],
@@ -468,19 +485,32 @@ Redwood.controller("AdminCtrl",
                //    }
                // }
 
-               for (var group in $scope.groupManagers){                                          //for each group
-                  for (var period = 1; period <= $scope.numPeriods; period++){                   //for each period
-                     var row = $scope.groupManagers[group].dataStore.playerFinalProfits[period]; //a finalProfit object
-                     for(var player in row){
-                        data.push([player, row[player], row[player] / $scope.exchangeRate]);     //push each 
+
+               // data.sort(function (a, b) {
+               //    return a[0] - b[0];
+               // });
+
+               $scope.profitData.sort(function (a, b) {     //ask how to do this in one sort
+                  return a[1] - b[1];     //first sort by player then period so all players are next to each other
+               });
+
+               // $scope.profitData.sort(function (a, b) {
+               //    return a[0] - b[0];  //sorts b to lower index than a
+               // });
+
+               
+
+               // combine rows with same period nad user
+               for (let row = 1; row < $scope.profitData.length; row++) {
+                  for(let moving_row = row + 1; moving_row < $scope.profitData.length; moving_row++){
+                     if (($scope.profitData[row][0] === $scope.profitData[moving_row][0]) && ($scope.profitData[row][1] === $scope.profitData[moving_row][1])){
+                        $scope.profitData.splice(moving_row, 1);
                      }
                   }
                }
 
-               console.log(data);
-
-               data.sort(function (a, b) {
-                  return a[0] - b[0];
+               $scope.profitData.sort(function (a, b) {
+                  return a[0] - b[0];  //sorts b to lower index than a
                });
 
                // for(var p = 1; p <= $scope.numPeriods; p++){
@@ -489,14 +519,14 @@ Redwood.controller("AdminCtrl",
                //    data.unshift(fp, ffp);
                // }
 
-               data.unshift(["player", "final_profit", "after_exchange_rate_"]);    //adds to beginning of array
+               $scope.profitData.unshift(["period, player", "final_profit", "after_exchange_rate_"]);    //adds to beginning of array
 
                // get file name by formatting end time as readable string
                var filename = printTime($scope.startTime) + '_cda_final_profits.csv';
 
                var csvRows = [];
-               for (let index = 0; index < data.length; index++) {
-                  csvRows.push(data[index].join(','));
+               for (let index = 0; index < $scope.profitData.length; index++) {
+                  csvRows.push($scope.profitData[index].join(','));
                }
                var csvString = csvRows.join("\n");
                var a = document.createElement('a');

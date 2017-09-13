@@ -490,34 +490,26 @@ Redwood.controller("AdminCtrl",
                //    return a[0] - b[0];
                // });
 
-               $scope.profitData.sort(function (a, b) {     //ask how to do this in one sort
-                  return a[1] - b[1];     //first sort by player then period so all players are next to each other
-               });
-
-               // $scope.profitData.sort(function (a, b) {
-               //    return a[0] - b[0];  //sorts b to lower index than a
+               // $scope.profitData.sort(function (a, b) {     //ask how to do this in one sort
+               //    return a[1] - b[1];     //first sort by player then period so all players are next to each other
                // });
-
-               
-
-               // combine rows with same period nad user
-               for (let row = 1; row < $scope.profitData.length; row++) {
-                  for(let moving_row = row + 1; moving_row < $scope.profitData.length; moving_row++){
-                     if (($scope.profitData[row][0] === $scope.profitData[moving_row][0]) && ($scope.profitData[row][1] === $scope.profitData[moving_row][1])){
-                        $scope.profitData.splice(moving_row, 1);
-                     }
-                  }
-               }
 
                $scope.profitData.sort(function (a, b) {
                   return a[0] - b[0];  //sorts b to lower index than a
                });
 
-               // for(var p = 1; p <= $scope.numPeriods; p++){
-               //    let fp = "final_profit_p" + p;
-               //    let ffp = "after_exchange_rate_" + p;
-               //    data.unshift(fp, ffp);
-               // }
+               var temp = [];
+
+               // combine rows with same period nad user
+               for (let row = 0; row < $scope.profitData.length; row++) {
+                  for(let moving_row = row + 1; moving_row < $scope.profitData.length; moving_row++){
+                     console.log(row, moving_row);
+                     //if same period and player, remove from array
+                     if (($scope.profitData[row][0] === $scope.profitData[moving_row][0]) && ($scope.profitData[row][1] === $scope.profitData[moving_row][1])){
+                        $scope.profitData.splice(moving_row, 1);
+                     }
+                  }
+               }
 
                $scope.profitData.unshift(["period, player", "final_profit", "after_exchange_rate_"]);    //adds to beginning of array
 

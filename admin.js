@@ -130,7 +130,7 @@ Redwood.controller("AdminCtrl",
          $scope.groupManagers = {};
 
          var resetGroups = function (period) {              
-            var config = ra.get_config(1, 0) || {};
+            var config = ra.get_config(period, 0) || {};    //MAYBE CHANGE TO 1 INSTEAD OF PERIOD I HATE THIS SHIT
             for (var i = 0; i < ra.subjects.length; i++) { //set all subjects to group 1 (this is so that matching can be changed per period)
                if ($.isArray(config.groups)) {
                   for (var groupId = 0; groupId < config.groups.length; groupId++) {
@@ -404,7 +404,6 @@ Redwood.controller("AdminCtrl",
             //download data:
             for(var groupNum = 1; groupNum <= $scope.groups.length; groupNum++){
                $scope.groupManagers[groupNum].socket.send(generateSystemEventMsg('E'));   //signal to server to end the day
-               // $("#export-btn-" + groupNum).click().removeAttr("id");     //removes download link after the click
             }
             $('#export-profits').click().removeAttr("id");
         };
@@ -476,34 +475,14 @@ Redwood.controller("AdminCtrl",
          $("#export-profits")
             .button()
             .click(function () {
-               // export final profit values to csv
-               // var data = [];
-               // for (var group in $scope.groupManagers) {
-               //    for (var player in $scope.groupManagers[group].dataStore.playerFinalProfits) {
-               //       data.push([player, $scope.groupManagers[group].dataStore.playerFinalProfits[player],
-               //          $scope.groupManagers[group].dataStore.playerFinalProfits[player] / $scope.exchangeRate]);
-               //    }
-               // }
-
-
-               // data.sort(function (a, b) {
-               //    return a[0] - b[0];
-               // });
-
-               // $scope.profitData.sort(function (a, b) {     //ask how to do this in one sort
-               //    return a[1] - b[1];     //first sort by player then period so all players are next to each other
-               // });
 
                $scope.profitData.sort(function (a, b) {
                   return a[0] - b[0];  //sorts b to lower index than a
                });
 
-               var temp = [];
-
-               // combine rows with same period nad user
+               // combine rows with same period and user
                for (let row = 0; row < $scope.profitData.length; row++) {
                   for(let moving_row = row + 1; moving_row < $scope.profitData.length; moving_row++){
-                     console.log(row, moving_row);
                      //if same period and player, remove from array
                      if (($scope.profitData[row][0] === $scope.profitData[moving_row][0]) && ($scope.profitData[row][1] === $scope.profitData[moving_row][1])){
                         $scope.profitData.splice(moving_row, 1);

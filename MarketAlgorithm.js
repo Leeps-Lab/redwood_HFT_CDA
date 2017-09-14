@@ -195,25 +195,27 @@ Redwood.factory("MarketAlgorithm", function () {
 
          if (msg.msgType === "USPEED") {
             this.using_speed = msg.msgData[1];
+            this.sendToAllDataHistories(msg);
          }
 
          //User updated their spread
          if (msg.msgType === "UUSPR") {
-            this.state = "state_maker";
+            // this.state = "state_maker";
             this.spread = msg.msgData[1];
             //See if there are existing orders that need to be updated
             if (this.buyEntered) {
                this.sendToGroupManager(this.updateBuyOfferMsg());
             }
-            else{
-               this.sendToGroupManager(this.enterBuyOfferMsg());
-            }
+            // else{
+            //    this.sendToGroupManager(this.enterBuyOfferMsg());
+            // }
             if (this.sellEntered) {
                this.sendToGroupManager(this.updateSellOfferMsg());
             }
-            else{
-               this.sendToGroupManager(this.enterSellOfferMsg());
-            }
+            // else{
+            //    this.sendToGroupManager(this.enterSellOfferMsg());
+            // }
+            this.sendToAllDataHistories(msg);
          }
 
          // Confirmation that a buy offer has been placed in market
@@ -313,7 +315,7 @@ Redwood.factory("MarketAlgorithm", function () {
          nMsg.msgId = this.currentBuyId;
          this.buyEntered = false;
          return nMsg;
-      }
+      };
 
       marketAlgorithm.removeSellOfferMsg = function() {
          var nMsg = new OuchMessage("RSELL", this.myId, null, null);
@@ -322,7 +324,7 @@ Redwood.factory("MarketAlgorithm", function () {
          nMsg.msgId = this.currentSellId;
          this.sellEntered = false;
          return nMsg;
-      }
+      };
 
       marketAlgorithm.updateBuyOfferMsg = function () {
          var nMsg = new OuchMessage("UBUY", this.myId, this.fundamentalPrice - this.spread / 2, false);
@@ -334,7 +336,7 @@ Redwood.factory("MarketAlgorithm", function () {
          this.currentMsgId++;
          this.buyEntered = true;
          return nMsg;
-      }
+      };
 
       marketAlgorithm.updateSellOfferMsg = function () {
          var nMsg = new OuchMessage("USELL", this.myId, this.fundamentalPrice + this.spread / 2, false);

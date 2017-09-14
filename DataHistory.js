@@ -135,6 +135,7 @@ RedwoodHighFrequencyTrading.factory("DataHistory", function () {
                this.lowestSpread = this.playerData[player].spread;
             }
          }
+         // console.log(this.playerData);
       };
 
       dataHistory.recordStateChange = function (newState, uid, timestamp) {
@@ -323,7 +324,6 @@ RedwoodHighFrequencyTrading.factory("DataHistory", function () {
             this.storeProfitSegment(startTime, uid);
          }
          this.playerData[uid].curProfitSegment = [startTime, price, slope, state];
-         //console.log("player: " + uid + " state: " + state + " price:" + price + " \n");
       };
 
       dataHistory.storeProfitSegment = function (endTime, uid) {
@@ -333,7 +333,6 @@ RedwoodHighFrequencyTrading.factory("DataHistory", function () {
          //find end price by subtracting how far graph has descended from start price
          var endPrice = this.playerData[uid].curProfitSegment[1] - ((endTime - this.playerData[uid].curProfitSegment[0]) * this.playerData[uid].curProfitSegment[2] / 1000000000); //changed from 1000
          this.playerData[uid].pastProfitSegments.push([this.playerData[uid].curProfitSegment[0], endTime, this.playerData[uid].curProfitSegment[1], endPrice, this.playerData[uid].curProfitSegment[3]]);
-         // console.log(this.playerData[uid].curProfitSegment[1], endPrice);
          this.playerData[uid].curProfitSegment = null;
       };
 
@@ -347,7 +346,6 @@ RedwoodHighFrequencyTrading.factory("DataHistory", function () {
             if(this.playerData[uid].state === "Maker"){
                dataHistory.totalMakers++;
                dataHistory.totalTraders++;
-               // console.log(dataHistory.totalMakers, "totalMakers");
                if(this.playerData[uid].speed == true){
                   dataHistory.fastMakers++;
                }
@@ -355,13 +353,11 @@ RedwoodHighFrequencyTrading.factory("DataHistory", function () {
             if(this.playerData[uid].state === "Snipe"){
                dataHistory.totalSnipers++;
                dataHistory.totalTraders++;
-               // console.log(dataHistory.totalSnipers, "totalSnipers");
                if(this.playerData[uid].speed == true){
                   dataHistory.fastSnipers++;
                }
             }
          }
-         // console.log("makers:",dataHistory.totalMakers,"snipers:",dataHistory.totalSnipers,"total:",dataHistory.totalTraders);
       };
 
       return dataHistory;

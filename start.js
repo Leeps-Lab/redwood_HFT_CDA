@@ -381,11 +381,11 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
          $("#graph1")
             .mousedown( function(event) {
                $scope.mousePressed = true;                                       //set the flag so in case we leave the svg element we know it was a press
-               if ($scope.state != "state_maker") {
-                     // var msg = new Message("USER", "UMAKER", [rs.user_id, $scope.tradingGraph.getCurOffsetTime()]);
-                     // $scope.sendToGroupManager(msg);
-                     $scope.setState("state_maker");
-               }  
+               // if ($scope.state != "state_maker") {
+               //       // var msg = new Message("USER", "UMAKER", [rs.user_id, $scope.tradingGraph.getCurOffsetTime()]);
+               //       // $scope.sendToGroupManager(msg);
+               //       $scope.setState("state_maker");
+               // }  
             })
             .mouseleave( function(event) {
                if ($scope.mousePressed) {                                        //only set the spread if svg has been clicked on
@@ -403,8 +403,11 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
                   var msg = new Message("USER", "UUSPR", [rs.user_id, $scope.spread, $scope.tradingGraph.getCurOffsetTime()]);
                   $scope.sendToGroupManager(msg);
 
-                  var msg2 = new Message("USER", "UMAKER", [rs.user_id, $scope.tradingGraph.getCurOffsetTime()]);
-                  $scope.dHistory.recvMessage(msg2);  //must tell datahistory state changed
+                  if ($scope.state != "state_maker") {
+                     var msg2 = new Message("USER", "UMAKER", [rs.user_id, $scope.tradingGraph.getCurOffsetTime()]);
+                     $scope.sendToGroupManager(msg2);
+                     $scope.setState("state_maker");
+                  }
                   
                   $scope.tradingGraph.currSpreadTick = event.offsetY;            //sets the location to be graphed
                   $scope.oldOffsetY = $scope.curOffsetY;                                //update our last y position for receding lines
@@ -429,8 +432,11 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
                var msg = new Message("USER", "UUSPR", [rs.user_id, $scope.spread, $scope.tradingGraph.getCurOffsetTime()]);
                $scope.sendToGroupManager(msg);
 
-               var msg2 = new Message("USER", "UMAKER", [rs.user_id, $scope.tradingGraph.getCurOffsetTime()]);
-               $scope.dHistory.recvMessage(msg2); 
+               if ($scope.state != "state_maker") {
+                  var msg2 = new Message("USER", "UMAKER", [rs.user_id, $scope.tradingGraph.getCurOffsetTime()]);
+                  $scope.sendToGroupManager(msg2);
+                  $scope.setState("state_maker");
+               }
 
                $scope.tradingGraph.currSpreadTick = event.offsetY;               //sets the location to be graphed
                $scope.oldOffsetY = $scope.curOffsetY;                                   //update our last y position for receding lines

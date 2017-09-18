@@ -4,25 +4,6 @@ Redwood.factory("MarketAlgorithm", function () {
    api.createMarketAlgorithm = function (subjectArgs, groupManager) {
       var marketAlgorithm = {};
 
-      // marketAlgorithm.init = function (subjectArgs) {
-      //    marketAlgorithm.spread = subjectArgs.maxSpread / 2;    // record of this user's spread value
-      //    marketAlgorithm.using_speed = false;
-      //    marketAlgorithm.state = "state_out";   // user's state - can be "state_out", "state_maker", or "state_snipe"
-      //    marketAlgorithm.buyEntered = false;    // flags for if this user has buy/sell orders still in the book
-      //    marketAlgorithm.sellEntered = false;
-
-      //    marketAlgorithm.myId = subjectArgs.myId;
-      //    marketAlgorithm.groupId = subjectArgs.groupId;
-      //    marketAlgorithm.groupManager = groupManager;   //Sends message to group manager, function obtained as parameter
-      //    marketAlgorithm.fundamentalPrice = subjectArgs.startFP;
-      //    marketAlgorithm.oldFundamentalPrice = 0;
-      //    marketAlgorithm.currentMsgId = 1;
-      //    marketAlgorithm.currentBuyId = 0;
-      //    marketAlgorithm.currentSellId = 0;
-      //    marketAlgorithm.isDebug = subjectArgs.isDebug;
-      //    console.log("poop");
-      // };
-
       marketAlgorithm.spread = subjectArgs.maxSpread / 2;    // record of this user's spread value
       marketAlgorithm.using_speed = false;
       marketAlgorithm.state = "state_out";   // user's state - can be "state_out", "state_maker", or "state_snipe"

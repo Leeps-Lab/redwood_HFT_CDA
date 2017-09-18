@@ -26,7 +26,7 @@ Redwood.factory("GroupManager", function () {
 
       groupManager.syncFPArray = new SynchronizeArray(groupManager.memberIDs);
       groupManager.FPMsgList = [];
-      groupManager.curMsgId = 1;
+      groupManager.curMsgId = 1 + 500 * groupArgs.period;
 
       groupManager.isDebug = groupArgs.isDebug;     // indicates if message logger should be used
       groupManager.outboundMarketLog = "";          // string of debug info for messages outbound to market
@@ -290,7 +290,7 @@ Redwood.factory("GroupManager", function () {
             var msg2 = new OuchMessage("ESELL", 0, 0, true);      //changed 7/20/17
          }
          msg2.msgId = this.curMsgId;
-         this.curMsgId ++;
+         this.curMsgId++;
          msg2.delay = false;
          this.sendToMarket(msg2);
 

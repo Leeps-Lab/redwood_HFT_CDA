@@ -381,7 +381,7 @@ Redwood.controller("AdminCtrl",
                   }
                   $("#export-btn-" + groupNum).click().removeAttr("id");     //removes download link after the click
                   getFinalProfits();
-                  }
+               }
 
 
                $scope.period++;

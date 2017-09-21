@@ -394,11 +394,9 @@ Redwood.controller("AdminCtrl",
                }
                else{
                   initExperiment();
-		  window.setTimeout(function (){
-	
-                    ra.sendCustom("_next_period");
+            		window.setTimeout(function (){
+                     ra.sendCustom("_next_period");
                   }, 1000);
-		  //initExperiment();             //initialize experiment using next row in config csv
                   window.setTimeout(sendPeriod, $scope.experimentLength);
                }
          };

@@ -140,7 +140,7 @@ Redwood.factory("DataStorage", function () {
             playerToIndex[this.group[index]] = index;
          }
 
-         var numColumns = this.group.length * 5 + 11;
+         var numColumns = this.group.length * 5 + 7;
 
          // iterate through every entry in each storage array
 
@@ -215,102 +215,12 @@ Redwood.factory("DataStorage", function () {
             data.push(row);
          }
 
-         // add buy order changes to data array
-         for (let entry of this.buyOrderChanges) {
-            let row = new Array(numColumns).fill(null);
-
-            row[0] = entry[0];
-
-            // add before market state to data
-            if (entry[2].length === 0) row[numColumns - 8] = "EMPTY";
-            else {
-               let ids = [];
-               let times = [];
-               let origTimes = [];
-               let prices = [];
-
-               for (let order of entry[2]) {
-                  ids.push(order.id == 0 ? "'INV'" : playerToIndex[order.id] + 1);
-                  times.push(order.timestamp - this.startTime);
-                  prices.push(order.price);
-                  origTimes.push(order.originTimestamp - this.startTime);
-               }
-
-               row[numColumns - 8] = "\"{'id': (" + ids.join(', ') + "), 'time': (" + times.join(', ') + "), 'price': (" + prices.join(', ') + "), 'time_orig': (" + origTimes.join(', ') + ")}\"";
-            }
-
-            // add after market state to data
-            if (entry[1].length === 0) row[numColumns - 7] = "EMPTY";
-            else {
-               let ids = [];
-               let times = [];
-               let origTimes = [];
-               let prices = [];
-
-               for (let order of entry[1]) {
-                  ids.push(order.id == 0 ? "'INV'" : playerToIndex[order.id] + 1);
-                  times.push(order.timestamp - this.startTime);
-                  prices.push(order.price);
-                  origTimes.push(order.originTimestamp - this.startTime);
-               }
-
-               row[numColumns - 7] = "\"{'id': (" + ids.join(', ') + "), 'time': (" + times.join(', ') + "), 'price': (" + prices.join(', ') + "), 'time_orig': (" + origTimes.join(', ') + ")}\"";
-            }
-
-            data.push(row);
-         }
-
-         // add sell order changes to data array
-         for (let entry of this.sellOrderChanges) {
-            let row = new Array(numColumns).fill(null);
-
-            row[0] = entry[0];
-
-            // add before market state to data
-            if (entry[2].length === 0) row[numColumns - 6] = "EMPTY";
-            else {
-               let ids = [];
-               let times = [];
-               let origTimes = [];
-               let prices = [];
-
-               for (let order of entry[2]) {
-                  ids.push(order.id == 0 ? "'INV'" : playerToIndex[order.id] + 1);
-                  times.push(order.timestamp - this.startTime);
-                  prices.push(order.price);
-                  origTimes.push(order.originTimestamp - this.startTime);
-               }
-
-               row[numColumns - 6] = "\"{'id': (" + ids.join(', ') + "), 'time': (" + times.join(', ') + "), 'price': (" + prices.join(', ') + "), 'time_orig': (" + origTimes.join(', ') + ")}\"";
-            }
-
-            // add after market state to data
-            if (entry[1].length === 0) row[numColumns - 5] = "EMPTY";
-            else {
-               let ids = [];
-               let times = [];
-               let origTimes = [];
-               let prices = [];
-
-               for (let order of entry[1]) {
-                  ids.push(order.id == 0 ? "'INV'" : playerToIndex[order.id] + 1);
-                  times.push(order.timestamp - this.startTime);
-                  prices.push(order.price);
-                  origTimes.push(order.originTimestamp - this.startTime);
-               }
-
-               row[numColumns - 5] = "\"{'id': (" + ids.join(', ') + "), 'time': (" + times.join(', ') + "), 'price': (" + prices.join(', ') + "), 'time_orig': (" + origTimes.join(', ') + ")}\"";
-            }
-
-            data.push(row);
-         }
-
          // add equilibrium price data
          for (let entry of this.equilibriumPrices) {
             let row = new Array(numColumns).fill(null);
 
             row[0] = entry[0];
-            row[numColumns - 9] = entry[1];
+            row[numColumns - 5] = entry[1];
 
             data.push(row);
          }
@@ -320,7 +230,7 @@ Redwood.factory("DataStorage", function () {
             let row = new Array(numColumns).fill(null);
 
             row[0] = entry[0];
-            row[numColumns - 10] = entry[1];
+            row[numColumns - 6] = entry[1];
 
             data.push(row);
          }
@@ -347,33 +257,16 @@ Redwood.factory("DataStorage", function () {
             }
          }
 
-         // fill empty market state rows appropriately
-         for (let row = 1; row < data.length; row++) {
-            // if buy before column is empty, assume all buy state columns are empty
-            // probably not the best way to do this
-            if (data[row][numColumns - 8] === null) {
-               // copy after state from previous row into both columns for this row
-               data[row][numColumns - 8] = data[row - 1][numColumns - 7];
-               data[row][numColumns - 7] = data[row - 1][numColumns - 7];
-            }
-
-            // do the same for sell orders
-            if (data[row][numColumns - 6] === null) {
-               data[row][numColumns - 6] = data[row - 1][numColumns - 5];
-               data[row][numColumns - 5] = data[row - 1][numColumns - 5];
-            }
-         }
-
          // set empty delta and investor columns to 0 and NA respectively
          for (let row of data) {
             for (let index = 0; index < this.group.length; index++) {
                if (row[index * 5 + 4] === null) row[index * 5 + 4] = 0;
             }
-            if (row[numColumns - 3] === null) row[numColumns - 3] = 0;
-            if (row[numColumns - 1] === null) row[numColumns - 1] = "NA";
-            if (row[numColumns - 4] === null) row[numColumns - 4] = "NA";
-            if (row[numColumns - 9] === null) row[numColumns - 9] = "NA";
-            if (row[numColumns - 10] === null) row[numColumns - 10] = "NA";
+            if (row[numColumns - 3] === null) row[numColumns - 3] = 0;     //dvalue
+            if (row[numColumns - 1] === null) row[numColumns - 1] = "NA";  //investors
+            if (row[numColumns - 4] === null) row[numColumns - 4] = "NA";  //porder
+            if (row[numColumns - 5] === null) row[numColumns - 5] = "NA";  //eq price
+            if (row[numColumns - 6] === null) row[numColumns - 6] = "NA";  //num transactions
          }
 
          // fill empty cells with the value above them
@@ -404,7 +297,7 @@ Redwood.factory("DataStorage", function () {
          for (let index = 0; index < this.group.length; index++) {
             data[0].push("status_p" + (index + 1), "spread_p" + (index + 1), "speed_p" + (index + 1), "dprofit_p" + (index + 1), "cumprofit_p" + (index + 1));
          }
-         data[0].push("num_transactions", "eq_price", "buy_orders_before", "buy_orders_after", "sell_orders_before", "sell_orders_after", "porder", "dvalue", "cumvalue", "investor_buy_sell");
+         data[0].push("num_transactions", "price", "porder", "dvalue", "fund_value", "investor_buy_sell");
 
          // get file name by formatting start time as readable string
          var filename = printTime(this.startTime) + '_cda_group_' + this.groupNum + '_period_' + this.period + '.csv';

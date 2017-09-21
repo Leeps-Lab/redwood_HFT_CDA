@@ -101,6 +101,7 @@ Redwood.factory("GroupManager", function () {
       };
 
       groupManager.sendToDataHistory = function (msg, uid, period) {
+         this.dataStore.storeMsg(msg);
          this.rssend("To_Data_History_" + uid, msg, period);
       };
 

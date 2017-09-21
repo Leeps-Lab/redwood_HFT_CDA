@@ -136,7 +136,7 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
          });
 
          rs.recv("_next_period", function (uid, msg) {
-            console.log("Starting Next Period");
+            // console.log("Starting Next Period");
             rs.trigger("_next_period");
          });
 

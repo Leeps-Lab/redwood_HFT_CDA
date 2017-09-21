@@ -18,6 +18,7 @@ Redwood.factory("MarketAlgorithm", function () {
       marketAlgorithm.currentMsgId = 1;
       marketAlgorithm.currentBuyId = 0;
       marketAlgorithm.currentSellId = 0;
+      marketAlgorithm.numTransactions = 0;
 
       marketAlgorithm.isDebug = subjectArgs.isDebug;
       if (marketAlgorithm.isDebug) {
@@ -263,7 +264,6 @@ Redwood.factory("MarketAlgorithm", function () {
                }
             }
             this.sendToDataHistory(msg,msg.subjectID);
-            this.groupManager.dataStore.storeMsg(msg);   
          }
       };
 

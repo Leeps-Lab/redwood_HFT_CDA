@@ -117,12 +117,20 @@ Redwood.factory("DataStorage", function () {
       dataStorage.storeTransaction = function (timestamp, price, fundPrice, buyer, seller) {
          if (buyer != 0) {
             this.profitChanges.push([timestamp - this.startTime, fundPrice - price, buyer]);
+            this.equilibriumPrices.push([timestamp - this.startTime, price]);
+            this.storeNumTransactions(timestamp, 1);
          }
 
          if (seller != 0) {
             this.profitChanges.push([timestamp - this.startTime, price - fundPrice, seller]);
+            this.equilibriumPrices.push([timestamp - this.startTime, price]);
+            this.storeNumTransactions(timestamp, 1);
          }
-         this.equilibriumPrices.push([timestamp - this.startTime, price]);
+         
+      };
+
+      dataStorage.storeNumTransactions = function (timestamp, transactions) {
+         this.numTransactions.push([timestamp - this.startTime, transactions]);   
       };
 
       dataStorage.storeFPC = function (timestamp, price) {
@@ -199,7 +207,7 @@ Redwood.factory("DataStorage", function () {
             let row = new Array(numColumns).fill(null);
 
             row[0] = entry[0];
-            row[numColumns - 3] = entry[1];
+            //row[numColumns - 3] = entry[1];
             row[numColumns - 2] = entry[2];
 
             data.push(row);
@@ -273,6 +281,14 @@ Redwood.factory("DataStorage", function () {
          for (let row = 1; row < data.length; row++) {
             for (let col = 0; col < data[row].length; col++) {
                if (data[row][col] === null) data[row][col] = data[row - 1][col];
+            }
+         }
+
+         //calculate dvalue based on fund_value
+         for (let row = 1; row < data.length; row++) {
+            dval = data[row][numColumns - 2] - data[row-1][numColumns -2];
+            if (dval != 0){ //change in fund
+               data[row][numColumns - 3] = dval;
             }
          }
 

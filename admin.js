@@ -328,6 +328,7 @@ Redwood.controller("AdminCtrl",
 
             // start experiment if all subjects are marked ready
             if ($scope.startSyncArrays[groupNum].allReady()) {
+               $scope.startSyncArrays[groupNum].reset();    //patch for bug where some groups keep reentering this if statement ending experiment early
                $scope.startTime = getTime();
                var group = $scope.getGroup(groupNum);
                var startFP = $scope.priceChanges[0][1];

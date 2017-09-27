@@ -349,7 +349,6 @@ Redwood.controller("AdminCtrl",
                };
 
                if($scope.config.hasOwnProperty("input_addresses")) {
-                  //console.log("%cRUNNING IN TEST MODE", 'font-family: "Comic Sans MS"');
                   beginData.input_addresses = $scope.config.input_addresses.split(',');
                }
 
@@ -364,11 +363,9 @@ Redwood.controller("AdminCtrl",
                if ($scope.priceChanges.length > 2) {
                   var jumpDelay = $scope.startTime + $scope.priceChanges[$scope.groupManagers[groupNum].priceIndex][0] - getTime();
                   window.setTimeout($scope.groupManagers[groupNum].sendNextPriceChange, jumpDelay / 1000000);
-                  // console.log("First Jump in...", jumpDelay / 1000000);
                }
                if ($scope.investorArrivals.length > 1) {
                   var investorDelayTime = ($scope.startTime + $scope.investorArrivals[$scope.groupManagers[groupNum].investorIndex][0]) - getTime();
-                  // console.log("First Investor in...", investorDelayTime / 1000000);
                   window.setTimeout($scope.groupManagers[groupNum].sendNextInvestorArrival, investorDelayTime / 1000000);
                }
             }

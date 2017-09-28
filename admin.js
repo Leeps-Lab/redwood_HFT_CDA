@@ -352,8 +352,10 @@ Redwood.controller("AdminCtrl",
                   beginData.input_addresses = $scope.config.input_addresses.split(',');
                }
 
+
                ra.sendCustom("Experiment_Begin", beginData, "admin", $scope.period, groupNum);  //****
                $scope.groupManagers[groupNum].startTime = $scope.startTime;
+
                $scope.groupManagers[groupNum].dataStore.init(startFP, $scope.startTime, $scope.config.maxSpread);
                for (var user of group) {
                   $scope.groupManagers[groupNum].marketAlgorithms[user].fundamentalPrice = startFP;
@@ -368,6 +370,9 @@ Redwood.controller("AdminCtrl",
                   var investorDelayTime = ($scope.startTime + $scope.investorArrivals[$scope.groupManagers[groupNum].investorIndex][0]) - getTime();
                   window.setTimeout($scope.groupManagers[groupNum].sendNextInvestorArrival, investorDelayTime / 1000000);
                }
+
+               $scope.groupManagers[groupNum].socket.send(generateSystemEventMsg('S',$scope.startTime));   //reset exchange + sync time
+               console.log(groupNum, "sync time:", printTime($scope.startTime));
             }
          });
 
@@ -405,7 +410,7 @@ Redwood.controller("AdminCtrl",
 
             //download data:
             for(var groupNum = 1; groupNum <= $scope.groups.length; groupNum++){
-               $scope.groupManagers[groupNum].socket.send(generateSystemEventMsg('E'));   //signal to server to end the day
+               $scope.groupManagers[groupNum].socket.send(generateSystemEventMsg('E', getTime() - $scope.startTime));   //signal to server to end the day
             }
             $('#export-profits').click().removeAttr("id");
         };

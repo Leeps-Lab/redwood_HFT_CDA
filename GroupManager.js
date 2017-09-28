@@ -50,7 +50,7 @@ Redwood.factory("GroupManager", function () {
 
             groupManager.socket.onopen = function(event) {
                console.log(printTime(getTime()), "Group", groupArgs.groupNum, "Connected to", groupArgs.URI);
-               this.send(generateSystemEventMsg('S'));
+               // this.send(generateSystemEventMsg('S', groupArgs.startTime));
             };
 
             // recieves messages from remote market
@@ -193,7 +193,7 @@ Redwood.factory("GroupManager", function () {
 
       groupManager.sendToRemoteMarket = function(leepsMsg){
          var msg = leepsMsgToOuch(leepsMsg);
-         // console.log(leepsMsg);
+         console.log(leepsMsg);
          this.socket.send(msg);
       }
 

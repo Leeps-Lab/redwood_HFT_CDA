@@ -404,8 +404,8 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
                   $scope.sendToGroupManager(msg);
 
                   if ($scope.state != "state_maker") {
-                     var msg2 = new Message("USER", "UMAKER", [rs.user_id, $scope.tradingGraph.getCurOffsetTime()]);
-                     $scope.sendToGroupManager(msg2);
+                     // var msg2 = new Message("USER", "UMAKER", [rs.user_id, $scope.tradingGraph.getCurOffsetTime()]);
+                     // $scope.sendToGroupManager(msg2);
                      $scope.setState("state_maker");
                   }
                   
@@ -433,8 +433,8 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
                $scope.sendToGroupManager(msg);
 
                if ($scope.state != "state_maker") {
-                  var msg2 = new Message("USER", "UMAKER", [rs.user_id, $scope.tradingGraph.getCurOffsetTime()]);
-                  $scope.sendToGroupManager(msg2);
+                  // var msg2 = new Message("USER", "UMAKER", [rs.user_id, $scope.tradingGraph.getCurOffsetTime()]);
+                  // $scope.sendToGroupManager(msg2);
                   $scope.setState("state_maker");
                }
 

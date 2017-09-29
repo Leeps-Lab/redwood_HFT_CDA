@@ -188,15 +188,15 @@ Redwood.factory("MarketAlgorithm", function () {
             if (this.buyEntered) {
                this.sendToGroupManager(this.updateBuyOfferMsg());
             }
-            // else{
-            //    this.sendToGroupManager(this.enterBuyOfferMsg());
-            // }
+            else{
+               this.sendToGroupManager(this.enterBuyOfferMsg());
+            }
             if (this.sellEntered) {
                this.sendToGroupManager(this.updateSellOfferMsg());
             }
-            // else{
-            //    this.sendToGroupManager(this.enterSellOfferMsg());
-            // }
+            else{
+               this.sendToGroupManager(this.enterSellOfferMsg());
+            }
             this.sendToAllDataHistories(msg);
          }
 

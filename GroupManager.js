@@ -100,9 +100,9 @@ Redwood.factory("GroupManager", function () {
          sendFunction(key, value, "admin", period, this.groupNumber);      //***** was by default sending to period 1
       };
 
-      groupManager.sendToDataHistory = function (msg, uid, period) {
+      groupManager.sendToDataHistory = function (msg, uid) {
          this.dataStore.storeMsg(msg);
-         this.rssend("To_Data_History_" + uid, msg, period);
+         this.rssend("To_Data_History_" + uid, msg, this.period);
       };
 
       groupManager.sendToAllDataHistories = function (msg) {
@@ -193,7 +193,7 @@ Redwood.factory("GroupManager", function () {
 
       groupManager.sendToRemoteMarket = function(leepsMsg){
          var msg = leepsMsgToOuch(leepsMsg);
-         console.log(leepsMsg);
+         // console.log(leepsMsg);
          this.socket.send(msg);
       }
 

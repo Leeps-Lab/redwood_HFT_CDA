@@ -233,10 +233,10 @@ Redwood.factory("GroupManager", function () {
             // else{
             //    window.setTimeout(this.sendToAllDataHistories.bind(this), this.delay, msg);   //wait delay time to send to update graph
             // }
-
+            // this.dataStore.storeMsg(msg);
+            
             this.marketAlgorithms[subjectID].recvFromGroupManager(msg);       //send to market algorithms -> server
 
-            this.dataStore.storeMsg(msg);
             if (msg.msgType == "UMAKER") this.dataStore.storeSpreadChange(msg.msgData[1], this.marketAlgorithms[subjectID].spread, msg.msgData[0]);
          }
       };

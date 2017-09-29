@@ -43,8 +43,18 @@ Redwood.factory("MarketAlgorithm", function () {
 
       // sends out buy and sell offer for entering market
       marketAlgorithm.enterMarket = function () {
-         this.sendToGroupManager(this.enterBuyOfferMsg());
-         this.sendToGroupManager(this.enterSellOfferMsg());
+         if (this.buyEntered) {
+               this.sendToGroupManager(this.updateBuyOfferMsg());
+            }
+            else{
+               this.sendToGroupManager(this.enterBuyOfferMsg());
+            }
+            if (this.sellEntered) {
+               this.sendToGroupManager(this.updateSellOfferMsg());
+            }
+            else{
+               this.sendToGroupManager(this.enterSellOfferMsg());
+            }
       };
 
       // sends out remove buy and sell messages for exiting market
@@ -184,20 +194,20 @@ Redwood.factory("MarketAlgorithm", function () {
          if (msg.msgType === "UUSPR") {
             // this.state = "state_maker";
             this.spread = msg.msgData[1];
+            this.state = "state_maker";
             //See if there are existing orders that need to be updated
-            if (this.buyEntered) {
-               this.sendToGroupManager(this.updateBuyOfferMsg());
-            }
-            else{
-               this.sendToGroupManager(this.enterBuyOfferMsg());
-            }
-            if (this.sellEntered) {
-               this.sendToGroupManager(this.updateSellOfferMsg());
-            }
-            else{
-               this.sendToGroupManager(this.enterSellOfferMsg());
-            }
-            this.sendToAllDataHistories(msg);
+            // if (this.buyEntered) {
+            //    this.sendToGroupManager(this.updateBuyOfferMsg());
+            // }
+            // else{
+            //    this.sendToGroupManager(this.enterBuyOfferMsg());
+            // }
+            // if (this.sellEntered) {
+            //    this.sendToGroupManager(this.updateSellOfferMsg());
+            // }
+            // else{
+            //    this.sendToGroupManager(this.enterSellOfferMsg());
+            // }
          }
 
          // Confirmation that a buy offer has been placed in market

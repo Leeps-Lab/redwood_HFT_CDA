@@ -372,7 +372,6 @@ Redwood.controller("AdminCtrl",
                }
 
                $scope.groupManagers[groupNum].socket.send(generateSystemEventMsg('S',$scope.startTime));   //reset exchange + sync time
-               console.log(groupNum, "sync time:", printTime($scope.startTime));
             }
          });
 

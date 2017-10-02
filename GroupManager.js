@@ -193,7 +193,7 @@ Redwood.factory("GroupManager", function () {
 
       groupManager.sendToRemoteMarket = function(leepsMsg){
          var msg = leepsMsgToOuch(leepsMsg);
-         // console.log(leepsMsg);
+         // console.log(leepsMsg, printTime(leepsMsg.timeStamp));
          this.socket.send(msg);
       }
 
@@ -226,7 +226,7 @@ Redwood.factory("GroupManager", function () {
          // if this is a user message, handle it and don't send it to market
          if (msg.protocol === "USER") {
             var subjectID = msg.msgData[0];
-
+            console.log(msg, printTime(msg.timeStamp));
             // if(this.marketAlgorithms[subjectID].using_speed){                 //if fast send straight to graph
                this.sendToAllDataHistories(msg);
             // }

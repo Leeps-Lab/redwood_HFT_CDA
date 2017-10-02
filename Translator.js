@@ -32,7 +32,8 @@ function splitMessages(messageStr){
 function generateSystemEventMsg(eventcode, timestamp) {
   var sysMsg = new Uint8Array(10);
   sysMsg[0] = charToByte('S');
-  spliceInArray(intToByteArray(timestamp), sysMsg, 8, 1);
+  // spliceInArray(intToByteArray(timestamp), sysMsg, 8, 1);
+  spliceInArray(timeToByteArray(timestamp), sysMsg, 8, 1);
   sysMsg[9] = charToByte(eventcode);
   return sysMsg;
 }
@@ -43,7 +44,8 @@ function leepsMsgToOuch(leepsMsg){
    // Convert an enter order message
    if(leepsMsg.msgType === "EBUY" || leepsMsg.msgType === "ESELL"){
       var ouchMsg = new Uint8Array(49);
-      
+      // var ouchMsg = new Uint8Array(57); //10/1/17
+        
       // Type
       ouchMsg[0] = charToByte('O');
 
@@ -116,11 +118,16 @@ function leepsMsgToOuch(leepsMsg){
       ouchMsg[48] = charToByte('R');
 
       //console.log(leepsMsg.msgType + ": " + printOuchMsg(ouchMsg));
+
+      //leeps timestamp
+      // spliceInArray(intToByteArray(leepsMsg.timeStamp), ouchMsg, 8, 49);
+// 
       return ouchMsg;
    }
    else if(leepsMsg.msgType === "RBUY" || leepsMsg.msgType === "RSELL")
    {
       var ouchMsg = new Uint8Array(19);
+      // var ouchMsg = new Uint8Array(27);
       
       // Type
       ouchMsg[0] = charToByte('X');
@@ -144,11 +151,15 @@ function leepsMsgToOuch(leepsMsg){
       // Shares
       spliceInArray(intToByteArray(0), ouchMsg, 4, 15);
 
+      //leeps timestamp
+      // spliceInArray(intToByteArray(leepsMsg.timeStamp), ouchMsg, 8, 19);
+
       return ouchMsg;
    }
    else if(leepsMsg.msgType === "UBUY" || leepsMsg.msgType === "USELL")
    {
       var ouchMsg = new Uint8Array(47);
+      // var ouchMsg = new Uint8Array(55);
 
       // Type
       ouchMsg[0] = charToByte('U');
@@ -210,6 +221,8 @@ function leepsMsgToOuch(leepsMsg){
       // Minimum quantity
       spliceInArray(intToByteArray(1), ouchMsg, 4, 43);
 
+      //leeps timestamp
+      // spliceInArray(intToByteArray(leepsMsg.timeStamp), ouchMsg, 8, 47);
       return ouchMsg;
    }
 }
@@ -398,6 +411,29 @@ function intToByteArray(num){
    num = num >> 8
    bytes[0] = num & (255);
 
+   return bytes;
+}
+
+//int to array of 8 bytes
+function timeToByteArray(num){
+   var bytes = new Uint8Array(8);
+   
+   bytes[7] = num & (255);
+   num = num >>> 8;
+   bytes[6] = num & (255);
+   num = num >>> 8;
+   bytes[5] = num & (255);
+   num = num >>> 8;
+   bytes[4] = num & (255);
+   num - num >>> 8;
+   bytes[3] = num & (255);
+   num = num >>> 8;
+   bytes[2] = num & (255);
+   num = num >>> 8;
+   bytes[1] = num & (255);
+   num = num >>> 8;
+   bytes[0] = num & (255);
+   console.log(bytes);
    return bytes;
 }
 

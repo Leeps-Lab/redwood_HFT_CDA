@@ -364,14 +364,17 @@ Redwood.controller("AdminCtrl",
                // if there are any price changes to send, start price change sending recursive function
                if ($scope.priceChanges.length > 2) {
                   var jumpDelay = $scope.startTime + $scope.priceChanges[$scope.groupManagers[groupNum].priceIndex][0] - getTime();
+                  $scope.groupManagers[groupNum].priceIndex++; //increment the initial index
                   window.setTimeout($scope.groupManagers[groupNum].sendNextPriceChange, jumpDelay / 1000000);
                }
                if ($scope.investorArrivals.length > 1) {
                   var investorDelayTime = ($scope.startTime + $scope.investorArrivals[$scope.groupManagers[groupNum].investorIndex][0]) - getTime();
+                  $scope.groupManagers[groupNum].investorIndex++;    //increment the initial index
                   window.setTimeout($scope.groupManagers[groupNum].sendNextInvestorArrival, investorDelayTime / 1000000);
                }
 
                $scope.groupManagers[groupNum].socket.send(generateSystemEventMsg('S',$scope.startTime));   //reset exchange + sync time
+               console.log(printTime($scope.startTime), $scope.startTime);
             }
          });
 

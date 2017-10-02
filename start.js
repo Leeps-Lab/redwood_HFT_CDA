@@ -566,12 +566,9 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
 
                case "SPREAD":
                   var newVal = parseFloat($scope.inputData[inputIndex][2]);
-                  if (newVal != $scope.sliderVal) {
-                     $scope.sliderVal = newVal;
-                     $("#slider").slider({value: newVal});
-                     var msg = new Message("USER", "UUSPR", [rs.user_id, $scope.sliderVal, $scope.tradingGraph.getCurOffsetTime()]);
-                     $scope.sendToGroupManager(msg);
-                  }
+                  var msg = new Message("USER", "UUSPR", [rs.user_id, newVal, $scope.tradingGraph.getCurOffsetTime()]);
+                  $scope.sendToGroupManager(msg);
+                  
                   if ($scope.state != "state_maker") {
                      var msg2 = new Message("USER", "UMAKER", [rs.user_id, $scope.tradingGraph.getCurOffsetTime()]);
                      $scope.sendToGroupManager(msg2);

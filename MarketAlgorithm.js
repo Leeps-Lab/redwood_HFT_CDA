@@ -42,25 +42,25 @@ Redwood.factory("MarketAlgorithm", function () {
       };
 
       // sends out buy and sell offer for entering market
-      marketAlgorithm.enterMarket = function () {
+      marketAlgorithm.enterMarket = function (timestamp) {
          if (this.buyEntered) {
                this.sendToGroupManager(this.updateBuyOfferMsg());
             }
             else{
-               this.sendToGroupManager(this.enterBuyOfferMsg());
+               this.sendToGroupManager(this.enterBuyOfferMsg(timestamp));
             }
             if (this.sellEntered) {
                this.sendToGroupManager(this.updateSellOfferMsg());
             }
             else{
-               this.sendToGroupManager(this.enterSellOfferMsg());
+               this.sendToGroupManager(this.enterSellOfferMsg(timestamp));
             }
       };
 
       // sends out remove buy and sell messages for exiting market
-      marketAlgorithm.exitMarket = function () {
-         this.sendToGroupManager(this.removeBuyOfferMsg());
-         this.sendToGroupManager(this.removeSellOfferMsg());         //test 8/31 to make sure all of your orders are cancelled
+      marketAlgorithm.exitMarket = function (timestamp) {
+         this.sendToGroupManager(this.removeBuyOfferMsg(timestamp));
+         this.sendToGroupManager(this.removeSellOfferMsg(timestamp));         //test 8/31 to make sure all of your orders are cancelled
          this.state = "state_out";
       };
 
@@ -165,14 +165,14 @@ Redwood.factory("MarketAlgorithm", function () {
 
          // user sent signal to change state to market maker. Need to enter market.
          if (msg.msgType === "UMAKER") {
-            this.enterMarket();                 // enter market
+            this.enterMarket(msg.timeStamp);                 // enter market
             this.state = "state_maker";         // set state
          }
 
          // user sent signal to change state to sniper
          if (msg.msgType === "USNIPE") {
             if (this.state === "state_maker") {   // if switching from being a maker, exit the market
-               this.exitMarket();
+               this.exitMarket(msg.timeStamp);
             }
             this.state = "state_snipe";         // update state
          }
@@ -180,7 +180,7 @@ Redwood.factory("MarketAlgorithm", function () {
          // user sent signal to change state to "out of market"
          if (msg.msgType === "UOUT") {
             if (this.state === "state_maker") {   // if switching from being a maker, exit the market
-               this.exitMarket();
+               this.exitMarket(msg.timeStamp);
             }
             this.state = "state_out";           // update state
          }
@@ -195,19 +195,6 @@ Redwood.factory("MarketAlgorithm", function () {
             // this.state = "state_maker";
             this.spread = msg.msgData[1];
             this.state = "state_maker";
-            //See if there are existing orders that need to be updated
-            // if (this.buyEntered) {
-            //    this.sendToGroupManager(this.updateBuyOfferMsg());
-            // }
-            // else{
-            //    this.sendToGroupManager(this.enterBuyOfferMsg());
-            // }
-            // if (this.sellEntered) {
-            //    this.sendToGroupManager(this.updateSellOfferMsg());
-            // }
-            // else{
-            //    this.sendToGroupManager(this.enterSellOfferMsg());
-            // }
          }
 
          // Confirmation that a buy offer has been placed in market
@@ -277,42 +264,46 @@ Redwood.factory("MarketAlgorithm", function () {
          }
       };
 
-      marketAlgorithm.enterBuyOfferMsg = function () {
+      marketAlgorithm.enterBuyOfferMsg = function (timestamp) {
          var nMsg = new OuchMessage("EBUY", this.myId, this.fundamentalPrice - this.spread / 2, false);
          nMsg.delay = !this.using_speed;
          nMsg.senderId = this.myId;
          nMsg.msgId = this.currentMsgId;
+         if(timestamp) nMsg.timeStamp = timestamp;
          this.currentBuyId = this.currentMsgId;
          this.currentMsgId++;
          this.buyEntered = true;
          return nMsg;
       };
 
-      marketAlgorithm.enterSellOfferMsg = function () {
+      marketAlgorithm.enterSellOfferMsg = function (timestamp) {
          var nMsg = new OuchMessage("ESELL", this.myId, this.fundamentalPrice + this.spread / 2, false);
          nMsg.delay = !this.using_speed;
          nMsg.senderId = this.myId;
          nMsg.msgId = this.currentMsgId;
+         if(timestamp) nMsg.timeStamp = timestamp;
          this.currentSellId = this.currentMsgId;
          this.currentMsgId++;
          this.sellEntered = true;
          return nMsg;
       };
 
-      marketAlgorithm.removeBuyOfferMsg = function() {
+      marketAlgorithm.removeBuyOfferMsg = function(timestamp) {
          var nMsg = new OuchMessage("RBUY", this.myId, null, null);
          nMsg.delay = !this.using_speed;
          nMsg.senderId = this.myId;
          nMsg.msgId = this.currentBuyId;
+         if(timestamp) nMsg.timeStamp = timestamp;
          this.buyEntered = false;
          return nMsg;
       };
 
-      marketAlgorithm.removeSellOfferMsg = function() {
+      marketAlgorithm.removeSellOfferMsg = function(timestamp) {
          var nMsg = new OuchMessage("RSELL", this.myId, null, null);
          nMsg.delay = !this.using_speed;
          nMsg.senderId = this.myId;
          nMsg.msgId = this.currentSellId;
+         if(timestamp) nMsg.timeStamp = timestamp;
          this.sellEntered = false;
          return nMsg;
       };

@@ -28,6 +28,7 @@ Redwood.factory("GroupManager", function () {
          groupManager.syncFPArray = new SynchronizeArray(groupManager.memberIDs);
          groupManager.FPMsgList = [];
          groupManager.curMsgId = 1 + 500 * groupArgs.period;
+         groupManager.debugArray = [];
 
          groupManager.isDebug = groupArgs.isDebug;     // indicates if message logger should be used
          groupManager.outboundMarketLog = "";          // string of debug info for messages outbound to market
@@ -104,7 +105,7 @@ Redwood.factory("GroupManager", function () {
       groupManager.sendToDataHistory = function (msg, uid) {
          if(!this.suppressMessages){
             this.dataStore.storeMsg(msg);
-            this.rssend("To_Data_History_" + uid, msg, this.period);
+            this.rssend("To_Data_History_" + uid, msg, this.period); 
          }
       };
 
@@ -199,6 +200,7 @@ Redwood.factory("GroupManager", function () {
       groupManager.sendToRemoteMarket = function(leepsMsg){
          var msg = leepsMsgToOuch(leepsMsg);
          // console.log(leepsMsg, printTime(leepsMsg.timeStamp));
+         this.debugArray.push([leepsMsg.msgId, printTime(leepsMsg.timeStamp), leepsMsg.msgType]);   //push info to compare return msg from server
          this.socket.send(msg);
       }
 
@@ -223,6 +225,7 @@ Redwood.factory("GroupManager", function () {
                this.sendToAllDataHistories(msg);            //added 7/20/17 for refactor
             }
          }
+         this.debugArray.push([msg.msgId, printTime(msg.timeStamp), msg.msgType]); //push info to compare server msg to redwood
       };
 
       // handles message from subject and passes it on to market algorithm
@@ -231,7 +234,7 @@ Redwood.factory("GroupManager", function () {
          // if this is a user message, handle it and don't send it to market
          if (msg.protocol === "USER") {
             var subjectID = msg.msgData[0];
-            console.log(msg, printTime(msg.timeStamp));
+            //console.log(msg, printTime(msg.timeStamp));
             // if(this.marketAlgorithms[subjectID].using_speed){                 //if fast send straight to graph
                this.sendToAllDataHistories(msg);
             // }

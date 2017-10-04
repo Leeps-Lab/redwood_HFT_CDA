@@ -452,6 +452,14 @@ Redwood.controller("AdminCtrl",
                }
             });
 
+         $("#debug")
+            .button()
+            .click(function () {
+               for (var groupNum = 1; groupNum <= $scope.groups.length; groupNum++){         //download data and leave market
+                  console.log(groupNum, $scope.groupManagers[groupNum].debugArray);  //so no transactions during period transition
+               }
+            });
+
          $("#sell-investor")
             .button()
             .click(function () {

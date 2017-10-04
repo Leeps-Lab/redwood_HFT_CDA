@@ -433,7 +433,7 @@ function timeToByteArray(num){
    bytes[1] = num & (255);
    num = num >>> 8;
    bytes[0] = num & (255);
-   console.log(bytes);
+   // console.log(bytes);
    return bytes;
 }
 

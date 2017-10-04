@@ -383,6 +383,7 @@ Redwood.controller("AdminCtrl",
                
                for (var groupNum = 1; groupNum <= $scope.groups.length; groupNum++){         //download data and leave market
                   var group = $scope.getGroup(groupNum);
+                  $scope.groupManagers[groupNum].suppressMessages = true;  //so no transactions during period transition
                   for (var user of group) {
                      if($scope.groupManagers[groupNum].marketAlgorithms[user] != null){
                         $scope.groupManagers[groupNum].marketAlgorithms[user].exitMarket();           //ensure each user is reset for next period

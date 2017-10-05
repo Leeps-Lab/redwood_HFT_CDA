@@ -293,6 +293,7 @@ Redwood.controller("AdminCtrl",
          ra.on_load(function () {
             $scope.period = 1;         //start period from 1
             $scope.profitData = [];    //initialize array for storing cummulatie profit
+            $scope.deltas = [];
             initExperiment();          //moved everything to a function for calls between period
          }); 
 
@@ -455,9 +456,19 @@ Redwood.controller("AdminCtrl",
          $("#debug")
             .button()
             .click(function () {
-               for (var groupNum = 1; groupNum <= $scope.groups.length; groupNum++){         //download data and leave market
-                  console.log(groupNum, $scope.groupManagers[groupNum].debugArray);  //so no transactions during period transition
+               for (var groupNum = 1; groupNum <= $scope.groups.length; groupNum++){         //do for each group
+                  var a = $scope.groupManagers[groupNum].debugArray;
+                  a.sort(function (a,b) {
+                     return a.msgId - b.msgId;
+                  });
+                  console.log(groupNum, a);          //print whole array
+                  for (var index = 0; index < $scope.groupManagers[groupNum].debugArray.length - 1; index+=2){  
+                     if(a[index + 1].msgId == a[index].msgId){
+                        $scope.deltas.push({msgId: a[index].msgId, delta: printTime(Math.abs(a[index + 1].timeStamp - a[index].timeStamp)), msgType: a[index].msgType + "," + a[index + 1].msgType});
+                     }          
+                  }
                }
+               console.log($scope.deltas);
             });
 
          $("#sell-investor")

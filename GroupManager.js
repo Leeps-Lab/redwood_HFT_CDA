@@ -200,7 +200,7 @@ Redwood.factory("GroupManager", function () {
       groupManager.sendToRemoteMarket = function(leepsMsg){
          var msg = leepsMsgToOuch(leepsMsg);
          // console.log(leepsMsg, printTime(leepsMsg.timeStamp));
-         this.debugArray.push([leepsMsg.msgId, printTime(leepsMsg.timeStamp), leepsMsg.msgType]);   //push info to compare return msg from server
+         this.debugArray.push({msgId: leepsMsg.msgId, timeString: printTime(leepsMsg.timeStamp), msgType: leepsMsg.msgType, timeStamp: leepsMsg.timeStamp});   //push info to compare return msg from server
          this.socket.send(msg);
       }
 
@@ -218,14 +218,14 @@ Redwood.factory("GroupManager", function () {
          }
          else {
             //console.log(msg);
-            if(msg.subjectID > 0) {
+            if(msg.subjectID > 0) { //only care about non investors
                this.marketAlgorithms[msg.subjectID].recvFromGroupManager(msg);
             }
             else {
                this.sendToAllDataHistories(msg);            //added 7/20/17 for refactor
-            }
+            }//dont want to push c_tra msgs
+            this.debugArray.push({msgId: msg.msgId, timeString: printTime(msg.timeStamp), msgType: msg.msgType, timeStamp: msg.timeStamp}); //push info to compare server msg to redwood
          }
-         this.debugArray.push([msg.msgId, printTime(msg.timeStamp), msg.msgType]); //push info to compare server msg to redwood
       };
 
       // handles message from subject and passes it on to market algorithm

@@ -21,7 +21,7 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
          $scope.jumpOffsetY = 0;
          $scope.LaserSound;
          $scope.statename = "Out";
-         $scope.spamDelay = 300;
+         $scope.spamDelay = 500;
          $scope.isAnimating = false;
 
          $scope.s = {
@@ -358,13 +358,15 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
          $("#graph1")
             .mousedown( function(event) {
                if($scope.isAnimating){
-                  return;
+                   console.log("not supposed to be able to click...");
+		   return;
                }
                //only allow mousePressed to register after 
                $scope.mousePressed = true;                                       //set the flag so in case we leave the svg element we know it was a press
                
+	       $scope.isAnimating = true;
                setTimeout(function() {
-                    isAnimating = false;
+                   $scope.isAnimating = false;
                 }, $scope.spamDelay);
             })
             .mouseleave( function(event) {

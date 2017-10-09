@@ -168,7 +168,7 @@ RedwoodHighFrequencyTrading.factory("DataHistory", function () {
 
       //records a new buy offer
       dataHistory.recordBuyOffer = function (buyMsg) {
-         if(buyMsg.subjectID > 0){
+         if(buyMsg.subjectID > 0){     //not an investor
             if(this.playerData[buyMsg.subjectID].state == 'Snipe'){                                   //TEST -> don't want to graph snipe offer
                // console.log("Tried to record buy offer, state: "  + this.playerData[buyMsg.subjectID].state);
                return;

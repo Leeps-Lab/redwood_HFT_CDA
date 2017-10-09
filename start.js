@@ -372,6 +372,7 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
             .mouseleave( function(event) {
                if ($scope.mousePressed) {                                        //only set the spread if svg has been clicked on
                   $scope.mousePressed = false;                                   //reset the flag
+
                   if (event.offsetY <= $scope.tradingGraph.elementHeight / 2) {      //you left the svg right of the center tick
                      $scope.spread = (5 - Math.abs(10 * event.offsetY / $scope.tradingGraph.elementHeight)).toPrecision(2); //.1 increments
                      if($scope.spread > 5) $scope.spread = 5;                                       //cap max spread to 5
@@ -385,9 +386,10 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
                   var msg = new Message("USER", "UUSPR", [rs.user_id, $scope.spread, $scope.tradingGraph.getCurOffsetTime()]);
                   $scope.sendToGroupManager(msg);
 
+                  var msg2 = new Message("USER", "UMAKER", [rs.user_id, $scope.tradingGraph.getCurOffsetTime()]);
+                  $scope.sendToGroupManager(msg2);
+                  
                   if ($scope.state != "state_maker") {
-                     var msg2 = new Message("USER", "UMAKER", [rs.user_id, $scope.tradingGraph.getCurOffsetTime()]);
-                     $scope.sendToGroupManager(msg2);
                      $scope.setState("state_maker");
                   }
                   
@@ -415,9 +417,10 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
                   var msg = new Message("USER", "UUSPR", [rs.user_id, $scope.spread, $scope.tradingGraph.getCurOffsetTime()]);
                   $scope.sendToGroupManager(msg);
 
+                  var msg2 = new Message("USER", "UMAKER", [rs.user_id, $scope.tradingGraph.getCurOffsetTime()]);
+                  $scope.sendToGroupManager(msg2);
+
                   if ($scope.state != "state_maker") {
-                     var msg2 = new Message("USER", "UMAKER", [rs.user_id, $scope.tradingGraph.getCurOffsetTime()]);
-                     $scope.sendToGroupManager(msg2);
                      $scope.setState("state_maker");
                   }
 

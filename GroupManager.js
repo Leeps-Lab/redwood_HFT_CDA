@@ -199,9 +199,9 @@ Redwood.factory("GroupManager", function () {
 
       groupManager.sendToRemoteMarket = function(leepsMsg){
          var msg = leepsMsgToOuch(leepsMsg);
-         // console.log(leepsMsg, printTime(leepsMsg.timeStamp));
-         this.debugArray.push({msgId: leepsMsg.msgId, timeString: printTime(leepsMsg.timeStamp), msgType: leepsMsg.msgType, timeStamp: leepsMsg.timeStamp});   //push info to compare return msg from server
+         console.log(leepsMsg, printTime(leepsMsg.timeStamp));
          this.socket.send(msg);
+         this.debugArray.push({msgId: leepsMsg.msgId, timeString: printTime(leepsMsg.timeStamp), msgType: leepsMsg.msgType, timeStamp: leepsMsg.timeStamp});   //push info to compare return msg from server
       }
 
       groupManager.sendToDebugMarket = function(leepsMsg){

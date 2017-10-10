@@ -15,7 +15,7 @@ Redwood.factory("GroupManager", function () {
          groupManager.period = groupArgs.period;
          groupManager.priceChanges = groupArgs.priceChanges;         // array of all price changes that will occur
          groupManager.investorArrivals = groupArgs.investorArrivals; // array of all investor arrivals that will occur
-         groupManager.priceIndex = 1;                                // index of last price index to occur. start at 1 because start FP is handled differently
+         groupManager.priceIndex = 0;                                // index of last price index to occur. start at 1 because start FP is handled differently
          groupManager.investorIndex = 0;                             // index of last investor arrival to occur
          groupManager.intervalPromise = null;                        // promise for canceling interval when experiment ends
          groupManager.timeouts = [];

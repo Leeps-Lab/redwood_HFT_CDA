@@ -261,7 +261,7 @@ Redwood.factory("GroupManager", function () {
             this.rssend("end_game", this.groupNumber);
             return;
          }
-
+         // console.log(this.priceChanges[this.priceIndex][1], this.priceIndex);
          var msg = new Message("ITCH", "FPC", [getTime(), this.priceChanges[this.priceIndex][1], this.priceIndex]);
          msg.delay = false;
          this.dataStore.storeMsg(msg);

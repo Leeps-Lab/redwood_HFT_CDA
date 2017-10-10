@@ -117,22 +117,6 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
             requestAnimationFrame($scope.update);                 //added 7/31/17 for smoother graphing
 
             // // if input data was provided, setup automatic input system
-            // if (data.hasOwnProperty("input_addresses")) {
-            //    // get unique index for this player
-            //    var index = $scope.group.findIndex(function (element) { return element == rs.user_id; });
-
-            //    // download input csv file
-            //    $http.get(data.input_addresses[index]).then(function (response) {
-            //       // parse input into array
-            //       $scope.inputData = response.data.split('\n').map(function (element) {
-            //          return element.split(',');
-            //       });
-            //       var delay = $scope.inputData[0][0] + ($scope.dHistory.startTime - $scope.tradingGraph.getCurOffsetTime())/1000000;
-            //       console.log("delay: " + delay);
-            //       window.setTimeout($scope.processInputAction, delay, 0);
-            //    });
-            // }
-
             if (data.hasOwnProperty("input_addresses")) {
                
                // get unique index for this player
@@ -150,7 +134,7 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
                      var cells = rows[i].split(",");                       //if more data in csv row, add column to arrays row
                      for (let j = 0; j < cells.length; j++) {              //for each column in csv row
                         if(j == 1) {
-                           $scope.inputData[i][j] = String(cells[j]);;     //read as a string (MAKER,SNIPE,etc)
+                           $scope.inputData[i][j] = String(cells[j]);     //read as a string (MAKER,SNIPE,etc)
                         }
                         else{
                            $scope.inputData[i][j] = parseFloat(cells[j]);  //read timestamps and spreads as ints

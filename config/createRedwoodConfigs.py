@@ -10,10 +10,10 @@ startingWealth = 20
 speedCost = 0.02
 maxSpread = 5
 exchangeRate = 1
-experimentLength = 150000
-marketEventsURLRoot = "https://raw.githubusercontent.com/Leeps-Lab/redwood-high-frequency-trading-remote/master/config/20170831/Investors/investors_period"
-priceChangesURLRoot = "https://raw.githubusercontent.com/Leeps-Lab/redwood-high-frequency-trading-remote/master/config/20170831/Jumps/jumps_period"
-exchangeURI = "52.59.251.204"
+experimentLength = 300000
+marketEventsURLRoot = "https://raw.githubusercontent.com/Leeps-Lab/redwood-high-frequency-trading-remote/master/config/20171012/Investors/investors_period"
+priceChangesURLRoot = "https://raw.githubusercontent.com/Leeps-Lab/redwood-high-frequency-trading-remote/master/config/20171012/Jumps/jumps_period"
+exchangeURI = "54.219.182.118"
 
 groupList = list()
 for group in range(1,nGroups+1):

@@ -1,8 +1,10 @@
-periodVal = 8
-groupVal = 3
-filePath = paste("~/Dropbox/Academics/Research/UCSC/redwood-high-frequency-trading-remote/config/20170831/",sep="")
-jumpFile = paste(filePath,"jumps_period",periodVal,"_group",groupVal,".csv",sep="")
-investorFile = paste(filePath,"investors_period",periodVal,"_group",groupVal,".csv",sep="")
+#!/usr/bin/env Rscript
+args = commandArgs(trailingOnly=TRUE)
+periodVal = args[1]
+groupVal = args[2]
+filePath = paste("~/Dropbox/Academics/Research/UCSC/redwood-high-frequency-trading-remote/config/20171011/",sep="")
+jumpFile = paste(filePath,"Jumps/jumps_period",periodVal,"_group",groupVal,".csv",sep="")
+investorFile = paste(filePath,"Investors/investors_period",periodVal,"_group",groupVal,".csv",sep="")
 
 # Parameters for jump times
 totalTime = 5*60*1000

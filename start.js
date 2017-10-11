@@ -142,7 +142,7 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
                      }
                   }
                }).then(function() {
-                  var delay = $scope.inputData[0][0] + ($scope.dHistory.startTime - $scope.tradingGraph.getCurOffsetTime())/1000000;
+                  var delay = $scope.inputData[0][0] + ($scope.dHistory.startTime - $scope.tradingGraph.getCurOffsetTime())/1000000;   //use player time offset
                   console.log("delay: " + delay);
                   window.setTimeout($scope.processInputAction, delay, 0);
                });

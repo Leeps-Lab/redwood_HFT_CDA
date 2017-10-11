@@ -368,8 +368,9 @@ Redwood.controller("AdminCtrl",
                if ($scope.priceChanges.length > 2) {
                   console.log("priceIndex", $scope.groupManagers[groupNum].priceIndex,$scope.priceChanges);
                   var jumpDelay = $scope.startTime + $scope.priceChanges[$scope.groupManagers[groupNum].priceIndex][0] - getTime();
-                  console.log(printTime(jumpDelay));
-                  $scope.groupManagers[groupNum].priceIndex++; //increment the initial index
+                  if(jumpDelay < 0) jumpDelay = 0;
+                  // console.log(printTime(jumpDelay));
+                  // $scope.groupManagers[groupNum].priceIndex++; //increment the initial index
                   window.setTimeout($scope.groupManagers[groupNum].sendNextPriceChange, jumpDelay / 1000000);
                }
                if ($scope.investorArrivals.length > 1) {
@@ -474,7 +475,7 @@ Redwood.controller("AdminCtrl",
                      }          
                   }
                }
-               console.log($scope.deltas);
+               // console.log($scope.deltas);
                var filename = printTime($scope.startTime) + '_cda_deltas.csv';
 
                var csvRows = [];

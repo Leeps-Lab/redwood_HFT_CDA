@@ -375,7 +375,7 @@ Redwood.controller("AdminCtrl",
                }
                if ($scope.investorArrivals.length > 1) {
                   var investorDelayTime = ($scope.startTime + $scope.investorArrivals[$scope.groupManagers[groupNum].investorIndex][0]) - getTime();
-                  $scope.groupManagers[groupNum].investorIndex++;    //increment the initial index
+                  // $scope.groupManagers[groupNum].investorIndex++;    //increment the initial index
                   window.setTimeout($scope.groupManagers[groupNum].sendNextInvestorArrival, investorDelayTime / 1000000);
                }
 

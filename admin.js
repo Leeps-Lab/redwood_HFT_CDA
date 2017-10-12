@@ -185,13 +185,12 @@ Redwood.controller("AdminCtrl",
             var priceURL = $scope.config.priceChangesURL;
             $http.get(priceURL).then(function (response) {
                var rows = response.data.split("\n");
-
                //Parse price changes CSV
-               for (let i = 0; i < rows.length - 2; i++) {
+               for (let i = 0; i < rows.length - 1; i++) {
                   $scope.priceChanges[i] = [];
                }
 
-               for (let i = 0; i < rows.length - 2; i++) {
+               for (let i = 0; i < rows.length - 1; i++) {
                   if (rows[i + 1] === "") continue;
                   var cells = rows[i + 1].split(",");
                   for (let j = 0; j < cells.length; j++) {
@@ -207,13 +206,12 @@ Redwood.controller("AdminCtrl",
                var arrivalURL = $scope.config.marketEventsURL;
                $http.get(arrivalURL).then(function (response) {
                   var rows = response.data.split("\n");
-
                   //Parse investor arrival changes CSV
-                  for (var i = 0; i < rows.length - 2; i++) {
+                  for (var i = 0; i < rows.length - 1; i++) {
                      $scope.investorArrivals[i] = [];
                   }
 
-                  for (var i = 0; i < rows.length - 2; i++) {
+                  for (var i = 0; i < rows.length - 1; i++) {
                      if (rows[i + 1] === "") continue;
                      var cells = rows[i + 1].split(",");
                      for (var j = 0; j < cells.length; j++) {

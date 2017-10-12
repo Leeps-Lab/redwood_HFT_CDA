@@ -185,6 +185,7 @@ Redwood.controller("AdminCtrl",
             var priceURL = $scope.config.priceChangesURL;
             $http.get(priceURL).then(function (response) {
                var rows = response.data.split("\n");
+               console.log(rows)
                //Parse price changes CSV
                for (let i = 0; i < rows.length - 1; i++) {
                   $scope.priceChanges[i] = [];

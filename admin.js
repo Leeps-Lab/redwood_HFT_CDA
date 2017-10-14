@@ -185,7 +185,6 @@ Redwood.controller("AdminCtrl",
             var priceURL = $scope.config.priceChangesURL;
             $http.get(priceURL).then(function (response) {
                var rows = response.data.split("\n");
-               console.log(rows)
                //Parse price changes CSV
                for (let i = 0; i < rows.length - 1; i++) {
                   $scope.priceChanges[i] = [];
@@ -365,7 +364,7 @@ Redwood.controller("AdminCtrl",
 
                // if there are any price changes to send, start price change sending recursive function
                if ($scope.priceChanges.length > 2) {
-                  console.log("priceIndex", $scope.groupManagers[groupNum].priceIndex,$scope.priceChanges);
+                  // console.log("priceIndex", $scope.groupManagers[groupNum].priceIndex,$scope.priceChanges);
                   var jumpDelay = $scope.startTime + $scope.priceChanges[$scope.groupManagers[groupNum].priceIndex][0] - getTime();
                   if(jumpDelay < 0) jumpDelay = 0;
                   // console.log(printTime(jumpDelay));

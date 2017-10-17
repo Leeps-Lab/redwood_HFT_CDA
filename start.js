@@ -571,17 +571,16 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
                   break;
 
                case "MAKER":
-                  var msg = new Message("USER", "UMAKER", [rs.user_id, $scope.tradingGraph.getCurOffsetTime()]);
-                  $scope.sendToGroupManager(msg);
                   $scope.setState("state_maker");
-
                   $scope.tickState = $scope.s.NO_LINES;        //fake a click event
                   $scope.event = $scope.e.CLICK;
                   $scope.curOffsetY = $scope.tradingGraph.elementHeight / 4;
-                  $scope.spread = 2.5;
+                  $scope.spread = $scope.maxSpread / 2;
                   $scope.oldOffsetY = null;
                   var nMsg = new Message("USER", "UUSPR", [rs.user_id, $scope.spread, $scope.tradingGraph.getCurOffsetTime()]);
                   $scope.sendToGroupManager(nMsg);
+                  var msg = new Message("USER", "UMAKER", [rs.user_id, $scope.tradingGraph.getCurOffsetTime()]);
+                  $scope.sendToGroupManager(msg);
                   break;
 
                case "FAST":

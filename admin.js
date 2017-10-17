@@ -269,7 +269,7 @@ Redwood.controller("AdminCtrl",
                      $scope.groupManagers[groupNum].initGroupManager(groupArgs);
                      
                      // $scope.groupManagers[groupNum].market = marketManager.createMarketManager(ra.sendCustom, groupNum, $scope.groupManagers[groupNum]);
-                     $scope.groupManagers[groupNum].dataStore = dataStorage.createDataStorage(group, groupNum, $scope.speedCost, $scope.startingWealth, $scope.period);
+                     $scope.groupManagers[groupNum].dataStore = dataStorage.createDataStorage(group, groupNum, $scope.speedCost, $scope.startingWealth, $scope.config.sessionNumber);
                      for (var subjectNum of group) {
 
                         // map subject number to group number
@@ -309,7 +309,7 @@ Redwood.controller("AdminCtrl",
 
          ra.on("start_session", function () {
             ra.start_session();
-            window.setTimeout(sendPeriod, 5000 + $scope.experimentLength);    //generous 5secs to load everything before recursive calls to send next period
+            //window.setTimeout(sendPeriod, 5000 + $scope.experimentLength);    //generous 5secs to load everything before recursive calls to send next period
          });
 
          $scope.playerTimeOffsets = {};
@@ -379,6 +379,7 @@ Redwood.controller("AdminCtrl",
 
                $scope.groupManagers[groupNum].socket.send(generateSystemEventMsg('S',$scope.startTime));   //reset exchange + sync time
                console.log(printTime($scope.startTime), $scope.startTime);
+               window.setTimeout(sendPeriod, $scope.experimentLength);
             }
          });
 
@@ -474,7 +475,7 @@ Redwood.controller("AdminCtrl",
                   }
                }
                // console.log($scope.deltas);
-               var filename = printTime($scope.startTime) + '_cda_deltas.csv';
+               var filename = printTime($scope.startTime) + '_period_' + $scope.config.sessionNumber + '_cda_deltas.csv';
 
                var csvRows = [];
                for (let index = 0; index < $scope.deltas.length; index++) {      //godbless stackoverflow
@@ -538,7 +539,7 @@ Redwood.controller("AdminCtrl",
                $scope.profitData.unshift(["period, player", "final_profit", "after_exchange_rate_"]);    //adds to beginning of array
 
                // get file name by formatting end time as readable string
-               var filename = printTime($scope.startTime) + '_cda_final_profits.csv';
+               var filename = printTime($scope.startTime) + '_period_' + $scope.config.sessionNumber + '_cda_final_profits.csv';
 
                var csvRows = [];
                for (let index = 0; index < $scope.profitData.length; index++) {

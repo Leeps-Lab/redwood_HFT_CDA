@@ -84,7 +84,10 @@ RedwoodHighFrequencyTrading.factory("Graphing", function () {
       graph.PreviousProfit = 0;
 
       graph.getCurOffsetTime = function () {
-         //return getTime() - this.timeOffset;
+         return getTime() - this.timeOffset;
+      };
+
+      graph.getCorrectCurOffsetTime = function () {
          return this.timeOffset;
       };
 

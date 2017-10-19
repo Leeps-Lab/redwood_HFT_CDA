@@ -142,7 +142,9 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
                      }
                   }
                }).then(function() {
-                  var delay = $scope.inputData[0][0] - ($scope.tradingGraph.getCurOffsetTime()/1000000);   //use player time offset w/o delay calculation
+                  var delay = $scope.inputData[0][0];
+	          var offset =  $scope.tradingGraph.getCorrectCurOffsetTime()
+	          console.log("offset: " + offset);
                   console.log("delay: " + delay);
                   window.setTimeout($scope.processInputAction, delay, 0);
                });
@@ -612,7 +614,9 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
 
             if (inputIndex >= $scope.inputData.length - 1) return;
             //delay
-            var delay = ($scope.inputData[inputIndex + 1][0] + $scope.inputData[inputIndex][0]) - ($scope.tradingGraph.getCurOffsetTime()/1000000); //delay calculation is next timestamp - current timestamp w/o offset
+            var delay = ($scope.inputData[inputIndex + 1][0] - $scope.inputData[inputIndex][0]);
+	    var offset =  $scope.tradingGraph.getCorrectCurOffsetTime()
+	    console.log("offset: " + offset);
             console.log("delay: " + delay);
             window.setTimeout($scope.processInputAction, delay, inputIndex + 1);
          }

@@ -115,10 +115,10 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
             // set last time and start looping the update function
             $scope.lastTime = getTime();
             requestAnimationFrame($scope.update);                 //added 7/31/17 for smoother graphing
-
+	    var test_time = getTime();
             // // if input data was provided, setup automatic input system
             if (data.hasOwnProperty("input_addresses")) {
-               
+               console.log("before download:", printTime(test_time));
                // get unique index for this player
                var index = $scope.group.findIndex(function (element) { return element == rs.user_id; });
 
@@ -142,10 +142,11 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
                      }
                   }
                }).then(function() {
+                  console.log("after download:", printTime(getTime()), "delta:", getTime() - test_time);
                   var delay = $scope.inputData[0][0];
-	          var offset =  $scope.tradingGraph.getCorrectCurOffsetTime()
-	          console.log("offset: " + offset);
-                  console.log("delay: " + delay);
+	          //var offset =  $scope.tradingGraph.getCorrectCurOffsetTime()
+	          //console.log("offset: " + offset);
+                  //console.log("delay: " + delay);
                   window.setTimeout($scope.processInputAction, delay, 0);
                });
             }
@@ -616,8 +617,8 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
             //delay
             var delay = ($scope.inputData[inputIndex + 1][0] - $scope.inputData[inputIndex][0]);
 	    var offset =  $scope.tradingGraph.getCorrectCurOffsetTime()
-	    console.log("offset: " + offset);
-            console.log("delay: " + delay);
+	    console.log("offset: " + printTime(offset));
+            console.log("delay: " + printTime(delay));
             window.setTimeout($scope.processInputAction, delay, inputIndex + 1);
          }
       }]);

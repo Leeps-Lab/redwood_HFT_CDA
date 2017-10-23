@@ -243,10 +243,49 @@ Redwood.controller("AdminCtrl",
                      }
                   }
 
+                  $scope.input_array = [];  //asdf	ASFADFADFASDFFIX HERE LEFT OFF HERE ARRAY NOT GETTTING FILLED CORRETTLY!!
+                  //$scope.player_inputs = [];
                   // loop through groups and create their groupManager, market, dataStorage and marketAlgorithms
                   for (var groupNum = 1; groupNum <= $scope.groups.length; groupNum++) {
 
                      var group = $scope.getGroup(groupNum); // fetch group from array
+                      
+                     for (var subjectNum of group) {
+                        // download user input csvs
+			$scope.input_array[subjectNum] = [];
+                        if ($scope.config.hasOwnProperty("input_addresses")) {
+                           var input_addresses = $scope.config.input_addresses.split(',');
+                           console.log(input_addresses[subjectNum-1]);
+                           console.log(subjectNum, "before download:", printTime(getTime()));
+                           // download input csv file
+                           $http.get(input_addresses[subjectNum-1]).then(function (response) {
+                              //$scope.input_array = [];
+                              var rows = response.data.split("\n");                    //split csv up line by line into an array of rows
+                              //Parse input CSV
+                              for (var i = 0; i < rows.length; i++) {                  //create a row in array for each line in csv
+                                 $scope.input_array[i] = [];
+                              }
+                              for (let i = 0; i < rows.length; i++) {                  //for each row in array
+                                 if (rows[i] === "") continue;                         //if reached end of csv line continue to next one
+                                 var cells = rows[i].split(",");                       //if more data in csv row, add column to arrays row
+                                 for (let j = 0; j < cells.length; j++) {              //for each column in csv row
+                                    if(j == 1) {
+                                       $scope.input_array[i][j] = String(cells[j]);     //read as a string (MAKER,SNIPE,etc)
+                                    }
+                                    else{
+                                       $scope.input_array[i][j] = parseFloat(cells[j]);  //read timestamps and spreads as ints
+                                    }
+                                 }
+                              }
+	                      console.log(subjectNum, "after download:", printTime(getTime()));
+                              $scope.player_inputs[subjectNum] = $scope.input_array;
+                           });//.then(function () {
+                             // console.log(subjectNum, "after download:", printTime(getTime()));
+                             // $scope.player_inputs[subjectNum-1] = $scope.input_array;
+                          // });
+                        } 
+                     }  
+
 
                      // package arguments into an object
                      var groupArgs = {
@@ -328,38 +367,6 @@ Redwood.controller("AdminCtrl",
             // mark subject as ready
             $scope.startSyncArrays[groupNum].markReady(uid);
  
-            // download user input csvs
-             if ($scope.config.hasOwnProperty("input_addresses")) {
-               var input_addresses = $scope.config.input_addresses.split(',');
-               console.log(uid, "before download:", printTime(getTime()));
-               // download input csv file
-               $http.get(input_addresses[uid]).then(function (response) {
-                  $scope.input_array = [];
-                  var rows = response.data.split("\n");                    //split csv up line by line into an array of rows
-                  //Parse input CSV
-                  for (var i = 0; i < rows.length; i++) {                  //create a row in array for each line in csv
-                     $scope.input_array[i] = [];
-                  }
-                  for (let i = 0; i < rows.length; i++) {                  //for each row in array
-                     if (rows[i] === "") continue;                         //if reached end of csv line continue to next one
-                     var cells = rows[i].split(",");                       //if more data in csv row, add column to arrays row
-                     for (let j = 0; j < cells.length; j++) {              //for each column in csv row
-                        if(j == 1) {
-                           $scope.input_array[i][j] = String(cells[j]);     //read as a string (MAKER,SNIPE,etc)
-                        }
-                        else{
-                           $scope.input_array[i][j] = parseFloat(cells[j]);  //read timestamps and spreads as ints
-                        }
-                     }
-                  }
-                  //console.log(uid, "after download:", printTime(getTime()));
-                  //$scope.player_inputs[uid] = input_array;
-              }).then(function () {
-                 console.log(uid, "after download:", printTime(getTime()));
-                 $scope.player_inputs[uid] = $scope.input_array; 
-              });
-	   }
-
             // start experiment if all subjects are marked ready
             if ($scope.startSyncArrays[groupNum].allReady()) {
                $scope.startSyncArrays[groupNum].reset();    //patch for bug where some groups keep reentering this if statement ending experiment early

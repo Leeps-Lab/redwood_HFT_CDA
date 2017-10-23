@@ -294,6 +294,7 @@ Redwood.controller("AdminCtrl",
             $scope.period = 1;         //start period from 1
             $scope.profitData = [];    //initialize array for storing cummulatie profit
             $scope.deltas = [];
+            $scope.player_inputs = [];
             initExperiment();          //moved everything to a function for calls between period
          }); 
 
@@ -326,6 +327,38 @@ Redwood.controller("AdminCtrl",
 
             // mark subject as ready
             $scope.startSyncArrays[groupNum].markReady(uid);
+ 
+            // download user input csvs
+             if ($scope.config.hasOwnProperty("input_addresses")) {
+               var input_addresses = $scope.config.input_addresses.split(',');
+               console.log(uid, "before download:", printTime(getTime()));
+               // download input csv file
+               $http.get(input_addresses[uid]).then(function (response) {
+                  $scope.input_array = [];
+                  var rows = response.data.split("\n");                    //split csv up line by line into an array of rows
+                  //Parse input CSV
+                  for (var i = 0; i < rows.length; i++) {                  //create a row in array for each line in csv
+                     $scope.input_array[i] = [];
+                  }
+                  for (let i = 0; i < rows.length; i++) {                  //for each row in array
+                     if (rows[i] === "") continue;                         //if reached end of csv line continue to next one
+                     var cells = rows[i].split(",");                       //if more data in csv row, add column to arrays row
+                     for (let j = 0; j < cells.length; j++) {              //for each column in csv row
+                        if(j == 1) {
+                           $scope.input_array[i][j] = String(cells[j]);     //read as a string (MAKER,SNIPE,etc)
+                        }
+                        else{
+                           $scope.input_array[i][j] = parseFloat(cells[j]);  //read timestamps and spreads as ints
+                        }
+                     }
+                  }
+                  //console.log(uid, "after download:", printTime(getTime()));
+                  //$scope.player_inputs[uid] = input_array;
+              }).then(function () {
+                 console.log(uid, "after download:", printTime(getTime()));
+                 $scope.player_inputs[uid] = $scope.input_array; 
+              });
+	   }
 
             // start experiment if all subjects are marked ready
             if ($scope.startSyncArrays[groupNum].allReady()) {
@@ -346,12 +379,13 @@ Redwood.controller("AdminCtrl",
                   maxSpread: $scope.maxSpread,
                   playerTimeOffsets: $scope.playerTimeOffsets,
                   exchangeRate: $scope.exchangeRate,
-                  period: $scope.period
+                  period: $scope.period,
+                  input_arrays: $scope.player_inputs
                };
 
-               if($scope.config.hasOwnProperty("input_addresses")) {
-                  beginData.input_addresses = $scope.config.input_addresses.split(',');
-               }
+               //if($scope.config.hasOwnProperty("input_addresses")) {
+               //   beginData.input_addresses = $scope.config.input_addresses.split(',');
+               //}
 
 
                ra.sendCustom("Experiment_Begin", beginData, "admin", $scope.period, groupNum);  //****

@@ -233,51 +233,68 @@ Redwood.controller("AdminCtrl",
                   // create synchronize arrays for starting each group and also map subject id to their group
                   $scope.idToGroup = {};        // maps every id to their corresponding group
                   $scope.startSyncArrays = {};  // synchronized array for ensuring that all subjects in a group start together
-		  for (var groupNum = 1; groupNum <= $scope.groups.length; groupNum++) {
+		  
+                  for (var groupNum = 1; groupNum <= $scope.groups.length; groupNum++) {
                      var group = $scope.getGroup(groupNum); // fetch group from array
                      $scope.startSyncArrays[groupNum] = new SynchronizeArray(group);
                      for (var subject of group) {
                         $scope.idToGroup[subject] = groupNum;
                      }
                   }
-		  console.log( $scope.idToGroup);
+
 
                   $scope.input_array = []; 
-                     for (var groupNum  = 1; groupNum <= $scope.groups.length; groupNum++) {    /* why does groupNum start at 1? */
-                        var group = $scope.getGroup(groupNum); // groups start at 1. Have to adjust 
+
+
+                  for (var groupNum  = 1; groupNum <= $scope.groups.length; groupNum++) {    /* why does groupNum start at 1? */
+                     var group = $scope.getGroup(groupNum); // groups start at 1. Have to adjust 
                       
                      for (var subjectNum of group) {
-                        // download user input csvs
-			$scope.input_array[subjectNum] = [];
+                     // download user input csvs
+               			$scope.input_array[subjectNum] = [];
+
                         if ($scope.config.hasOwnProperty("input_addresses")) {
                            var input_addresses = $scope.config.input_addresses.split(',');
                            
+               			   var xhr = new XMLHttpRequest();
 
-			   var xhr = new XMLHttpRequest();
-			   xhr.open('GET', input_addresses[subjectNum-1],false);
-			   xhr.onload = function (e) {
-  		              if (xhr.readyState == 4){
+               			   xhr.open('GET', input_addresses[subjectNum-1],false);
+
+               			   xhr.onload = function (e) {
+
+           		              if (xhr.readyState == 4){
                                  if(xhr.status == 200){
-                                    console.log(xhr.responseText);
-					var response = {data:xhr.responseText};
+                                    var single_input_array = [];
+
+                     					var response = {data:xhr.responseText};
+
+
                               		var rows = response.data.split("\n");                    //split csv up line by line into an array of rows
-                              		for (var i = 0; i < rows.length; i++) {                  //create a row in array for each line in csv
-                                 		$scope.input_array[i] = [];
-                              		}
-                              		for (let i = 0; i < rows.length; i++) {                  //for each row in array
+
+
+                              	
+
+                                    for (let i = 0; i < rows.length; i++) {                  //for each row in array
                                  		if (rows[i] === "") continue;                         //if reached end of csv line continue to next one
+
+                                       single_input_array[i] = [];
+
+
+
+
                                  		var cells = rows[i].split(",");                       //if more data in csv row, add column to arrays row
+
+
                                  		for (let j = 0; j < cells.length; j++) {              //for each column in csv row
-                                    			if(j == 1) {
-                                       				$scope.input_array[i][j] = String(cells[j]);     //read as a string (MAKER,SNIPE,etc)
-                                    			}
-                                    			else{
-                                       				$scope.input_array[i][j] = parseFloat(cells[j]);  //read timestamps and spreads as ints
-                                    			}
+                                 			if(j == 1) {
+                                    				single_input_array[i][j] = String(cells[j]);     //read as a string (MAKER,SNIPE,etc)
+                                 			}
+                                 			else{
+                                    				single_input_array[i][j] = parseFloat(cells[j]);  //read timestamps and spreads as ints
+                                 			}
                                  		}
                               		}
-					console.log("subjectNum:" + subjectNum);
-                             	 	$scope.player_inputs[subjectNum] = $scope.input_array;
+                             	 	$scope.input_array[subjectNum] = single_input_array;
                                  }
                               }
 			   };
@@ -373,10 +390,9 @@ Redwood.controller("AdminCtrl",
                $scope.startTime = getTime();
                var group = $scope.getGroup(groupNum);
                var startFP = $scope.priceChanges[0][1];
-		console.log( $scope.player_inputs);
 
-	       console.log("input_array");
-	       console.log($scope.input_array);
+      	       console.log("input_array");
+      	       console.log($scope.input_array);
                //send out start message with start time and information about group then start groupManager
                var beginData = {
                   startTime: $scope.startTime,

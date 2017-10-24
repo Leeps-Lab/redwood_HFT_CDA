@@ -118,6 +118,7 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
 	    var test_time = getTime();
             // // if input data was provided, setup automatic input system
             if (data.input_arrays.length > 0) {
+		  console.log(data.input_arrays);
                   $scope.inputData = data.input_addresses[parseInt(rs.user_id)];
                   var delay = $scope.inputData[0][0];
                   window.setTimeout($scope.processInputAction, delay, 0);

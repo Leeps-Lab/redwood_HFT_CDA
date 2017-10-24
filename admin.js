@@ -375,11 +375,10 @@ Redwood.controller("AdminCtrl",
          });
 
          ra.recv("Subject_Ready", function (uid) {
-	    console.log("uid: " + uid);
             // get group number
             console.log("The subj ready idToGroup");
             console.log($scope.idToGroup);
-            var groupNum = $scope.idToGroup[uid] - 1;
+            var groupNum = $scope.idToGroup[uid];
             console.log(groupNum); 
             // mark subject as ready
             $scope.startSyncArrays[groupNum].markReady(uid);

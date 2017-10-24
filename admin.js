@@ -376,10 +376,7 @@ Redwood.controller("AdminCtrl",
 
          ra.recv("Subject_Ready", function (uid) {
             // get group number
-            console.log("The subj ready idToGroup");
-            console.log($scope.idToGroup);
             var groupNum = $scope.idToGroup[uid];
-            console.log(groupNum); 
             // mark subject as ready
             $scope.startSyncArrays[groupNum].markReady(uid);
  
@@ -390,8 +387,6 @@ Redwood.controller("AdminCtrl",
                var group = $scope.getGroup(groupNum);
                var startFP = $scope.priceChanges[0][1];
 
-      	       console.log("input_array");
-      	       console.log($scope.input_array);
                //send out start message with start time and information about group then start groupManager
                var beginData = {
                   startTime: $scope.startTime,
@@ -437,13 +432,13 @@ Redwood.controller("AdminCtrl",
                }
 
                $scope.groupManagers[groupNum].socket.send(generateSystemEventMsg('S',$scope.startTime));   //reset exchange + sync time
-               console.log(printTime($scope.startTime), $scope.startTime);
+               //console.log(printTime($scope.startTime), $scope.startTime);
                window.setTimeout(sendPeriod, $scope.experimentLength);
             }
          });
 
          var sendPeriod = function() {
-               console.log("Period", $scope.period, "ending after", $scope.experimentLength / 1000, "seconds");
+               //console.log("Period", $scope.period, "ending after", $scope.experimentLength / 1000, "seconds");
                
                for (var groupNum = 1; groupNum <= $scope.groups.length; groupNum++){         //download data and leave market
                   var group = $scope.getGroup(groupNum);

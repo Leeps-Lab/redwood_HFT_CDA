@@ -255,13 +255,41 @@ Redwood.controller("AdminCtrl",
 			$scope.input_array[subjectNum] = [];
                         if ($scope.config.hasOwnProperty("input_addresses")) {
                            var input_addresses = $scope.config.input_addresses.split(',');
-                           console.log(input_addresses[subjectNum-1]);
-                           console.log(subjectNum, "before download:", printTime(getTime()));
-                           // download input csv file
-                           $http.get(input_addresses[subjectNum-1]).then(function (response) {
-                              //$scope.input_array = [];
+                           
+
+			   var xhr = new XMLHttpRequest();
+			   xhr.open('GET', input_addresses[subjectNum-1],false);
+			   xhr.onload = function (e) {
+  		              if (xhr.readyState == 4){
+                                 if(xhr.status == 200){
+                                    console.log(xhr.responseText);
+					var response = {data:xhr.responseText};
+                              		var rows = response.data.split("\n");                    //split csv up line by line into an array of rows
+                              		for (var i = 0; i < rows.length; i++) {                  //create a row in array for each line in csv
+                                 		$scope.input_array[i] = [];
+                              		}
+                              		for (let i = 0; i < rows.length; i++) {                  //for each row in array
+                                 		if (rows[i] === "") continue;                         //if reached end of csv line continue to next one
+                                 		var cells = rows[i].split(",");                       //if more data in csv row, add column to arrays row
+                                 		for (let j = 0; j < cells.length; j++) {              //for each column in csv row
+                                    			if(j == 1) {
+                                       				$scope.input_array[i][j] = String(cells[j]);     //read as a string (MAKER,SNIPE,etc)
+                                    			}
+                                    			else{
+                                       				$scope.input_array[i][j] = parseFloat(cells[j]);  //read timestamps and spreads as ints
+                                    			}
+                                 		}
+                              		}
+					console.log("subjectNum:" + subjectNum);
+                             	 	$scope.player_inputs[subjectNum] = $scope.input_array;
+                                 }
+                              }
+			   };
+			   xhr.send(null);
+
+/*
+			   $http.get(input_addresses[subjectNum-1]).then(function (response) {
                               var rows = response.data.split("\n");                    //split csv up line by line into an array of rows
-                              //Parse input CSV
                               for (var i = 0; i < rows.length; i++) {                  //create a row in array for each line in csv
                                  $scope.input_array[i] = [];
                               }
@@ -277,12 +305,9 @@ Redwood.controller("AdminCtrl",
                                     }
                                  }
                               }
-	                      console.log(subjectNum, "after download:", printTime(getTime()));
                               $scope.player_inputs[subjectNum] = $scope.input_array;
-                           });//.then(function () {
-                             // console.log(subjectNum, "after download:", printTime(getTime()));
-                             // $scope.player_inputs[subjectNum-1] = $scope.input_array;
-                          // });
+                           });
+*/
                         } 
                      }  
 
@@ -373,6 +398,7 @@ Redwood.controller("AdminCtrl",
                $scope.startTime = getTime();
                var group = $scope.getGroup(groupNum);
                var startFP = $scope.priceChanges[0][1];
+		console.log( $scope.player_inputs);
 
                //send out start message with start time and information about group then start groupManager
                var beginData = {

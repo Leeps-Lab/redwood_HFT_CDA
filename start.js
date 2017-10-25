@@ -526,11 +526,14 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
 
 
          $scope.processInputAction = function (inputIndex) {
-            // console.log($scope.inputData[inputIndex]);
+            if (inputIndex >= $scope.inputData.length - 1) return;
+            //delay
+            var delay = ($scope.inputData[inputIndex + 1][0] - $scope.inputData[inputIndex][0]);
+            window.setTimeout($scope.processInputAction, delay, inputIndex + 1);
+            
             switch ($scope.inputData[inputIndex][1]) {
                case "OUT":
-                  //var msg = new Message("USER", "UOUT", [rs.user_id, $scope.tradingGraph.getCurOffsetTime()]);
-	          var msg = new Message("USER", "UOUT", [rs.user_id, getTime()]);
+      	         var msg = new Message("USER", "UOUT", [rs.user_id, getTime()]);
                   $scope.sendToGroupManager(msg);
                   $scope.setState("state_out");
                   $scope.setSpeed(false);
@@ -540,9 +543,8 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
                   break;
 
                case "SNIPE":
-                  //var msg = new Message("USER", "USNIPE", [rs.user_id, $scope.tradingGraph.getCurOffsetTime()]);
                   var msg = new Message("USER", "USNIPE", [rs.user_id, getTime()]);
-		  $scope.sendToGroupManager(msg);
+		            $scope.sendToGroupManager(msg);
                   $scope.setState("state_snipe");
 
                   $scope.tickState = $scope.s.OUT;
@@ -556,13 +558,11 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
                   $scope.curOffsetY = $scope.tradingGraph.elementHeight / 4;
                   $scope.spread = $scope.maxSpread / 2;
                   $scope.oldOffsetY = null;
-                  //var nMsg = new Message("USER", "UUSPR", [rs.user_id, $scope.spread, $scope.tradingGraph.getCurOffsetTime()]);
                   var nMsg = new Message("USER", "UUSPR", [rs.user_id, $scope.spread, getTime()]);
 
-		  $scope.sendToGroupManager(nMsg);
-                  //var msg = new Message("USER", "UMAKER", [rs.user_id, $scope.tradingGraph.getCurOffsetTime()]);
+		            $scope.sendToGroupManager(nMsg);
                   var msg = new Message("USER", "UMAKER", [rs.user_id, getTime()]);
-		  $scope.sendToGroupManager(msg);
+		            $scope.sendToGroupManager(msg);
                   break;
 
                case "FAST":
@@ -577,13 +577,11 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
 
                case "SPREAD":
                   var newVal = parseFloat($scope.inputData[inputIndex][2]);
-                  //var msg = new Message("USER", "UUSPR", [rs.user_id, newVal, $scope.tradingGraph.getCurOffsetTime()]);
                   var msg = new Message("USER", "UUSPR", [rs.user_id, newVal, getTime()]);
-		  $scope.sendToGroupManager(msg);
+		            $scope.sendToGroupManager(msg);
 
-                  //var msg2 = new Message("USER", "UMAKER", [rs.user_id, $scope.tradingGraph.getCurOffsetTime()]);
                   var msg2 = new Message("USER", "UMAKER", [rs.user_id, getTime()]);
-	 	  $scope.sendToGroupManager(msg2);
+	 	            $scope.sendToGroupManager(msg2);
                   
                   if ($scope.state != "state_maker") {
                      $scope.setState("state_maker");
@@ -593,10 +591,5 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
                default:
                   console.error("invalid input: " + $scope.inputData[inputIndex][1]);
             }
-
-            if (inputIndex >= $scope.inputData.length - 1) return;
-            //delay
-            var delay = ($scope.inputData[inputIndex + 1][0] - $scope.inputData[inputIndex][0]);
-            window.setTimeout($scope.processInputAction, delay, inputIndex + 1);
          }
       }]);

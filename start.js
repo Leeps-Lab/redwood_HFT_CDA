@@ -24,6 +24,7 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
          $scope.spamDelay = 300;
          $scope.isAnimating = false;
          $scope.inputData;// = [];
+         $scope.adminStartTime;
 
          $scope.s = {
             NO_LINES: 0,
@@ -115,12 +116,12 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
             // set last time and start looping the update function
             $scope.lastTime = getTime();
             requestAnimationFrame($scope.update);                 //added 7/31/17 for smoother graphing
-	    var test_time = getTime();
+	    $scope.adminStartTime = data.startTime;
             // // if input data was provided, setup automatic input system
             if (data.input_arrays.length > 0) {
 		  $scope.inputData = data.input_arrays[parseInt(rs.user_id)];           //save user's input array
 		  var delay = $scope.inputData[0][0];					//time til first input action
-		  timeSinceStart = (getTime() - data.startTime) / 1000000;              //time (in ms) since the experiment began
+		  var timeSinceStart = (getTime() - data.startTime) / 1000000;              //time (in ms) since the experiment began
                   window.setTimeout($scope.processInputAction, delay - timeSinceStart, 0);
                   //window.setTimeout($scope.processInputAction, delay, 0);
 
@@ -528,10 +529,13 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
          $scope.processInputAction = function (inputIndex) {
             if (inputIndex >= $scope.inputData.length - 1) return;
             //delay
-            var delay = ($scope.inputData[inputIndex + 1][0] - $scope.inputData[inputIndex][0]);
-            window.setTimeout($scope.processInputAction, delay, inputIndex + 1);
-            
-            switch ($scope.inputData[inputIndex][1]) {
+            //var delay = ($scope.inputData[inputIndex + 1][0] - $scope.inputData[inputIndex][0]);
+            //window.setTimeout($scope.processInputAction, delay, inputIndex + 1);
+            var delay = $scope.inputData[inputIndex + 1][0];
+            var timeSinceStart = (getTime() - $scope.adminStartTime) / 1000000;              //time (in ms) since the experiment began
+            window.setTimeout($scope.processInputAction, delay - timeSinceStart, inputIndex + 1);
+
+	    switch ($scope.inputData[inputIndex][1]) {
                case "OUT":
       	         var msg = new Message("USER", "UOUT", [rs.user_id, getTime()]);
                   $scope.sendToGroupManager(msg);

@@ -119,9 +119,9 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
 	    $scope.adminStartTime = data.startTime;
             // // if input data was provided, setup automatic input system
             if (data.input_arrays.length > 0) {
-		  $scope.inputData = data.input_arrays[parseInt(rs.user_id)];           //save user's input array
-		  var delay = $scope.inputData[0][0];					//time til first input action
-		  var timeSinceStart = (getTime() - data.startTime) / 1000000;              //time (in ms) since the experiment began
+		         $scope.inputData = data.input_arrays[parseInt(rs.user_id)];           //save user's input array
+		         var delay = $scope.inputData[0][0];					//time til first input action
+		       var timeSinceStart = $scope.getTimeSinceStart();              //time (in ms) since the experiment began
                   window.setTimeout($scope.processInputAction, delay - timeSinceStart, 0);
                   //window.setTimeout($scope.processInputAction, delay, 0);
 
@@ -142,6 +142,10 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
             handleMsgFromGM(msg);
          });
 
+
+         $scope.getTimeSinceStart = function () {
+            return (getTime() - $scope.adminStartTime) / 1000000;
+         };
 
          $scope.GetStateName = function (){
             if ($scope.state == "state_maker") return "Maker";
@@ -529,10 +533,8 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
          $scope.processInputAction = function (inputIndex) {
             if (inputIndex >= $scope.inputData.length - 1) return;
             //delay
-            //var delay = ($scope.inputData[inputIndex + 1][0] - $scope.inputData[inputIndex][0]);
-            //window.setTimeout($scope.processInputAction, delay, inputIndex + 1);
-            var delay = $scope.inputData[inputIndex + 1][0];
-            var timeSinceStart = (getTime() - $scope.adminStartTime) / 1000000;              //time (in ms) since the experiment began
+            var delay = $scope.inputData[inputIndex + 1][0];      //time of the next input action
+            var timeSinceStart = $scope.getTimeSinceStart();              //time (in ms) since the experiment began
             window.setTimeout($scope.processInputAction, delay - timeSinceStart, inputIndex + 1);
 
 	    switch ($scope.inputData[inputIndex][1]) {

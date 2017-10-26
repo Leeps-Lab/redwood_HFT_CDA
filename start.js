@@ -124,7 +124,7 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
 		       var timeSinceStart = $scope.getTimeSinceStart();              //time (in ms) since the experiment began
                   window.setTimeout($scope.processInputAction, delay - timeSinceStart, 0);
                   //window.setTimeout($scope.processInputAction, delay, 0);
-
+        		 console.log($scope.inputData);
             }
          });  
 

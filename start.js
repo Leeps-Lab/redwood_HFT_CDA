@@ -127,7 +127,7 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
                      $scope.processInputAction(0);
                   }, delay - timeSinceStart);
                   //window.setTimeout($scope.processInputAction, delay, 0);
-
+        		 console.log($scope.inputData);
             }
          });  
 

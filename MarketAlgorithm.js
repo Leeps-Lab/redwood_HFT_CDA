@@ -194,7 +194,7 @@ Redwood.factory("MarketAlgorithm", function () {
          if (msg.msgType === "UUSPR") {
             // this.state = "state_maker";
             this.spread = msg.msgData[1];
-            this.state = "state_maker";
+            //this.state = "state_maker";   //uuspr paird with umaker so change state then becase delay btwn messages
          }
 
          // Confirmation that a buy offer has been placed in market

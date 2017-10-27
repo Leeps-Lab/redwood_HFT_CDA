@@ -23,7 +23,8 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
          $scope.statename = "Out";
          $scope.spamDelay = 300;
          $scope.isAnimating = false;
-         $scope.inputData = [];
+         $scope.inputData;// = [];
+         $scope.adminStartTime;
 
          $scope.s = {
             NO_LINES: 0,
@@ -115,40 +116,15 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
             // set last time and start looping the update function
             $scope.lastTime = getTime();
             requestAnimationFrame($scope.update);                 //added 7/31/17 for smoother graphing
-
+	    $scope.adminStartTime = data.startTime;
             // // if input data was provided, setup automatic input system
-            if (data.hasOwnProperty("input_addresses")) {
-               
-               // get unique index for this player
-               var index = $scope.group.findIndex(function (element) { return element == rs.user_id; });
-
-               // download input csv file
-               $http.get(data.input_addresses[index]).then(function (response) {
-                  var rows = response.data.split("\n");                    //split csv up line by line into an array of rows
-                  //Parse input CSV
-                  for (var i = 0; i < rows.length; i++) {                  //create a row in array for each line in csv
-                     $scope.inputData[i] = [];
-                  }
-                  for (let i = 0; i < rows.length; i++) {                  //for each row in array
-                     if (rows[i] === "") continue;                         //if reached end of csv line continue to next one
-                     var cells = rows[i].split(",");                       //if more data in csv row, add column to arrays row
-                     for (let j = 0; j < cells.length; j++) {              //for each column in csv row
-                        if(j == 1) {
-                           $scope.inputData[i][j] = String(cells[j]);     //read as a string (MAKER,SNIPE,etc)
-                        }
-                        else{
-                           $scope.inputData[i][j] = parseFloat(cells[j]);  //read timestamps and spreads as ints
-                        }
-                     }
-                  }
-               }).then(function() {
-                  var delay = $scope.inputData[0][0] + ($scope.dHistory.startTime - $scope.tradingGraph.getCurOffsetTime())/1000000;   //use player time offset
-                  console.log("delay: " + delay);
-                  window.setTimeout($scope.processInputAction, delay, 0);
-               });
+            if (data.input_arrays.length > 0) {
+		         $scope.inputData = data.input_arrays[parseInt(rs.user_id)];           //save user's input array
+		         var delay = $scope.inputData[0][0];					//time til first input action
+		       var timeSinceStart = $scope.getTimeSinceStart();              //time (in ms) since the experiment began
+                  window.setTimeout($scope.processInputAction, delay - timeSinceStart, 0);
             }
-
-         });
+         });  
 
          rs.recv("end_game", function (uid, msg) {
             console.log("ending game");
@@ -164,6 +140,24 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
             handleMsgFromGM(msg);
          });
 
+         window.rtimeOut=function(callback,delay){
+            var dateNow=Date.now,
+            requestAnimation=window.requestAnimationFrame,
+            start=dateNow(),
+            stop,
+            timeoutFunc=function(){
+               dateNow()-start<delay?stop||requestAnimation(timeoutFunc):callback()
+            };
+            requestAnimation(timeoutFunc);
+            return{
+               clear:function(){stop=1}
+            }
+         }
+
+
+         $scope.getTimeSinceStart = function () {
+            return (getTime() - $scope.adminStartTime) / 1000000;
+         };
 
          $scope.GetStateName = function (){
             if ($scope.state == "state_maker") return "Maker";
@@ -549,10 +543,15 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
 
 
          $scope.processInputAction = function (inputIndex) {
-            // console.log($scope.inputData[inputIndex]);
-            switch ($scope.inputData[inputIndex][1]) {
+            if (inputIndex >= $scope.inputData.length - 1) return;
+            //delay
+            var delay = $scope.inputData[inputIndex + 1][0];      //time of the next input action
+            var timeSinceStart = $scope.getTimeSinceStart();              //time (in ms) since the experiment began
+            window.setTimeout($scope.processInputAction, delay - timeSinceStart, inputIndex + 1);
+
+	    switch ($scope.inputData[inputIndex][1]) {
                case "OUT":
-                  var msg = new Message("USER", "UOUT", [rs.user_id, $scope.tradingGraph.getCurOffsetTime()]);
+      	         var msg = new Message("USER", "UOUT", [rs.user_id, getTime()]);
                   $scope.sendToGroupManager(msg);
                   $scope.setState("state_out");
                   $scope.setSpeed(false);
@@ -562,8 +561,8 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
                   break;
 
                case "SNIPE":
-                  var msg = new Message("USER", "USNIPE", [rs.user_id, $scope.tradingGraph.getCurOffsetTime()]);
-                  $scope.sendToGroupManager(msg);
+                  var msg = new Message("USER", "USNIPE", [rs.user_id, getTime()]);
+		            $scope.sendToGroupManager(msg);
                   $scope.setState("state_snipe");
 
                   $scope.tickState = $scope.s.OUT;
@@ -577,10 +576,11 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
                   $scope.curOffsetY = $scope.tradingGraph.elementHeight / 4;
                   $scope.spread = $scope.maxSpread / 2;
                   $scope.oldOffsetY = null;
-                  var nMsg = new Message("USER", "UUSPR", [rs.user_id, $scope.spread, $scope.tradingGraph.getCurOffsetTime()]);
-                  $scope.sendToGroupManager(nMsg);
-                  var msg = new Message("USER", "UMAKER", [rs.user_id, $scope.tradingGraph.getCurOffsetTime()]);
-                  $scope.sendToGroupManager(msg);
+                  var nMsg = new Message("USER", "UUSPR", [rs.user_id, $scope.spread, getTime()]);
+
+		            $scope.sendToGroupManager(nMsg);
+                  var msg = new Message("USER", "UMAKER", [rs.user_id, getTime()]);
+		            $scope.sendToGroupManager(msg);
                   break;
 
                case "FAST":
@@ -595,11 +595,11 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
 
                case "SPREAD":
                   var newVal = parseFloat($scope.inputData[inputIndex][2]);
-                  var msg = new Message("USER", "UUSPR", [rs.user_id, newVal, $scope.tradingGraph.getCurOffsetTime()]);
-                  $scope.sendToGroupManager(msg);
+                  var msg = new Message("USER", "UUSPR", [rs.user_id, newVal, getTime()]);
+		            $scope.sendToGroupManager(msg);
 
-                  var msg2 = new Message("USER", "UMAKER", [rs.user_id, $scope.tradingGraph.getCurOffsetTime()]);
-                  $scope.sendToGroupManager(msg2);
+                  var msg2 = new Message("USER", "UMAKER", [rs.user_id, getTime()]);
+	 	            $scope.sendToGroupManager(msg2);
                   
                   if ($scope.state != "state_maker") {
                      $scope.setState("state_maker");
@@ -609,11 +609,5 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
                default:
                   console.error("invalid input: " + $scope.inputData[inputIndex][1]);
             }
-
-            if (inputIndex >= $scope.inputData.length - 1) return;
-            //delay
-            var delay = $scope.inputData[inputIndex + 1][0] + ($scope.dHistory.startTime - $scope.tradingGraph.getCurOffsetTime())/1000000;
-            console.log("delay: " + delay);
-            window.setTimeout($scope.processInputAction, delay, inputIndex + 1);
          }
       }]);

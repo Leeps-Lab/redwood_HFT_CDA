@@ -87,6 +87,10 @@ RedwoodHighFrequencyTrading.factory("Graphing", function () {
          return getTime() - this.timeOffset;
       };
 
+      graph.getCorrectCurOffsetTime = function () {
+         return this.timeOffset;
+      };
+
       graph.setExpandedGraph = function () {
          this.prevMaxPriceMarket = this.maxPriceMarket;
          this.prevMinPriceMarket = this.minPriceMarket;

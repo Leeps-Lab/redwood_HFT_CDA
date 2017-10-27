@@ -123,6 +123,9 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
 		         var delay = $scope.inputData[0][0];					//time til first input action
 		       var timeSinceStart = $scope.getTimeSinceStart();              //time (in ms) since the experiment began
                   window.setTimeout($scope.processInputAction, delay - timeSinceStart, 0);
+                  window.rtimeOut(function(){
+                     $scope.processInputAction(0);
+                  }, delay - timeSinceStart);
                   //window.setTimeout($scope.processInputAction, delay, 0);
 
             }
@@ -141,6 +144,20 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
          rs.recv("From_Group_Manager", function (uid, msg) {
             handleMsgFromGM(msg);
          });
+
+         window.rtimeOut=function(callback,delay){
+            var dateNow=Date.now,
+            requestAnimation=window.requestAnimationFrame,
+            start=dateNow(),
+            stop,
+            timeoutFunc=function(){
+               dateNow()-start<delay?stop||requestAnimation(timeoutFunc):callback()
+            };
+            requestAnimation(timeoutFunc);
+            return{
+               clear:function(){stop=1}
+            }
+         }
 
 
          $scope.getTimeSinceStart = function () {

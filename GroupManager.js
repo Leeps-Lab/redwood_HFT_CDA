@@ -131,11 +131,11 @@ Redwood.factory("GroupManager", function () {
             //mark that this user sent msg
             this.syncFPArray.markReady(msg.msgData[0]);
             this.FPMsgList.push(msg);
-
+	    //console.log(msg.msgData[0],"before sync",printTime(getTime()));
 
             // check if every user has sent a response
             if (this.syncFPArray.allReady()) {
-               //console.log("Time after players are synced: " + printTime(getTime()) + "\n");
+               //console.log("after synced: ", printTime(getTime()));
                // shuffle the order of messages sitting in the arrays
                var indexOrder = this.getRandomMsgOrder(this.FPMsgList.length);
 
@@ -146,7 +146,8 @@ Redwood.factory("GroupManager", function () {
                for (var index of indexOrder) {
                   playerOrder.push(this.FPMsgList[index].msgData[0]);
                   for (var rmsg of this.FPMsgList[index].msgData[2]) {
-                     this.sendToMarket(rmsg);
+                        //console.log(index,"sent to server @",printTime(getTime()));
+			this.sendToMarket(rmsg);
                   }
                }
                
@@ -158,7 +159,7 @@ Redwood.factory("GroupManager", function () {
                this.syncFPArray = new SynchronizeArray(this.memberIDs);
             }
          }
-         // general message that needs to be passed on to marketManager
+         // general message that needs to be passed on to the exchange
          if (msg.protocol === "OUCH") {
             groupManager.sendToMarket(msg);
          }

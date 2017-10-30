@@ -311,6 +311,14 @@ Redwood.factory("DataStorage", function () {
          //make timestamps readable
           for (let row = 1; row < data.length; row++) {
              data[row][0] = printTime(data[row][0]);
+             
+             padding = data[row][0].split(':');  // split readable on colon [00:00:00:00]
+             while(padding[3].length != 4){      // allow possible digits
+                padding[3] = '0' + padding[3];   // pad if necessary
+             }
+             data[row][0] = padding.join(':');      // 
+
+
           }
 
          // set up headings for each column

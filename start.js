@@ -395,10 +395,10 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
                      if($scope.spread > $scope.maxSpread) $scope.spread = $scope.maxSpread;                                       //cap max spread to 5
                      if($scope.spread <= .1) $scope.spread = .1;
                   }
-                  var msg = new Message("USER", "UUSPR", [rs.user_id, $scope.spread, $scope.tradingGraph.getCurOffsetTime()]);
+                  var msg = new Message("USER", "UUSPR", [rs.user_id, $scope.spread, getTime()]);
                   $scope.sendToGroupManager(msg);
 
-                  var msg2 = new Message("USER", "UMAKER", [rs.user_id, $scope.tradingGraph.getCurOffsetTime()]);
+                  var msg2 = new Message("USER", "UMAKER", [rs.user_id, getTime()]);
                   $scope.sendToGroupManager(msg2);
                   
                   if ($scope.state != "state_maker") {
@@ -426,10 +426,10 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
                      if($scope.spread > $scope.maxSpread) $scope.spread = $scope.maxSpread;                                       //cap max spread to 5
                      if($scope.spread <= .1) $scope.spread = .1;   
                   }
-                  var msg = new Message("USER", "UUSPR", [rs.user_id, $scope.spread, $scope.tradingGraph.getCurOffsetTime()]);
+                  var msg = new Message("USER", "UUSPR", [rs.user_id, $scope.spread, getTime()]);
                   $scope.sendToGroupManager(msg);
 
-                  var msg2 = new Message("USER", "UMAKER", [rs.user_id, $scope.tradingGraph.getCurOffsetTime()]);
+                  var msg2 = new Message("USER", "UMAKER", [rs.user_id, getTime()]);
                   $scope.sendToGroupManager(msg2);
 
                   if ($scope.state != "state_maker") {
@@ -450,7 +450,7 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
             .addClass("state-not-selected")
             .button()
             .click(function (event) {
-               var msg = new Message("USER", "USNIPE", [rs.user_id, $scope.tradingGraph.getCurOffsetTime()]);
+               var msg = new Message("USER", "USNIPE", [rs.user_id, getTime()]);
                $scope.sendToGroupManager(msg);
                $scope.setState("state_snipe");
                $scope.tickState = $scope.s.OUT;
@@ -468,9 +468,9 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
                $scope.curOffsetY = $scope.tradingGraph.elementHeight / 4;
                $scope.spread = $scope.maxSpread / 2;
                $scope.oldOffsetY = null;
-               var nMsg = new Message("USER", "UUSPR", [rs.user_id, $scope.spread, $scope.tradingGraph.getCurOffsetTime()]);
+               var nMsg = new Message("USER", "UUSPR", [rs.user_id, $scope.spread, getTime()]);
                $scope.sendToGroupManager(nMsg);
-               var msg = new Message("USER", "UMAKER", [rs.user_id, $scope.tradingGraph.getCurOffsetTime()]);
+               var msg = new Message("USER", "UMAKER", [rs.user_id, getTime()]);
                $scope.sendToGroupManager(msg);
             });
 
@@ -482,7 +482,7 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
                $scope.setSpeed(false);
                $("#speed-switch").prop("checked", false);
 
-               var msg = new Message("USER", "UOUT", [rs.user_id, $scope.tradingGraph.getCurOffsetTime()]);
+               var msg = new Message("USER", "UOUT", [rs.user_id, getTime()]);
                $scope.sendToGroupManager(msg);
                $scope.setState("state_out");
                $scope.tickState = $scope.s.OUT;

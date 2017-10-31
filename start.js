@@ -584,8 +584,8 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
                   break;
 
                case "SPREAD":
-                  var newVal = parseFloat($scope.inputData[inputIndex][2]);
-                  var msg = new Message("USER", "UUSPR", [rs.user_id, newVal, getTime()]);
+                  $scope.spread = parseFloat($scope.inputData[inputIndex][2]);
+                  var msg = new Message("USER", "UUSPR", [rs.user_id, $scope.spread, getTime()]);
 		            $scope.sendToGroupManager(msg);
 
                   var msg2 = new Message("USER", "UMAKER", [rs.user_id, getTime()]);

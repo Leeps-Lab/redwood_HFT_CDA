@@ -28,6 +28,11 @@ Redwood.factory("DataStorage", function () {
       dataStorage.numTransactions = [];   // array of numbers of transactions for for each batch
       dataStorage.playerFinalProfits = {};
 
+      dataStorage.offsets = {
+         playerData: 5,
+         globalData: 7,
+      }
+
       dataStorage.init = function (startFP, startTime, maxSpread) {
          this.startTime = startTime;
          this.curFundPrice = startFP;
@@ -148,7 +153,7 @@ Redwood.factory("DataStorage", function () {
             playerToIndex[this.group[index]] = index;
          }
 
-         var numColumns = this.group.length * 5 + 7;
+         var numColumns = this.group.length * this.offsets.playerData + this.offsets.globalData;
 
          // iterate through every entry in each storage array
 
@@ -157,7 +162,7 @@ Redwood.factory("DataStorage", function () {
             let row = new Array(numColumns).fill(null);
 
             row[0] = entry[0];
-            row[playerToIndex[entry[2]] * 5 + 3] = entry[1];
+            row[playerToIndex[entry[2]] * this.offsets.playerData + 3] = entry[1];
 
             data.push(row);
          }
@@ -167,7 +172,7 @@ Redwood.factory("DataStorage", function () {
             let row = new Array(numColumns).fill(null);
 
             row[0] = entry[0];
-            row[playerToIndex[entry[2]] * 5 + 1] = entry[1];
+            row[playerToIndex[entry[2]] * this.offsets.playerData + 1] = entry[1];
 
             data.push(row);
          }
@@ -177,7 +182,7 @@ Redwood.factory("DataStorage", function () {
             let row = new Array(numColumns).fill(null);
 
             row[0] = entry[0];
-            row[playerToIndex[entry[2]] * 5 + 2] = entry[1];
+            row[playerToIndex[entry[2]] * this.offsets.playerData + 2] = entry[1];
 
             data.push(row);
          }
@@ -187,7 +192,7 @@ Redwood.factory("DataStorage", function () {
             let row = new Array(numColumns).fill(null);
 
             row[0] = entry[0];
-            row[playerToIndex[entry[2]] * 5 + 4] = entry[1];
+            row[playerToIndex[entry[2]] * this.offsets.playerData + 4] = entry[1];
 
             data.push(row);
          }
@@ -268,7 +273,7 @@ Redwood.factory("DataStorage", function () {
          // set empty delta and investor columns to 0 and NA respectively
          for (let row of data) {
             for (let index = 0; index < this.group.length; index++) {
-               if (row[index * 5 + 4] === null) row[index * 5 + 4] = 0;
+               if (row[index * this.offsets.playerData + 4] === null) row[index * this.offsets.playerData + 4] = 0;
             }
             if (row[numColumns - 3] === null) row[numColumns - 3] = 0;     //dvalue
             if (row[numColumns - 1] === null) row[numColumns - 1] = "NA";  //investors

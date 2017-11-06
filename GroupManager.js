@@ -147,7 +147,7 @@ Redwood.factory("GroupManager", function () {
                   playerOrder.push(this.FPMsgList[index].msgData[0]);
                   for (var rmsg of this.FPMsgList[index].msgData[2]) {
                         //console.log(index,"sent to server @",printTime(getTime()));
-			this.sendToMarket(rmsg);
+			      this.sendToMarket(rmsg);
                   }
                }
                
@@ -168,7 +168,7 @@ Redwood.factory("GroupManager", function () {
       // TODO setup arg for routing
       // Function for sending messages, will route msg to remote or local market based on this.marketFLag
       groupManager.sendToMarket = function (leepsMsg) {
-         //console.log("Outbound Message", leepsMsg);                //debug OUCH messages
+         // console.log("Outbound Message", leepsMsg);                //debug OUCH messages
          if (leepsMsg.delay) {
                window.setTimeout(this.sendToRemoteMarket.bind(this), this.delay, leepsMsg);
          }

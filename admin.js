@@ -432,7 +432,7 @@ Redwood.controller("AdminCtrl",
                }
                var msg = generateSystemEventMsg('S',$scope.startTime / 1000000);
                $scope.groupManagers[groupNum].socket.send(msg);   //reset exchange + sync time
-               console.log(printTime($scope.startTime), $scope.startTime, msg);
+               console.log(printTime($scope.startTime), $scope.startTime);
                window.setTimeout(sendPeriod, $scope.experimentLength);
             }
          });

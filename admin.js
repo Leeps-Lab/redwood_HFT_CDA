@@ -431,7 +431,7 @@ Redwood.controller("AdminCtrl",
                   window.setTimeout($scope.groupManagers[groupNum].sendNextInvestorArrival, investorDelayTime / 1000000);
                }
 
-               $scope.groupManagers[groupNum].socket.send(generateSystemEventMsg('S',$scope.startTime));   //reset exchange + sync time
+               //$scope.groupManagers[groupNum].socket.send(generateSystemEventMsg('S',$scope.startTime));   //reset exchange + sync time
                //console.log(printTime($scope.startTime), $scope.startTime);
                window.setTimeout(sendPeriod, $scope.experimentLength);
             }

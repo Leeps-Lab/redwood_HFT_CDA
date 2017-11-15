@@ -120,12 +120,12 @@ Redwood.factory("MarketAlgorithm", function () {
                nMsg3 = new Message("SYNC_FP", "SNIPE", [this.myId, this.using_speed, []]);
                nMsg3.timeStamp = msg.msgData[0]; // for debugging test output only
 
-               if(this.buyEntered) {    //remove stale snipe messages (no more IOC)    added 8/22/17
-                  this.sendToGroupManager(this.removeBuyOfferMsg());
-               }
-               if(this.sellEntered){
-                  this.sendToGroupManager(this.removeSellOfferMsg());
-               }
+               //if(this.buyEntered) {    //remove stale snipe messages (no more IOC)    added 8/22/17
+               //   this.sendToGroupManager(this.removeBuyOfferMsg());
+               //}
+               //if(this.sellEntered){
+               //   this.sendToGroupManager(this.removeSellOfferMsg());
+               //}
 
                if(positiveChange){     //the new price is greater than the old price -> generate snipe buy message
                   //snipeBuyMsg = new Message("OUCH", "EBUY", [this.myId, this.fundamentalPrice, true, getTime()]);  
@@ -134,7 +134,6 @@ Redwood.factory("MarketAlgorithm", function () {
                   snipeBuyMsg.msgId = this.currentMsgId;
                   this.currentBuyId = this.currentMsgId;
                   this.currentMsgId++;
-                  this.buyEntered = true;
                   nMsg3.msgData[2].push(snipeBuyMsg);
                }
                else{                   //the new price is less than the old price -> generate snipe sell message
@@ -144,7 +143,6 @@ Redwood.factory("MarketAlgorithm", function () {
                   snipeSellMsg.msgId = this.currentMsgId;
                   this.currentSellId = this.currentMsgId;
                   this.currentMsgId++;
-                  this.sellEntered = true;
                   nMsg3.msgData[2].push(snipeSellMsg);
                }
             }

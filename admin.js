@@ -430,15 +430,15 @@ Redwood.controller("AdminCtrl",
                   // $scope.groupManagers[groupNum].investorIndex++;    //increment the initial index
                   window.setTimeout($scope.groupManagers[groupNum].sendNextInvestorArrival, investorDelayTime / 1000000);
                }
-<<<<<<< HEAD
+
                var msg = generateSystemEventMsg('S',$scope.startTime / 1000000);
                $scope.groupManagers[groupNum].socket.send(msg);   //reset exchange + sync time
                console.log(printTime($scope.startTime), $scope.startTime);
-=======
+
 
                //$scope.groupManagers[groupNum].socket.send(generateSystemEventMsg('S',$scope.startTime));   //reset exchange + sync time
                //console.log(printTime($scope.startTime), $scope.startTime);
->>>>>>> c8f2fdce4bffacf4cff66bca0f5aa1c1e64bd9a0
+
                window.setTimeout(sendPeriod, $scope.experimentLength);
             }
          });

@@ -178,7 +178,7 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
          $scope.setSpeed = function (value) {
             if (value !== $scope.using_speed) {
                $scope.using_speed = value;
-               var msg = new Message("USER", "USPEED", [rs.user_id, $scope.using_speed, $scope.tradingGraph.getCurOffsetTime()]);
+               var msg = new Message("USER", "USPEED", [rs.user_id, $scope.using_speed, $scope.getTime()]);
                $scope.sendToGroupManager(msg);
             }
          };
@@ -375,12 +375,12 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
                if ($scope.mousePressed) {                                        //only set the spread if svg has been clicked on
                   $scope.mousePressed = false;                                   //reset the flag
 
-                  if (event.offsetY <= $scope.tradingGraph.elementHeight / 2) {      //you left the svg right of the center tick
+                  if (event.offsetY <= $scope.tradingGraph.elementHeight / 2) {      //you below the the center tick
                      $scope.spread = ($scope.maxSpread - Math.abs(2 * $scope.maxSpread * event.offsetY / $scope.tradingGraph.elementHeight)).toPrecision(2); //.1 increments
                      if($scope.spread > $scope.maxSpread) $scope.spread = $scope.maxSpread;                                       //cap max spread to 5
                      if($scope.spread <= .1) $scope.spread = .1;
                   } 
-                  else {                                                            //you clicked below of the center tick
+                  else {                                                            //you clicked above the center tick
                      $scope.spread = (((2 * $scope.maxSpread * event.offsetY - $scope.tradingGraph.elementHeight / $scope.maxSpread) / $scope.tradingGraph.elementHeight) - $scope.maxSpread - .2).toPrecision(2); //.1 increments
                      if($scope.spread > $scope.maxSpread) $scope.spread = $scope.maxSpread;                                       //cap max spread to 5
                      if($scope.spread <= .1) $scope.spread = .1;
@@ -406,12 +406,12 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
             .mouseup( function(event) {
                if($scope.mousePressed){
                   $scope.mousePressed = false;                                      //reset the flag
-                  if (event.offsetY <= $scope.tradingGraph.elementHeight / 2) {      //you clicked right of the center tick
+                  if (event.offsetY <= $scope.tradingGraph.elementHeight / 2) {      //you clicked below the center tick
                      $scope.spread = ($scope.maxSpread - Math.abs(2 * $scope.maxSpread * event.offsetY / $scope.tradingGraph.elementHeight)).toPrecision(2); //.1 increments
                      if($scope.spread > $scope.maxSpread) $scope.spread = $scope.maxSpread;                                       //cap max spread to 5
                      if($scope.spread <= .1) $scope.spread = .1;
                   } 
-                  else {                                                            //you clicked left of the center tick
+                  else {                                                            //you clicked above the center tick
                      $scope.spread = (((2 * $scope.maxSpread * event.offsetY - $scope.tradingGraph.elementHeight / $scope.maxSpread) / $scope.tradingGraph.elementHeight) - $scope.maxSpread - .2).toPrecision(2); //.1 increments
                      if($scope.spread > $scope.maxSpread) $scope.spread = $scope.maxSpread;                                       //cap max spread to 5
                      if($scope.spread <= .1) $scope.spread = .1;   

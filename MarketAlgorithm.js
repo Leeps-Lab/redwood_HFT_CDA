@@ -43,25 +43,14 @@ Redwood.factory("MarketAlgorithm", function () {
 
       // sends out buy and sell offer for entering market
       marketAlgorithm.enterMarket = function (timestamp) {
-         if (this.buyEntered) {
-               this.sendToGroupManager(this.updateBuyOfferMsg());
-            }
-            else{
-               this.sendToGroupManager(this.enterBuyOfferMsg(timestamp));
-            }
-            if (this.sellEntered) {
-               this.sendToGroupManager(this.updateSellOfferMsg());
-            }
-            else{
-               this.sendToGroupManager(this.enterSellOfferMsg(timestamp));
-            }
+         this.sendToGroupManager(this.enterBuyOfferMsg(timestamp));
+         this.sendToGroupManager(this.enterSellOfferMsg(timestamp));
       };
 
       // sends out remove buy and sell messages for exiting market
       marketAlgorithm.exitMarket = function (timestamp) {
          this.sendToGroupManager(this.removeBuyOfferMsg(timestamp));
          this.sendToGroupManager(this.removeSellOfferMsg(timestamp));         //test 8/31 to make sure all of your orders are cancelled
-         this.state = "state_out";
       };
 
       // Handle message sent to the market algorithm
@@ -163,6 +152,7 @@ Redwood.factory("MarketAlgorithm", function () {
 
          // user sent signal to change state to market maker. Need to enter market.
          if (msg.msgType === "UMAKER") {
+            this.exitMarket(msg.timeStamp);                  //just to be safe
             this.enterMarket(msg.timeStamp);                 // enter market
             this.state = "state_maker";         // set state
          }
@@ -177,15 +167,15 @@ Redwood.factory("MarketAlgorithm", function () {
 
          // user sent signal to change state to "out of market"
          if (msg.msgType === "UOUT") {
-            if (this.state === "state_maker") {   // if switching from being a maker, exit the market
+            //if (this.state === "state_maker") {   // if switching from being a maker, exit the market
                this.exitMarket(msg.timeStamp);
-            }
+            //}
             this.state = "state_out";           // update state
          }
 
          if (msg.msgType === "USPEED") {
             this.using_speed = msg.msgData[1];
-            this.sendToAllDataHistories(msg);
+            //this.sendToAllDataHistories(msg);
          }
 
          //User updated their spread

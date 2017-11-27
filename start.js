@@ -178,7 +178,7 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
          $scope.setSpeed = function (value) {
             if (value !== $scope.using_speed) {
                $scope.using_speed = value;
-               var msg = new Message("USER", "USPEED", [rs.user_id, $scope.using_speed, $scope.getTime()]);
+               var msg = new Message("USER", "USPEED", [rs.user_id, $scope.using_speed, getTime()]);
                $scope.sendToGroupManager(msg);
             }
          };
@@ -538,7 +538,7 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
             var delay = $scope.inputData[inputIndex + 1][0];      //time of the next input action
             var timeSinceStart = $scope.getTimeSinceStart();              //time (in ms) since the experiment began
             window.setTimeout($scope.processInputAction, delay - timeSinceStart, inputIndex + 1);
-
+	    console.log($scope.inputData[inputIndex]);
 	    switch ($scope.inputData[inputIndex][1]) {
                case "OUT":
       	         var msg = new Message("USER", "UOUT", [rs.user_id, getTime()]);
@@ -574,6 +574,7 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
                   break;
 
                case "FAST":
+		  console.log("Recieved message fast");
                   $scope.setSpeed(true);
                   $("#speed-on").attr("checked", true);
                   break;

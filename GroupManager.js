@@ -258,10 +258,10 @@ Redwood.factory("GroupManager", function () {
 
       groupManager.sendNextPriceChange = function () {
          // if current price is -1, end the game
-         // if (this.priceChanges[this.priceIndex][1] == -1) {
+         if (this.priceChanges[this.priceIndex][1] == -1) {
          //    this.rssend("end_game", this.groupNumber);
-         //    return;
-         // }
+             return;
+         }
          // console.log(this.priceChanges[this.priceIndex][1], this.priceIndex);
          var msg = new Message("ITCH", "FPC", [getTime(), this.priceChanges[this.priceIndex][1], this.priceIndex]);
          msg.delay = false;

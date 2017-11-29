@@ -1,7 +1,7 @@
 args = commandArgs(trailingOnly=TRUE)
-nPeriods = args[1]
-nGroups = args[2]
-dateStr = args[3]
+nPeriods = 2#args[1]
+nGroups = 1#args[2]
+dateStr = "20171129"#args[3]
 filePath = paste("~/Dropbox/Academics/Research/UCSC/redwood-high-frequency-trading-remote/config/",dateStr,"/",sep="")
 
 # Parameters for jump times

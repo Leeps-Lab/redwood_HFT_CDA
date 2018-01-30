@@ -533,7 +533,7 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
 
 
          $scope.processInputAction = function (inputIndex) {
-            if (inputIndex >= $scope.inputData.length - 1) return;
+            if (inputIndex > $scope.inputData.length - 1) return;
             //delay
             var delay = $scope.inputData[inputIndex + 1][0];      //time of the next input action
             var timeSinceStart = $scope.getTimeSinceStart();              //time (in ms) since the experiment began

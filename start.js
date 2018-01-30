@@ -24,6 +24,7 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
          $scope.spamDelay = 300;
          $scope.inputData;// = [];
          $scope.adminStartTime;
+         $scope.minSpread = .01;
 
          $scope.s = {
             NO_LINES: 0,
@@ -378,12 +379,12 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
                   if (event.offsetY <= $scope.tradingGraph.elementHeight / 2) {      //you below the the center tick
                      $scope.spread = ($scope.maxSpread - Math.abs(2 * $scope.maxSpread * event.offsetY / $scope.tradingGraph.elementHeight)).toPrecision(2); //.1 increments
                      if($scope.spread > $scope.maxSpread) $scope.spread = $scope.maxSpread;                                       //cap max spread to 5
-                     if($scope.spread <= .1) $scope.spread = .1;
+                     if($scope.spread <= $scope.minSpread) $scope.spread = $scope.minSpread;
                   } 
                   else {                                                            //you clicked above the center tick
                      $scope.spread = (((2 * $scope.maxSpread * event.offsetY - $scope.tradingGraph.elementHeight / $scope.maxSpread) / $scope.tradingGraph.elementHeight) - $scope.maxSpread - .2).toPrecision(2); //.1 increments
                      if($scope.spread > $scope.maxSpread) $scope.spread = $scope.maxSpread;                                       //cap max spread to 5
-                     if($scope.spread <= .1) $scope.spread = .1;
+                     if($scope.spread <= $scope.minSpread) $scope.spread = $scope.minSpread;
                   }
                   var msg = new Message("USER", "UUSPR", [rs.user_id, $scope.spread, getTime()]);
                   $scope.sendToGroupManager(msg);
@@ -409,12 +410,12 @@ RedwoodHighFrequencyTrading.controller("HFTStartController",
                   if (event.offsetY <= $scope.tradingGraph.elementHeight / 2) {      //you clicked below the center tick
                      $scope.spread = ($scope.maxSpread - Math.abs(2 * $scope.maxSpread * event.offsetY / $scope.tradingGraph.elementHeight)).toPrecision(2); //.1 increments
                      if($scope.spread > $scope.maxSpread) $scope.spread = $scope.maxSpread;                                       //cap max spread to 5
-                     if($scope.spread <= .1) $scope.spread = .1;
+                     if($scope.spread <= $scope.minSpread) $scope.spread = $scope.minSpread;
                   } 
                   else {                                                            //you clicked above the center tick
                      $scope.spread = (((2 * $scope.maxSpread * event.offsetY - $scope.tradingGraph.elementHeight / $scope.maxSpread) / $scope.tradingGraph.elementHeight) - $scope.maxSpread - .2).toPrecision(2); //.1 increments
                      if($scope.spread > $scope.maxSpread) $scope.spread = $scope.maxSpread;                                       //cap max spread to 5
-                     if($scope.spread <= .1) $scope.spread = .1;   
+                     if($scope.spread <= $scope.minSpread) $scope.spread = $scope.minSpread;   
                   }
                   var msg = new Message("USER", "UUSPR", [rs.user_id, $scope.spread, getTime()]);
                   $scope.sendToGroupManager(msg);

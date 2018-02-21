@@ -53,7 +53,6 @@ Redwood.factory("GroupManager", function () {
 
             groupManager.socket.onopen = function(event) {
                console.log(printTime(getTime()), "Group", groupArgs.groupNum, "Connected to", groupArgs.URI);
-               // this.send(generateSystemEventMsg('S', groupArgs.startTime));
             };
 
             // recieves messages from remote market
